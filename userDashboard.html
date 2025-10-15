@@ -46,21 +46,15 @@ header {
     color: #00aaff;
 }
 
-.card button {
-    margin-top: 10px;
-    background: #005f99;
-    color: #fff;
-    border: none;
+.card video {
+    width: 100%;
     border-radius: 8px;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
 }
 
-.card button:hover {
-    background: #00aaff;
-}
+/* מניעת הורדה קלה */
+video::-internal-media-controls-download-button { display:none; }
+video::-webkit-media-controls-enclosure { overflow:hidden; }
+video::-webkit-media-controls-panel { width: calc(100% + 30px); }
 </style>
 </head>
 <body>
@@ -73,8 +67,9 @@ header {
 
 <script>
 const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
-const userId = sessionStorage.getItem("userId") || "demoUser"; // מזהה משתמש (לפי מערכת login שלך)
+const userId = sessionStorage.getItem("userId") || "demoUser";
 
+// קבלת הקורסים מהשרת
 function fetchCourses() {
   fetch(`${API_URL}?action=getCourses`)
     .then(res=>res.json())
@@ -85,6 +80,7 @@ function fetchCourses() {
     });
 }
 
+// יצירת כרטיס לכל קורס
 function addCourseCard(course){
   const container = document.getElementById("coursesContainer");
   const card = document.createElement("div");
@@ -95,7 +91,7 @@ function addCourseCard(course){
     ${course.lessons.map(lesson=>`
       <div style="margin-top:10px;">
         <strong>${lesson.title}</strong><br>
-        <video width="100%" controls onplay="registerView('${course.courseId}','${lesson.lessonId}')">
+        <video controls onplay="registerView('${course.courseId}','${lesson.lessonId}')" onended="markCompleted('${course.courseId}','${lesson.lessonId}')">
           <source src="${lesson.videoUrl}" type="video/mp4">
           הדפדפן שלך לא תומך בסרטונים.
         </video>
@@ -105,31 +101,34 @@ function addCourseCard(course){
   container.appendChild(card);
 }
 
-// רשימת צפייה בסרטון
+// רישום צפייה
 function registerView(courseId, lessonId){
-  // מעדכן צפייה ב-VideoViews
   fetch(`${API_URL}?action=addVideoView&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}`)
     .then(res=>res.json())
     .then(data=>{
       if(data.success){
-        console.log(`צפייה רשומה: קורס ${courseId}, שיעור ${lessonId}`);
-        updateLessonStatus(courseId, lessonId);
+        updateLessonStatus(courseId, lessonId, 'InProgress');
       }
     });
 }
 
-// עדכון סטטוס שיעור ל-InProgress אם לא הושלם
-function updateLessonStatus(courseId, lessonId){
-  fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}&status=InProgress`)
+// עדכון סטטוס שיעור
+function updateLessonStatus(courseId, lessonId, status){
+  fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}&status=${status}`)
     .then(res=>res.json())
     .then(data=>{
-      if(data.success){
-        console.log(`סטטוס שיעור מעודכן`);
+      if(!data.success){
+        console.error("שגיאה בעדכון סטטוס");
       }
     });
 }
 
-// טעינת הקורסים כשנטען הדף
+// עדכון סטטוס ל-Completed בסיום הסרטון
+function markCompleted(courseId, lessonId){
+  updateLessonStatus(courseId, lessonId, 'Completed');
+}
+
+// טעינת הקורסים כשהדף נטען
 fetchCourses();
 </script>
 
