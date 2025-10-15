@@ -7,18 +7,101 @@
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   /* ===== כללי ===== */
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family: 'Assistant', sans-serif; background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; height:100vh; }
-  h2,h3 { margin-bottom: 20px; }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Assistant', sans-serif; }
+  body { background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; position:relative; }
+
+  /* ===== רקע דינמי ===== */
+  body::before {
+    content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+    background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%);
+    animation: bgMove 30s linear infinite;
+    z-index:-1;
+  }
+  @keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
 
   /* ===== כרטיס כניסה ===== */
-  #loginCard, #personalArea { background: #112f4f; padding: 40px 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); width: 350px; text-align:center; transition: all 0.5s ease; }
+  #loginCard, #personalArea {
+    background: rgba(17,47,79,0.9);
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    width: 380px;
+    text-align:center;
+    transition: all 0.5s ease, transform 0.3s ease;
+  }
+  #loginCard:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(0,191,255,0.5); }
 
-  input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; outline:none; font-size:16px; }
-  input:focus { box-shadow: 0 0 10px #00bfff; }
+  /* ===== לוגו ===== */
+  #loginCard img { width: 120px; margin-bottom: 25px; transition: transform 0.3s ease; }
+  #loginCard img:hover { transform: scale(1.1); }
 
-  button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; transition: all 0.3s ease; }
-  button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,191,255,0.4); }
+  /* ===== טקסט ===== */
+  h2,h3 { margin-bottom: 20px; font-weight:700; }
+
+  /* ===== שדות קלט ===== */
+  input {
+    width: 90%;
+    padding: 14px 15px;
+    margin: 12px 0;
+    border-radius: 12px;
+    border: none;
+    outline:none;
+    font-size:16px;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+  }
+  input:focus {
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 8px #00bfff;
+  }
+
+  /* ===== כפתור כניסה ===== */
+  button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    border:none;
+    border-radius: 12px;
+    background: #00bfff;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    font-size:16px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,191,255,0.5); }
+
+  /* ===== עיגול טעינה בתוך הכפתור ===== */
+  .spinner {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* ===== אנימציה לכפתור בזמן טעינה ===== */
+  .loadingButton {
+    animation: pulse 1s infinite;
+    box-shadow: 0 0 18px rgba(0,191,255,0.6);
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); }
+    50% { transform: scale(1.05); box-shadow: 0 0 28px rgba(0,191,255,0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); }
+  }
 
   /* ===== אזור אישי ===== */
   #personalArea { display:none; flex-direction: column; gap:15px; animation: fadeIn 1s ease forwards; }
@@ -27,20 +110,20 @@
 
   /* ===== אנימציות ===== */
   @keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
-
-  /* ===== אנימציה לדף ===== */
-  body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%); animation: bgMove 20s linear infinite; z-index:-1; }
-  @keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
 </style>
 </head>
 <body>
 
 <div id="loginCard">
+  <img src="logo.png" alt="לוגו">
   <h2>התחבר לאזור האישי שלך</h2>
   <form id="loginForm">
     <input type="text" id="idNumber" placeholder="תעודת זהות" required>
     <input type="email" id="email" placeholder="מייל" required>
-    <button type="submit">כניסה</button>
+    <button type="submit">
+      <span class="btnText">כניסה</span>
+      <div class="spinner"></div>
+    </button>
   </form>
 </div>
 
@@ -59,6 +142,16 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   const id = document.getElementById('idNumber').value.trim();
   const email = document.getElementById('email').value.trim();
 
+  const button = e.target.querySelector('button');
+  const spinner = button.querySelector('.spinner');
+  const btnText = button.querySelector('.btnText');
+
+  // מציגים את העיגול, מסתירים את הטקסט ומוסיפים אנימציה לכפתור
+  spinner.style.display = 'block';
+  btnText.style.visibility = 'hidden';
+  button.disabled = true;
+  button.classList.add('loadingButton');
+
   try {
     const response = await fetch(scriptURL, {
       method: 'POST',
@@ -75,6 +168,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   } catch (err) {
     alert("שגיאה בשרת. נסה שוב מאוחר יותר.");
     console.error(err);
+  } finally {
+    spinner.style.display = 'none';
+    btnText.style.visibility = 'visible';
+    button.disabled = false;
+    button.classList.remove('loadingButton');
   }
 });
 
@@ -85,18 +183,15 @@ function showPersonalArea(user) {
   document.getElementById('userContent').textContent = user.personalArea;
 }
 
-// כפתור התנתקות
 document.getElementById('logout').addEventListener('click', function() {
   localStorage.removeItem('loggedInUser');
   location.reload();
 });
 
-// כפתור מעבר לדף סודי
 document.getElementById('goToSecret').addEventListener('click', function() {
   window.location.href = 'seret.html';
 });
 
-// בדיקה אם המשתמש כבר מחובר
 window.addEventListener('load', function() {
   const user = JSON.parse(localStorage.getItem('loggedInUser'));
   if (user) showPersonalArea(user);
