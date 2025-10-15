@@ -81,19 +81,18 @@ button.btn:hover {
 <header>מבחן קורס</header>
 
 <div class="container" id="quizContainer">
-  <!-- השאלות יטענו כאן -->
-</div>
-
-<button class="btn" onclick="submitQuiz()">שלח את המבחן</button>
+  </div>
 
 <div class="container">
+  <button class="btn" onclick="submitQuiz()">שלח את המבחן</button>
   <div id="score"></div>
 </div>
 
 <script>
-const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
-const userId = sessionStorage.getItem("userId") || "demoUser";
+// התיקון: החלפת ה-Placeholder בכתובת ה-Web App שסופקה
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
 const urlParams = new URLSearchParams(window.location.search);
+const userId = sessionStorage.getItem("userId") || "demoUser"; 
 const courseId = urlParams.get('courseId');
 
 let quizQuestions = [];
@@ -104,6 +103,8 @@ function fetchQuiz(){
     .then(res=>res.json())
     .then(data=>{
       quizQuestions = data;
+      // התיקון: הסרת התשובה הנכונה מהאובייקט בצד הלקוח כדי למנוע חשיפה
+      quizQuestions.forEach(q => delete q.answer); 
       renderQuiz();
     });
 }
@@ -125,31 +126,33 @@ function renderQuiz(){
 
 // שליחת המבחן
 function submitQuiz(){
-  let score = 0;
   let results = [];
 
   quizQuestions.forEach(q=>{
     const answer = document.getElementById(`answer_${q.quizId}`).value.trim();
-    if(answer.toLowerCase() === q.answer.toLowerCase()) score++;
     results.push({
       quizId: q.quizId,
       userAnswer: answer
     });
   });
 
-  // שליחת תוצאות לשרת
+  // שליחת תוצאות לשרת - השרת יחשב את הציון ויחזיר אותו
   fetch(`${API_URL}?action=submitQuiz&userId=${userId}&courseId=${courseId}&results=${encodeURIComponent(JSON.stringify(results))}`)
     .then(res=>res.json())
     .then(data=>{
-      if(data.success){
-        document.getElementById("score").innerText = `הציון שלך: ${score} מתוך ${quizQuestions.length}`;
+      // התיקון: ציפייה שהשרת יחזיר את הציון (score ו-maxScore)
+      if(data.success && data.score !== undefined && data.maxScore !== undefined){
+        const percentage = Math.round((data.score/data.maxScore)*100);
+        document.getElementById("score").textContent = `הציון שלך: ${data.score}/${data.maxScore} (${percentage}%)`;
+      } else if(data.success) {
+        // Fallback למקרה שהשרת לא מחזיר score, כדאי לתקן את השרת
+         document.getElementById("score").textContent = `המבחן נשלח בהצלחה. הציון טרם התקבל.`;
       } else {
-        alert("שגיאה בשליחת התוצאות");
+         alert("שגיאה בשליחת המבחן: "+data.message);
       }
     });
 }
 
-// טעינת המבחן
 fetchQuiz();
 </script>
 
