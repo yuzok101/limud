@@ -87,12 +87,12 @@ button {
 }
 
 button:hover {
-    background: #007bb5;
+    background: #007bbd;
     transform: translateY(-2px);
 }
 
 #message {
-    color: #ff7373;
+    color: #ff6666;
     font-weight: bold;
     text-align: center;
     margin-top: 5px;
@@ -125,21 +125,41 @@ function login() {
     return;
   }
 
-  fetch(`${API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
+  // התיקון: שינוי מ-GET ל-POST לשליחת פרטי אבטחה בגוף הבקשה
+  const payload = {
+    action: 'login',
+    email: email,
+    password: password
+  };
+
+  fetch(API_URL, {
+    method: 'POST', // שינוי ל-POST
+    // שליחת הנתונים כ-JSON
+    body: JSON.stringify(payload),
+    headers: {
+        'Content-Type': 'application/json'
+    }
+  })
     .then(res => res.json())
     .then(data => {
       if(data.success){
         sessionStorage.setItem("userId", data.userId);
         sessionStorage.setItem("name", data.name);
         sessionStorage.setItem("role", data.role);
-        window.location.href = "dashboard.html";
+        
+        // ניתוב מחדש בהתאם לתפקיד
+        if(data.role === "admin"){
+          window.location.href = "adminPanel.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
       } else {
-        document.getElementById("message").textContent = "אימייל או סיסמה לא נכונים";
+        document.getElementById("message").textContent = data.message || "שגיאת התחברות";
       }
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("message").textContent = "שגיאה בשרת, נסה שוב";
+      document.getElementById("message").textContent = "שגיאה בשרת. נסה שוב מאוחר יותר.";
     });
 }
 </script>
