@@ -80,16 +80,16 @@ h1 {
     transform: scale(1.05);
 }
 
-/* באנר שקוף למניעת לחיצה על הכפתורים העליונים */
+/* באנר שקוף שמכסה חצי עליון של הסרטון */
 .card .top-blocker {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 35px; /* ניתן לשנות לפי גובה הכפתורים */
+    height: 50%; /* חצי העליון */
     z-index: 20;
     background: rgba(255,255,255,0); /* שקוף לגמרי */
-    pointer-events: all; /* “סופג” את הלחיצות */
+    pointer-events: all; /* "סופג" את הלחיצות */
     cursor: default;
 }
 
@@ -176,7 +176,7 @@ async function loadMedia() {
 
         card.appendChild(media);
 
-        // באנר שקוף למניעת לחיצה על הכפתורים העליונים
+        // באנר שקוף חצי עליון
         const blocker = document.createElement('div');
         blocker.className = 'top-blocker';
         card.appendChild(blocker);
