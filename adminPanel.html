@@ -129,16 +129,19 @@ select {
 </div>
 
 <script>
-const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
-const userId = sessionStorage.getItem("userId"); // optional אם יש מערכת login
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
+const userId = sessionStorage.getItem("userId") || "null"; // אם אין משתמש מחובר
 
 let usersData = [];
 
 function fetchDashboardData() {
     fetch(`${API_URL}?action=getDashboard&userId=${userId}`)
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("404 או שגיאת תקשורת");
+        return res.json();
+    })
     .then(data => {
-        if(data.success){
+        if (data.success) {
             usersData = data.users;
             renderTable();
         } else {
@@ -146,8 +149,8 @@ function fetchDashboardData() {
         }
     })
     .catch(err => {
-        console.error(err);
-        alert("שגיאה בטעינת הנתונים");
+        console.error("שגיאת טעינה:", err);
+        alert("שגיאה בטעינת הנתונים מהשרת");
     });
 }
 
@@ -204,7 +207,8 @@ function createUser(){
       } else {
         alert("שגיאה בהוספת המשתמש: "+data.message);
       }
-    });
+    })
+    .catch(err => alert("שגיאה בשליחה לשרת: " + err.message));
 }
 
 function changeStatus(userId, courseId, lessonId, status){
