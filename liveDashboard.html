@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
+
+body { margin:0; font-family:'Assistant',sans-serif; background:#0b1f3a; color:#fff; }
+header { background:#0a1630; padding:20px; text-align:center; font-size:2rem; font-weight:bold; color:#00aaff; box-shadow:0 4px 6px rgba(0,0,0,0.3);}
+.container { max-width:1200px; margin:30px auto; padding:0 20px;}
+table { width:100%; border-collapse: collapse; background:#12294f; border-radius: 10px; overflow:hidden; }
+th, td { padding:12px 15px; text-align:center; }
+th { background:#0a1630; color:#00aaff; font-weight:bold; }
+tr:nth-child(even) { background:#0f2a51; }
+tr:hover { background:#0c1f3d; }
+#chartContainer { background: #12294f; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 20px;}
+</style>
+</head>
+<body>
+
+<header>Live Dashboard – משתמשים פעילים</header>
+
+<div class="container">
+  <table id="activeUsersTable">
+    <thead>
+      <tr>
+        <th>שם משתמש</th>
+        <th>קורס</th>
+        <th>פעילות</th>
+        <th>פרטי פעילות</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="chartContainer">
+    <canvas id="activeChart" width="400" height="150"></canvas>
+  </div>
+</div>
+
+<script>
+const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
+
+let activeUsers = [];
+
+function fetchActiveUsers(){
+  fetch(`${API_URL}?action=getActiveUsers`)
+    .then(res=>res.json())
+    .then(data=>{
+      activeUsers = data;
+      renderTable();
+      renderChart();
+    });
+}
+
+// טבלת משתמשים פעילים
+function renderTable(){
+  const tbody = document.querySelector("#activeUsersTable tbody");
+  tbody.innerHTML = "";
+  activeUsers.forEach(u=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.username}</td>
+      <td>${u.course}</td>
+      <td>${u.activity}</td>
+      <td>${u.details}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// גרף מספר משתמשים פעילים לפי קורס
+function renderChart(){
+  const courses = [...new Set(activeUsers.map(u=>u.course))];
+  const counts = courses.map(c=>activeUsers.filter(u=>u.course===c).length);
+  const ctx = document.getElementById('activeChart').getContext('2d');
+  if(window.chartInstance) window.chartInstance.destroy(); // הרס גרף קודם
+  window.chartInstance = new Chart(ctx,{
+    type:'bar',
+    data:{ labels:courses, datasets:[{label:'משתמשים פעילים', data:counts, backgroundColor:'#00aaff'}]},
+    options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+  });
+}
+
+// רענון אוטומטי כל 10 שניות
+setInterval(fetchActiveUsers,10000);
+fetchActiveUsers();
+</script>
+
+</body>
+</html>
