@@ -39,10 +39,26 @@ input[type="text"] {
     width: 100%;
     max-width: 400px;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border-radius: 8px;
     border: none;
     font-size: 1rem;
+}
+
+button.btn {
+    background: #005f99;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-bottom: 20px;
+}
+
+button.btn:hover {
+    background: #00aaff;
 }
 
 table {
@@ -76,6 +92,13 @@ tr:hover {
 .status-InProgress { color: #ffcc00; font-weight: bold; }
 .status-Completed { color: #00ff88; font-weight: bold; }
 
+select {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -83,57 +106,54 @@ tr:hover {
 <header>לוח ניהול</header>
 
 <div class="container">
-    <input type="text" id="searchInput" placeholder="חפש משתמש או שיעור..." onkeyup="filterTable()">
+  <h3>הוספת משתמש חדש</h3>
+  <input type="text" id="newUserName" placeholder="שם משתמש">
+  <input type="text" id="newUserEmail" placeholder="אימייל">
+  <button class="btn" onclick="createUser()">הוסף משתמש</button>
 
-    <table id="dashboardTable">
-        <thead>
-            <tr>
-                <th>שם משתמש</th>
-                <th>אימייל</th>
-                <th>שם שיעור</th>
-                <th>סטטוס</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- השורות יתמלאו דינמית -->
-        </tbody>
-    </table>
+  <hr>
+
+  <input type="text" id="searchInput" placeholder="חפש משתמש או שיעור..." onkeyup="filterTable()">
+  <table id="dashboardTable">
+    <thead>
+      <tr>
+        <th>שם משתמש</th>
+        <th>אימייל</th>
+        <th>שם שיעור</th>
+        <th>סטטוס</th>
+        <th>צפיות בסרטון</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
-const userId = sessionStorage.getItem("userId"); // מזהה מנהל
-
-if(!userId){
-    alert("לא מחובר");
-    window.location.href = "login.html";
-}
+const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
+const userId = sessionStorage.getItem("userId"); // optional אם יש מערכת login
 
 let usersData = [];
 
-// משיכת נתונים מה-API
 function fetchDashboardData() {
     fetch(`${API_URL}?action=getDashboard&userId=${userId}`)
     .then(res => res.json())
     .then(data => {
         if(data.success){
-            usersData = data.users; // מערך של {userName, email, lessons: [{title, status}]}
+            usersData = data.users;
             renderTable();
         } else {
             alert("שגיאה בטעינת נתוני הדשבורד: " + data.message);
         }
     })
     .catch(err => {
-        console.error("Error fetching dashboard data:", err);
+        console.error(err);
         alert("שגיאה בטעינת הנתונים");
     });
 }
 
-// יצירת טבלה
 function renderTable() {
     const tbody = document.querySelector("#dashboardTable tbody");
     tbody.innerHTML = "";
-
     usersData.forEach(user => {
         user.lessons.forEach(lesson => {
             const tr = document.createElement("tr");
@@ -141,20 +161,70 @@ function renderTable() {
                 <td>${user.userName}</td>
                 <td>${user.email}</td>
                 <td>${lesson.title}</td>
-                <td class="status-${lesson.status}">${lesson.status}</td>
+                <td>
+                    <select onchange="changeStatus('${user.userId}','${lesson.courseId}','${lesson.lessonId}',this.value)">
+                        <option value="NotStarted" ${lesson.status==='NotStarted'?'selected':''}>לא התחיל</option>
+                        <option value="InProgress" ${lesson.status==='InProgress'?'selected':''}>בתהליך</option>
+                        <option value="Completed" ${lesson.status==='Completed'?'selected':''}>הושלם</option>
+                    </select>
+                </td>
+                <td><button class="btn" onclick="showViews('${lesson.courseId}','${lesson.lessonId}')">צפיות</button></td>
             `;
             tbody.appendChild(tr);
         });
     });
 }
 
-// סינון חיפוש
 function filterTable() {
     const filter = document.getElementById("searchInput").value.toLowerCase();
     const rows = document.querySelectorAll("#dashboardTable tbody tr");
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(filter) ? "" : "none";
+    });
+}
+
+function createUser(){
+  const name = document.getElementById("newUserName").value.trim();
+  const email = document.getElementById("newUserEmail").value.trim();
+
+  if(!name || !email){
+    alert("מלא שם ואימייל");
+    return;
+  }
+
+  fetch(`${API_URL}?action=addUser&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.success){
+        alert("משתמש נוסף בהצלחה! מזהה: "+data.userId);
+        fetchDashboardData();
+        document.getElementById("newUserName").value = "";
+        document.getElementById("newUserEmail").value = "";
+      } else {
+        alert("שגיאה בהוספת המשתמש: "+data.message);
+      }
+    });
+}
+
+function changeStatus(userId, courseId, lessonId, status){
+  fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}&status=${status}`)
+  .then(res=>res.json())
+  .then(data=>{
+    if(!data.success){
+      alert("שגיאה בעדכון הסטטוס");
+    }
+  });
+}
+
+function showViews(courseId, lessonId){
+  fetch(`${API_URL}?action=getVideoViews&courseId=${courseId}&lessonId=${lessonId}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.views){
+        let list = data.views.map(v=>`User: ${v.userId}, Timestamp: ${v.timestamp}`).join("\n");
+        alert(list || "אין צפיות עדיין");
+      }
     });
 }
 
