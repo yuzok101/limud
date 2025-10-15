@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לוח ניהול</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Assistant', sans-serif;
+    background: #0b1f3a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    width: 100%;
+    background: #0a1630;
+    padding: 20px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #00aaff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.container {
+    flex: 1;
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #12294f;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+th {
+    background: #0a1630;
+    color: #00aaff;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background: #0f2a51;
+}
+
+tr:hover {
+    background: #0c1f3d;
+}
+
+.status-NotStarted { color: #ccc; font-weight: bold; }
+.status-InProgress { color: #ffcc00; font-weight: bold; }
+.status-Completed { color: #00ff88; font-weight: bold; }
+
+</style>
+</head>
+<body>
+
+<header>לוח ניהול</header>
+
+<div class="container">
+    <input type="text" id="searchInput" placeholder="חפש משתמש או שיעור..." onkeyup="filterTable()">
+
+    <table id="dashboardTable">
+        <thead>
+            <tr>
+                <th>שם משתמש</th>
+                <th>אימייל</th>
+                <th>שם שיעור</th>
+                <th>סטטוס</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- השורות יתמלאו דינמית -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
+const userId = sessionStorage.getItem("userId"); // מזהה מנהל
+
+if(!userId){
+    alert("לא מחובר");
+    window.location.href = "login.html";
+}
+
+let usersData = [];
+
+// משיכת נתונים מה-API
+function fetchDashboardData() {
+    fetch(`${API_URL}?action=getDashboard&userId=${userId}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            usersData = data.users; // מערך של {userName, email, lessons: [{title, status}]}
+            renderTable();
+        } else {
+            alert("שגיאה בטעינת נתוני הדשבורד: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching dashboard data:", err);
+        alert("שגיאה בטעינת הנתונים");
+    });
+}
+
+// יצירת טבלה
+function renderTable() {
+    const tbody = document.querySelector("#dashboardTable tbody");
+    tbody.innerHTML = "";
+
+    usersData.forEach(user => {
+        user.lessons.forEach(lesson => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${user.userName}</td>
+                <td>${user.email}</td>
+                <td>${lesson.title}</td>
+                <td class="status-${lesson.status}">${lesson.status}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+// סינון חיפוש
+function filterTable() {
+    const filter = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#dashboardTable tbody tr");
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+}
+
+// טעינת הנתונים בעת פתיחת הדף
+fetchDashboardData();
+</script>
+
+</body>
+</html>
