@@ -62,14 +62,13 @@ video::-webkit-media-controls-panel { width: calc(100% + 30px); }
 <header>הקורסים שלי</header>
 
 <div class="container" id="coursesContainer">
-  <!-- כרטיסי קורסים וסרטונים יתווספו כאן -->
-</div>
+  </div>
 
 <script>
-const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
-const userId = sessionStorage.getItem("userId") || "demoUser";
+// התיקון: החלפת ה-Placeholder בכתובת ה-Web App שסופקה
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
+const userId = sessionStorage.getItem("userId") || "demoUser"; // קבלת הקורסים מהשרת
 
-// קבלת הקורסים מהשרת
 function fetchCourses() {
   fetch(`${API_URL}?action=getCourses`)
     .then(res=>res.json())
@@ -80,7 +79,6 @@ function fetchCourses() {
     });
 }
 
-// יצירת כרטיס לכל קורס
 function addCourseCard(course){
   const container = document.getElementById("coursesContainer");
   const card = document.createElement("div");
@@ -91,7 +89,7 @@ function addCourseCard(course){
     ${course.lessons.map(lesson=>`
       <div style="margin-top:10px;">
         <strong>${lesson.title}</strong><br>
-        <video controls onplay="registerView('${course.courseId}','${lesson.lessonId}')" onended="markCompleted('${course.courseId}','${lesson.lessonId}')">
+        <video controls controlsList="nodownload" onplay="registerView('${course.courseId}','${lesson.lessonId}')" onended="markCompleted('${course.courseId}','${lesson.lessonId}')">
           <source src="${lesson.videoUrl}" type="video/mp4">
           הדפדפן שלך לא תומך בסרטונים.
         </video>
@@ -118,17 +116,16 @@ function updateLessonStatus(courseId, lessonId, status){
     .then(res=>res.json())
     .then(data=>{
       if(!data.success){
-        console.error("שגיאה בעדכון סטטוס");
+        console.error("Failed to update lesson status:", data.message);
       }
     });
 }
 
-// עדכון סטטוס ל-Completed בסיום הסרטון
+// סימון כהושלם
 function markCompleted(courseId, lessonId){
   updateLessonStatus(courseId, lessonId, 'Completed');
 }
 
-// טעינת הקורסים כשהדף נטען
 fetchCourses();
 </script>
 
