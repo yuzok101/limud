@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גלריית מדיה</title>
+<style>
+:root {
+    --deep-blue: #0d1b2a;
+    --light-blue: #1b263b;
+    --accent-blue: #415a77;
+    --text-color: #e0e1dd;
+    --watermark-color: rgba(255,255,255,0.2);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--deep-blue);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: var(--accent-blue);
+    text-shadow: 1px 1px 4px black;
+}
+
+#userNameDisplay {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: var(--light-blue);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    padding: 15px;
+    text-align: center;
+    user-select: none;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.8s ease-out;
+    overflow: hidden;
+    position: relative;
+}
+
+.card.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.card h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text-color);
+    text-shadow: 0 1px 3px black;
+}
+
+.card iframe, .card video {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    border: none;
+    transition: transform 0.5s ease;
+}
+
+.card iframe:hover, .card video:hover {
+    transform: scale(1.05);
+}
+
+/* Watermark overlay */
+.watermark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: var(--watermark-color);
+    pointer-events: none;
+    font-weight: bold;
+    z-index: 10;
+    transform: rotate(-30deg);
+}
+
+@media (max-width: 768px) {
+    .card iframe, .card video {
+        height: 220px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card iframe, .card video {
+        height: 180px;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>גלריית מדיה</h1>
+<div id="userNameDisplay"></div>
+<div class="grid" id="mediaGrid"></div>
+
+<script>
+// --- בדיקה אם המשתמש מחובר ---
+const user = JSON.parse(localStorage.getItem('loggedInUser'));
+if(!user) {
+    window.location.href = 'login1.html';
+} else {
+    const nameElement = document.getElementById('userNameDisplay');
+    if(nameElement) {
+        nameElement.textContent = `שלום, ${user.firstName} ${user.lastName}`;
+    }
+}
+
+// --- גלריית מדיה ---
+const apiKey = 'AIzaSyD65W_O9z1Soy-UEXEu3j0rAcGra6dbm4o'; 
+const spreadsheetId = '2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU';
+const range = 'sert!B2:C'; // B=כותרת, C=קישור
+
+async function loadMedia() {
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`);
+    const data = await response.json();
+    const rows = data.values;
+    const container = document.getElementById('mediaGrid');
+
+    if (!rows) return;
+
+    rows.forEach((row, index) => {
+        const [title, link] = row;
+        if (title && link) {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            // Watermark
+            const watermark = document.createElement('div');
+            watermark.className = 'watermark';
+            watermark.textContent = 'MySite';
+            card.appendChild(watermark);
+
+            const h2 = document.createElement('h2');
+            h2.textContent = title;
+            card.appendChild(h2);
+
+            let media;
+
+            if (link.includes('youtube.com') || link.includes('youtu.be')) {
+                media = document.createElement('iframe');
+                media.src = link.replace('watch?v=', 'embed/');
+                media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                media.allowFullscreen = true;
+
+            } else if (link.includes('docs.google.com/presentation')) {
+                const embedLink = link.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
+                media = document.createElement('iframe');
+                media.src = embedLink;
+
+            } else if (link.includes('drive.google.com/file')) {
+                const fileIdMatch = link.match(/\/d\/(.+?)\//);
+                if(fileIdMatch) {
+                    const fileId = fileIdMatch[1];
+                    const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
+                    media = document.createElement('video');
+                    media.src = embedLink;
+                    media.controls = true;
+                    media.oncontextmenu = e => e.preventDefault();
+                    media.setAttribute('controlsList','nodownload');
+                }
+
+            } else {
+                media = document.createElement('video');
+                media.src = link;
+                media.controls = true;
+                media.oncontextmenu = e => e.preventDefault();
+                media.setAttribute('controlsList','nodownload');
+            }
+
+            card.appendChild(media);
+            container.appendChild(card);
+
+            // אנימציית כניסה
+            setTimeout(() => card.classList.add('show'), index * 150);
+        }
+    });
+}
+
+loadMedia();
+
+// מניעת לחצן ימני על כל הדף
+document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+
+</body>
+</html>
