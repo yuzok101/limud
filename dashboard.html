@@ -89,7 +89,6 @@
   .btn:hover {
     background: #00aaff;
   }
-
 </style>
 </head>
 <body>
@@ -97,10 +96,10 @@
 <header>המערכת שלי - קורסי עזרה ראשונה</header>
 
 <div class="container" id="coursesContainer">
-  <!-- הכרטיסים של הקורסים יתווספו כאן דינמית -->
-</div>
+  </div>
 
 <script>
+// API_URL כבר הוגדר כראוי בדף זה
 const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
 const userId = sessionStorage.getItem("userId");
 
@@ -120,13 +119,17 @@ function fetchProgress(courseId, callback) {
   fetch(`${API_URL}?action=getProgress&userId=${userId}`)
     .then(res => res.json())
     .then(progressData => {
+      // התיקון: סינון הנתונים רק לקורס הספציפי
+      const courseProgress = progressData.filter(p => p.courseId === courseId);
+      
       // חישוב אחוז התקדמות בקורס זה
       let completedLessons = 0;
-      let totalLessons = 0;
-      progressData.forEach(p => {
+      let totalLessons = courseProgress.length;
+      
+      courseProgress.forEach(p => {
         if(p.status === "Completed") completedLessons++;
-        totalLessons++;
       });
+      
       const percentage = totalLessons ? Math.round((completedLessons/totalLessons)*100) : 0;
       callback(percentage);
     });
@@ -139,14 +142,13 @@ function addCourseCard(course, progress) {
   card.innerHTML = `
     <h3>${course.title}</h3>
     <p>${course.description}</p>
-    <div class="progress-bar"><div class="progress" style="width:${progress}%"></div></div>
+    <div class="progress-bar"><div class="progress" style="width:${progress}%;"></div></div>
     <p>התקדמות: ${progress}%</p>
-    <a href="course.html?courseId=${course.courseId}" class="btn">פתח קורס</a>
+    <a href="curses.html" class="btn" onclick="sessionStorage.setItem('courseId', '${course.courseId}');">לצפייה בשיעורים</a>
   `;
   container.appendChild(card);
 }
 
-// טעינת הקורסים כשהדף נטען
 fetchCourses();
 </script>
 
