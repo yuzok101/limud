@@ -10,7 +10,6 @@
     --light-blue: #1b263b;
     --accent-blue: #415a77;
     --text-color: #e0e1dd;
-    --watermark-color: rgba(255,255,255,0.2);
 }
 
 * { box-sizing: border-box; }
@@ -21,7 +20,6 @@ body {
     padding: 20px;
     background: var(--deep-blue);
     color: var(--text-color);
-    overflow-x: hidden;
 }
 
 h1 {
@@ -82,18 +80,6 @@ h1 {
     transform: scale(1.05);
 }
 
-.watermark {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    color: var(--watermark-color);
-    pointer-events: none;
-    font-weight: bold;
-    z-index: 10;
-    transform: rotate(-30deg);
-}
-
 @media (max-width: 768px) {
     .card iframe, .card video { height: 220px; }
 }
@@ -110,16 +96,10 @@ h1 {
 <div class="grid" id="mediaGrid"></div>
 
 <script>
-// בדיקה אם המשתמש מחובר
+// --- בדיקה אם המשתמש מחובר ---
 const user = JSON.parse(localStorage.getItem('loggedInUser'));
-if(!user) {
-    window.location.href = 'login1.html';
-} else {
-    const nameElement = document.getElementById('userNameDisplay');
-    if(nameElement) {
-        nameElement.textContent = `שלום, ${user.firstName} ${user.lastName}`;
-    }
-}
+if(!user) window.location.href = 'login1.html';
+else document.getElementById('userNameDisplay').textContent = `שלום, ${user.firstName} ${user.lastName}`;
 
 // --- URL של גיליון Google שפורסם כ-Publish to Web (CSV) ---
 const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
@@ -131,65 +111,57 @@ async function loadMedia() {
     const container = document.getElementById('mediaGrid');
 
     rows.forEach((row, index) => {
-        if(index === 0) return; // דילוג על כותרות
-
+        if(index === 0) return; // דילוג על כותרת
         const title = row[1]?.trim(); // עמודה B
         const link = row[2]?.trim();  // עמודה C
-        if(title && link) {
-            const card = document.createElement('div');
-            card.className = 'card';
+        if(!title || !link) return;
 
-            // Watermark – אפשר להשאיר ריק אם רוצים ללא טקסט
-            const watermark = document.createElement('div');
-            watermark.className = 'watermark';
-            // watermark.textContent = 'MySite';
-            card.appendChild(watermark);
+        const card = document.createElement('div');
+        card.className = 'card';
 
-            const h2 = document.createElement('h2');
-            h2.textContent = title;
-            card.appendChild(h2);
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        card.appendChild(h2);
 
-            let media;
-            let encodedLink = encodeURI(link); // תמיכה בשמות עבריים
+        let media;
+        const encodedLink = encodeURI(link);
 
-            if(link.includes('youtube.com') || link.includes('youtu.be')) {
-                media = document.createElement('iframe');
-                media.src = encodedLink.replace('watch?v=', 'embed/');
-                media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-                media.allowFullscreen = true;
-            } else if(link.includes('docs.google.com/presentation')) {
-                const embedLink = encodedLink.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
+        if(link.includes('youtube.com') || link.includes('youtu.be')) {
+            media = document.createElement('iframe');
+            media.src = encodedLink.replace('watch?v=', 'embed/');
+            media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            media.allowFullscreen = true;
+        }
+        else if(link.includes('docs.google.com/presentation')) {
+            const embedLink = encodedLink.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
+            media = document.createElement('iframe');
+            media.src = embedLink;
+        }
+        else if(link.includes('drive.google.com/file')) {
+            const fileIdMatch = link.match(/\/d\/(.+?)\//);
+            if(fileIdMatch) {
+                const fileId = fileIdMatch[1];
+                const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
                 media = document.createElement('iframe');
                 media.src = embedLink;
-            } else if(link.includes('drive.google.com/file')) {
-                const fileIdMatch = link.match(/\/d\/(.+?)\//);
-                if(fileIdMatch) {
-                    const fileId = fileIdMatch[1];
-                    const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
-                    media = document.createElement('video');
-                    media.src = embedLink;
-                    media.controls = true;
-                    media.oncontextmenu = e => e.preventDefault();
-                    media.setAttribute('controlsList','nodownload');
-                }
-            } else {
-                media = document.createElement('video');
-                media.src = encodedLink;
-                media.controls = true;
-                media.oncontextmenu = e => e.preventDefault();
-                media.setAttribute('controlsList','nodownload');
+                media.allowFullscreen = true;
             }
-
-            card.appendChild(media);
-            container.appendChild(card);
-            setTimeout(() => card.classList.add('show'), index*150);
         }
+        else {
+            media = document.createElement('video');
+            media.src = encodedLink;
+            media.controls = true;
+            media.oncontextmenu = e => e.preventDefault();
+            media.setAttribute('controlsList','nodownload');
+        }
+
+        card.appendChild(media);
+        container.appendChild(card);
+        setTimeout(() => card.classList.add('show'), index*150);
     });
 }
 
 loadMedia();
-
-// חסימת לחצן ימני
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 
