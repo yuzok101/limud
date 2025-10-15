@@ -10,7 +10,6 @@
     --light-blue: #1b263b;
     --accent-blue: #415a77;
     --text-color: #e0e1dd;
-    --watermark-color: rgba(255,255,255,0.2);
 }
 
 * { box-sizing: border-box; }
@@ -81,18 +80,17 @@ h1 {
     transform: scale(1.05);
 }
 
-/* Watermark overlay */
-.watermark {
+/* באנר שקוף למניעת לחיצה על הכפתורים העליונים */
+.card .top-blocker {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 40px;
-    color: var(--watermark-color);
-    pointer-events: none;
-    font-weight: bold;
-    z-index: 10;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    white-space: nowrap;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35px; /* ניתן לשנות לפי גובה הכפתורים */
+    z-index: 20;
+    background: rgba(255,255,255,0); /* שקוף לגמרי */
+    pointer-events: all; /* “סופג” את הלחיצות */
+    cursor: default;
 }
 
 @media (max-width: 768px) {
@@ -139,12 +137,7 @@ async function loadMedia() {
         h2.textContent = title;
         card.appendChild(h2);
 
-        // Watermark
-        const watermark = document.createElement('div');
-        watermark.className = 'watermark';
-        watermark.textContent = 'MySite'; // אפשר לשנות לשם האתר שלך
-        card.appendChild(watermark);
-
+        // סרטון / מצגת
         let media;
         const encodedLink = encodeURI(link);
 
@@ -182,6 +175,12 @@ async function loadMedia() {
         }
 
         card.appendChild(media);
+
+        // באנר שקוף למניעת לחיצה על הכפתורים העליונים
+        const blocker = document.createElement('div');
+        blocker.className = 'top-blocker';
+        card.appendChild(blocker);
+
         container.appendChild(card);
         setTimeout(() => card.classList.add('show'), index*150);
     });
