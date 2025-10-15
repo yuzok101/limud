@@ -10,6 +10,7 @@
     --light-blue: #1b263b;
     --accent-blue: #415a77;
     --text-color: #e0e1dd;
+    --watermark-color: rgba(255,255,255,0.2);
 }
 
 * { box-sizing: border-box; }
@@ -80,6 +81,20 @@ h1 {
     transform: scale(1.05);
 }
 
+/* Watermark overlay */
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 40px;
+    color: var(--watermark-color);
+    pointer-events: none;
+    font-weight: bold;
+    z-index: 10;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    white-space: nowrap;
+}
+
 @media (max-width: 768px) {
     .card iframe { height: 220px; }
 }
@@ -119,14 +134,20 @@ async function loadMedia() {
         const card = document.createElement('div');
         card.className = 'card';
 
+        // כותרת
         const h2 = document.createElement('h2');
         h2.textContent = title;
         card.appendChild(h2);
 
+        // Watermark
+        const watermark = document.createElement('div');
+        watermark.className = 'watermark';
+        watermark.textContent = 'MySite'; // אפשר לשנות לשם האתר שלך
+        card.appendChild(watermark);
+
         let media;
         const encodedLink = encodeURI(link);
 
-        // --- סוגי מדיה ---
         if(link.includes('youtube.com') || link.includes('youtu.be')) {
             media = document.createElement('iframe');
             media.src = encodedLink.replace('watch?v=', 'embed/');
@@ -139,9 +160,7 @@ async function loadMedia() {
             media.src = embedLink;
 
         } else if(link.includes('drive.google.com')) {
-            // המרה אוטומטית לכל סוגי קישורי Drive ל-preview
             let fileId = null;
-
             if(link.includes('/file/d/')) {
                 const match = link.match(/\/d\/(.+?)\//);
                 if(match) fileId = match[1];
@@ -157,7 +176,6 @@ async function loadMedia() {
                 media.allowFullscreen = true;
             }
         } else {
-            // וידאו רגיל
             media = document.createElement('iframe');
             media.src = encodedLink;
             media.allowFullscreen = true;
