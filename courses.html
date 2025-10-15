@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>קורס</title>
+<title>ניהול קורסים</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
 
@@ -13,15 +13,11 @@ body {
     background: #0b1f3a;
     color: #fff;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-/* כותרת למעלה */
 header {
-    width: 100%;
     background: #0a1630;
-    padding: 20px 0;
+    padding: 20px;
     text-align: center;
     font-size: 2rem;
     font-weight: bold;
@@ -29,47 +25,23 @@ header {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-/* קונטיינר הכרטיסים */
 .container {
-    flex: 1;
     max-width: 1200px;
     margin: 30px auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
-    gap: 20px;
     padding: 0 20px;
 }
 
-/* כרטיס שיעור */
-.card {
-    background: #12294f;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-}
-
-.card h3 {
-    margin: 0;
-    font-size: 1.3rem;
-    color: #00aaff;
-}
-
-.card p {
+input, textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: none;
     font-size: 1rem;
-    color: #cce0ff;
 }
 
-/* כפתור צפייה */
-.btn {
+button.btn {
     background: #005f99;
     color: #fff;
     padding: 10px 15px;
@@ -78,194 +50,153 @@ header {
     cursor: pointer;
     font-weight: bold;
     transition: background 0.3s;
-    text-decoration: none;
-    display: inline-block;
+    margin-bottom: 20px;
 }
 
-.btn:hover {
+button.btn:hover {
     background: #00aaff;
 }
 
-/* modal לצפייה בסרטון */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    justify-content: center;
-    align-items: center;
-}
+hr { border: 1px solid #0a1630; margin: 20px 0; }
 
-.modal-content {
+table {
+    width: 100%;
+    border-collapse: collapse;
     background: #12294f;
-    border-radius: 12px;
-    padding: 20px;
-    max-width: 800px;
-    width: 90%;
-    position: relative;
-}
-
-.modal video {
-    width: 100%;
     border-radius: 10px;
+    overflow: hidden;
 }
 
-.close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    color: #00aaff;
+th, td {
+    padding: 12px 15px;
+    text-align: center;
 }
+
+th {
+    background: #0a1630;
+    color: #00aaff;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background: #0f2a51;
+}
+
+tr:hover {
+    background: #0c1f3d;
+}
+
 </style>
 </head>
 <body>
 
-<header>קורס: <span id="courseTitle">טוען...</span></header>
+<header>ניהול קורסים ומבחנים</header>
 
-<div class="container" id="lessonsContainer">
-  </div>
+<div class="container">
+  <h3>הוסף קורס חדש</h3>
+  <input type="text" id="courseTitle" placeholder="שם הקורס">
+  <textarea id="courseDesc" placeholder="תיאור הקורס"></textarea>
+  <button class="btn" onclick="addCourse()">הוסף קורס</button>
 
-<div class="modal" id="videoModal">
-    <div class="modal-content">
-        <span class="close" id="closeModal">&times;</span>
-        <video id="lessonVideo" controls controlsList="nodownload"></video>
-    </div>
+  <hr>
+
+  <h3>הוסף שיעור לסרטון</h3>
+  <input type="text" id="lessonCourseId" placeholder="ID קורס">
+  <input type="text" id="lessonTitle" placeholder="שם שיעור">
+  <input type="text" id="lessonVideoUrl" placeholder="קישור לסרטון">
+  <button class="btn" onclick="addLesson()">הוסף שיעור</button>
+
+  <hr>
+
+  <h3>הוסף מבחן</h3>
+  <input type="text" id="quizCourseId" placeholder="ID קורס">
+  <input type="text" id="quizQuestion" placeholder="שאלה">
+  <input type="text" id="quizAnswer" placeholder="תשובה">
+  <button class="btn" onclick="addQuiz()">הוסף מבחן</button>
+
+  <hr>
+
+  <h3>רשימת הקורסים</h3>
+  <table id="coursesTable">
+    <thead>
+      <tr>
+        <th>ID קורס</th>
+        <th>שם הקורס</th>
+        <th>תיאור</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
-// API_URL כבר הוגדר כראוי בדף זה
+// התיקון: החלפת ה-Placeholder בכתובת ה-Web App שסופקה
 const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
-const userId = sessionStorage.getItem("userId");
-const courseId = sessionStorage.getItem("courseId"); // צריך לשמור את מזהה הקורס אחרי כניסה/בחירה
 
-if(!userId || !courseId){
-    alert("לא מחובר או לא נבחר קורס");
-    window.location.href = "dashboard.html"; // או login.html
-}
-
-let lessonsData = []; // לשמירת נתוני השיעורים הנוכחיים
-
-// טעינת נתוני הקורס
-function fetchCourseData() {
-    fetch(`${API_URL}?action=getCourseLessons&courseId=${courseId}&userId=${userId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('courseTitle').textContent = data.courseTitle;
-                lessonsData = data.lessons;
-                renderLessons();
-            } else {
-                alert("שגיאה בטעינת הקורס: " + data.message);
-            }
-        })
-        .catch(err => console.error("Error fetching course data:", err));
-}
-
-// יצירת כרטיסי השיעורים
-function renderLessons() {
-    const container = document.getElementById('lessonsContainer');
-    container.innerHTML = '';
-    lessonsData.forEach(lesson => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <h3>${lesson.title}</h3>
-            <p>סטטוס: <span id="status-${lesson.id}">טוען...</span></p>
-            <button class="btn" onclick="openVideoModal('${lesson.id}', '${lesson.videoUrl}')">צפה בשיעור</button>
+function fetchCoursesList(){
+  fetch(`${API_URL}?action=getCourses`)
+    .then(res=>res.json())
+    .then(courses=>{
+      const tbody = document.querySelector("#coursesTable tbody");
+      tbody.innerHTML = "";
+      courses.forEach(c=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${c.courseId}</td>
+          <td>${c.title}</td>
+          <td>${c.description}</td>
         `;
-        container.appendChild(card);
-        
-        // טעינת סטטוס שיעור
-        fetchLessonStatus(lesson.id);
+        tbody.appendChild(tr);
+      });
     });
 }
 
-// טעינת הסטטוס מ-Google Sheets
-function fetchLessonStatus(lessonId) {
-    fetch(`${API_URL}?action=getLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById(`status-${lessonId}`).textContent = data.status || "NotStarted";
-                // עדכון אובייקט השיעור המקומי עם הסטטוס
-                const lesson = lessonsData.find(l=>l.id===lessonId);
-                if(lesson) lesson.status = data.status || "NotStarted";
-            } else {
-                console.error("Failed to fetch lesson status:", data.message);
-            }
-        })
-        .catch(err => console.error("Error fetching lesson status:", err));
+function addCourse(){
+  const title = document.getElementById("courseTitle").value.trim();
+  const desc = document.getElementById("courseDesc").value.trim();
+  if(!title || !desc){ alert("מלא את כל השדות"); return; }
+  
+  fetch(`${API_URL}?action=addCourse&title=${encodeURIComponent(title)}&description=${encodeURIComponent(desc)}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.success){
+        alert("קורס נוסף בהצלחה! ID: "+data.courseId);
+        fetchCoursesList();
+        document.getElementById("courseTitle").value="";
+        document.getElementById("courseDesc").value="";
+      } else alert("שגיאה: "+data.message);
+    });
 }
 
-// פתיחת ה-Modal והצגת הסרטון
-function openVideoModal(lessonId, videoUrl) {
-    const modal = document.getElementById("videoModal");
-    const video = document.getElementById("lessonVideo");
-    const lesson = lessonsData.find(l => l.id === lessonId);
+function addLesson(){
+  const courseId = document.getElementById("lessonCourseId").value.trim();
+  const title = document.getElementById("lessonTitle").value.trim();
+  const videoUrl = document.getElementById("lessonVideoUrl").value.trim();
+  if(!courseId || !title || !videoUrl){ alert("מלא את כל השדות"); return; }
 
-    if (!lesson) return;
-
-    video.src = videoUrl;
-    modal.style.display = "flex";
-
-    // אם הסטטוס לא התחיל, עדכן ל-InProgress
-    if (lesson.status === "NotStarted") {
-        lesson.status = "InProgress";
-        document.getElementById(`status-${lesson.id}`).textContent = lesson.status;
-        // התיקון: הוספת courseId לקריאה
-        updateLessonStatus(lesson.id, lesson.status);
-    }
-
-    // מאזינים לסיום הסרטון
-    video.onended = function() {
-        lesson.status = "Completed";
-        document.getElementById(`status-${lesson.id}`).textContent = lesson.status;
-        // התיקון: הוספת courseId לקריאה
-        updateLessonStatus(lesson.id, lesson.status);
-    };
+  fetch(`${API_URL}?action=addLesson&courseId=${courseId}&title=${encodeURIComponent(title)}&videoUrl=${encodeURIComponent(videoUrl)}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.success){ alert("שיעור נוסף בהצלחה!"); }
+      else alert("שגיאה: "+data.message);
+    });
 }
 
-// סגירת modal
-document.getElementById("closeModal").onclick = function() {
-    const modal = document.getElementById("videoModal");
-    const video = document.getElementById("lessonVideo");
-    video.pause();
-    video.src = "";
-    modal.style.display = "none";
+function addQuiz(){
+  const courseId = document.getElementById("quizCourseId").value.trim();
+  const question = document.getElementById("quizQuestion").value.trim();
+  const answer = document.getElementById("quizAnswer").value.trim();
+  if(!courseId || !question || !answer){ alert("מלא את כל השדות"); return; }
+
+  fetch(`${API_URL}?action=addQuiz&courseId=${courseId}&question=${encodeURIComponent(question)}&answer=${encodeURIComponent(answer)}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.success){ alert("מבחן נוסף בהצלחה!"); }
+      else alert("שגיאה: "+data.message);
+    });
 }
 
-window.onclick = function(event) {
-    const modal = document.getElementById("videoModal");
-    if(event.target === modal){
-        const video = document.getElementById("lessonVideo");
-        video.pause();
-        video.src = "";
-        modal.style.display = "none";
-    }
-}
-
-// שליחת סטטוס ל-Google Sheets
-// התיקון: הוספת courseId כפרמטר
-function updateLessonStatus(lessonId, status){
-    fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}&status=${status}`)
-    .then(res => res.json())
-    .then(data => {
-        if(!data.success){
-            console.error("Failed to update lesson status:", data.message);
-        }
-    })
-    .catch(err => console.error("Error updating lesson status:", err));
-}
-
-// טוען נתונים עם כניסה לדף
-fetchCourseData();
+fetchCoursesList();
 </script>
 
 </body>
