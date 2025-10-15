@@ -130,77 +130,96 @@ header {
 <header>קורס: <span id="courseTitle">טוען...</span></header>
 
 <div class="container" id="lessonsContainer">
-  <!-- כרטיסי שיעורים יתווספו כאן -->
-</div>
-
-<!-- Modal לצפייה בסרטון -->
-<div class="modal" id="videoModal">
-  <div class="modal-content">
-    <span class="close" id="closeModal">&times;</span>
-    <video id="lessonVideo" controls controlsList="nodownload"></video>
   </div>
+
+<div class="modal" id="videoModal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <video id="lessonVideo" controls controlsList="nodownload"></video>
+    </div>
 </div>
 
 <script>
+// API_URL כבר הוגדר כראוי בדף זה
 const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
 const userId = sessionStorage.getItem("userId");
 const courseId = sessionStorage.getItem("courseId"); // צריך לשמור את מזהה הקורס אחרי כניסה/בחירה
 
 if(!userId || !courseId){
     alert("לא מחובר או לא נבחר קורס");
-    window.location.href = "login.html";
+    window.location.href = "dashboard.html"; // או login.html
 }
 
-let lessons = [];
+let lessonsData = []; // לשמירת נתוני השיעורים הנוכחיים
 
-// משיכת שיעורים מה-API
-function fetchLessons() {
-    fetch(`${API_URL}?action=getLessons&courseId=${courseId}&userId=${userId}`)
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            document.getElementById("courseTitle").textContent = data.courseTitle;
-            lessons = data.lessons; // מערך שיעורים עם {id, title, description, videoUrl, status}
-            loadLessons();
-        } else {
-            alert("שגיאה בטעינת השיעורים: " + data.message);
-        }
-    })
-    .catch(err => {
-        console.error("Error fetching lessons:", err);
-        alert("שגיאה בטעינת השיעורים");
-    });
+// טעינת נתוני הקורס
+function fetchCourseData() {
+    fetch(`${API_URL}?action=getCourseLessons&courseId=${courseId}&userId=${userId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('courseTitle').textContent = data.courseTitle;
+                lessonsData = data.lessons;
+                renderLessons();
+            } else {
+                alert("שגיאה בטעינת הקורס: " + data.message);
+            }
+        })
+        .catch(err => console.error("Error fetching course data:", err));
 }
 
-// יצירת כרטיסי שיעורים
-function loadLessons() {
-    const container = document.getElementById("lessonsContainer");
-    container.innerHTML = "";
-    lessons.forEach(lesson => {
-        const card = document.createElement("div");
-        card.className = "card";
+// יצירת כרטיסי השיעורים
+function renderLessons() {
+    const container = document.getElementById('lessonsContainer');
+    container.innerHTML = '';
+    lessonsData.forEach(lesson => {
+        const card = document.createElement('div');
+        card.className = 'card';
         card.innerHTML = `
             <h3>${lesson.title}</h3>
-            <p>${lesson.description}</p>
-            <p>סטטוס: <span id="status-${lesson.id}">${lesson.status}</span></p>
-            <button class="btn" onclick="openVideo(${lesson.id})">צפה בסרטון</button>
+            <p>סטטוס: <span id="status-${lesson.id}">טוען...</span></p>
+            <button class="btn" onclick="openVideoModal('${lesson.id}', '${lesson.videoUrl}')">צפה בשיעור</button>
         `;
         container.appendChild(card);
+        
+        // טעינת סטטוס שיעור
+        fetchLessonStatus(lesson.id);
     });
 }
 
-// פתיחת modal עם סרטון
-function openVideo(lessonId) {
-    const lesson = lessons.find(l => l.id === lessonId);
+// טעינת הסטטוס מ-Google Sheets
+function fetchLessonStatus(lessonId) {
+    fetch(`${API_URL}?action=getLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`status-${lessonId}`).textContent = data.status || "NotStarted";
+                // עדכון אובייקט השיעור המקומי עם הסטטוס
+                const lesson = lessonsData.find(l=>l.id===lessonId);
+                if(lesson) lesson.status = data.status || "NotStarted";
+            } else {
+                console.error("Failed to fetch lesson status:", data.message);
+            }
+        })
+        .catch(err => console.error("Error fetching lesson status:", err));
+}
+
+// פתיחת ה-Modal והצגת הסרטון
+function openVideoModal(lessonId, videoUrl) {
     const modal = document.getElementById("videoModal");
     const video = document.getElementById("lessonVideo");
-    video.src = lesson.videoUrl;
+    const lesson = lessonsData.find(l => l.id === lessonId);
+
+    if (!lesson) return;
+
+    video.src = videoUrl;
     modal.style.display = "flex";
 
-    // עדכון סטטוס InProgress אם לא התחילו
-    if(lesson.status === "NotStarted"){
+    // אם הסטטוס לא התחיל, עדכן ל-InProgress
+    if (lesson.status === "NotStarted") {
         lesson.status = "InProgress";
         document.getElementById(`status-${lesson.id}`).textContent = lesson.status;
+        // התיקון: הוספת courseId לקריאה
         updateLessonStatus(lesson.id, lesson.status);
     }
 
@@ -208,6 +227,7 @@ function openVideo(lessonId) {
     video.onended = function() {
         lesson.status = "Completed";
         document.getElementById(`status-${lesson.id}`).textContent = lesson.status;
+        // התיקון: הוספת courseId לקריאה
         updateLessonStatus(lesson.id, lesson.status);
     };
 }
@@ -232,8 +252,9 @@ window.onclick = function(event) {
 }
 
 // שליחת סטטוס ל-Google Sheets
+// התיקון: הוספת courseId כפרמטר
 function updateLessonStatus(lessonId, status){
-    fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&lessonId=${lessonId}&status=${status}`)
+    fetch(`${API_URL}?action=updateLessonStatus&userId=${userId}&courseId=${courseId}&lessonId=${lessonId}&status=${status}`)
     .then(res => res.json())
     .then(data => {
         if(!data.success){
@@ -243,8 +264,8 @@ function updateLessonStatus(lessonId, status){
     .catch(err => console.error("Error updating lesson status:", err));
 }
 
-// טוען את השיעורים בעת טעינת הדף
-fetchLessons();
+// טוען נתונים עם כניסה לדף
+fetchCourseData();
 </script>
 
 </body>
