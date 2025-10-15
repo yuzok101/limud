@@ -131,8 +131,8 @@ async function loadMedia() {
     const container = document.getElementById('mediaGrid');
 
     rows.forEach((row, index) => {
-        const title = row[0]?.trim(); // עמודה B
-        const link = row[1]?.trim();  // עמודה C
+        const title = row[0]?.trim();
+        const link = row[1]?.trim();
         if(title && link) {
             const card = document.createElement('div');
             card.className = 'card';
@@ -147,13 +147,15 @@ async function loadMedia() {
             card.appendChild(h2);
 
             let media;
+            let encodedLink = encodeURI(link); // המרה ל-URL encoded לתמיכה בשמות עבריים
+
             if(link.includes('youtube.com') || link.includes('youtu.be')) {
                 media = document.createElement('iframe');
-                media.src = link.replace('watch?v=', 'embed/');
+                media.src = encodedLink.replace('watch?v=', 'embed/');
                 media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
                 media.allowFullscreen = true;
             } else if(link.includes('docs.google.com/presentation')) {
-                const embedLink = link.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
+                const embedLink = encodedLink.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
                 media = document.createElement('iframe');
                 media.src = embedLink;
             } else if(link.includes('drive.google.com/file')) {
@@ -169,7 +171,7 @@ async function loadMedia() {
                 }
             } else {
                 media = document.createElement('video');
-                media.src = link;
+                media.src = encodedLink;
                 media.controls = true;
                 media.oncontextmenu = e => e.preventDefault();
                 media.setAttribute('controlsList','nodownload');
@@ -183,8 +185,6 @@ async function loadMedia() {
 }
 
 loadMedia();
-
-// חסימת לחצן ימני
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 
