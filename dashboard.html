@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
+
+  body {
+    margin: 0;
+    font-family: 'Assistant', sans-serif;
+    background: #0b1f3a;
+    color: #fff;
+  }
+
+  header {
+    background: #0a1630;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+    padding: 0 20px;
+  }
+
+  .card {
+    background: #12294f;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  }
+
+  .card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: #00aaff;
+  }
+
+  .card p {
+    font-size: 1rem;
+    color: #cce0ff;
+  }
+
+  .progress-bar {
+    background: #0a1630;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 12px;
+    margin: 15px 0;
+  }
+
+  .progress {
+    height: 100%;
+    background: #00aaff;
+    width: 0%;
+    transition: width 0.5s;
+  }
+
+  .btn {
+    background: #005f99;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .btn:hover {
+    background: #00aaff;
+  }
+
+</style>
+</head>
+<body>
+
+<header>המערכת שלי - קורסי עזרה ראשונה</header>
+
+<div class="container" id="coursesContainer">
+  <!-- הכרטיסים של הקורסים יתווספו כאן דינמית -->
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
+const userId = sessionStorage.getItem("userId");
+
+function fetchCourses() {
+  fetch(`${API_URL}?action=getCourses`)
+    .then(res => res.json())
+    .then(courses => {
+      courses.forEach(course => {
+        fetchProgress(course.courseId, progress => {
+          addCourseCard(course, progress);
+        });
+      });
+    });
+}
+
+function fetchProgress(courseId, callback) {
+  fetch(`${API_URL}?action=getProgress&userId=${userId}`)
+    .then(res => res.json())
+    .then(progressData => {
+      // חישוב אחוז התקדמות בקורס זה
+      let completedLessons = 0;
+      let totalLessons = 0;
+      progressData.forEach(p => {
+        if(p.status === "Completed") completedLessons++;
+        totalLessons++;
+      });
+      const percentage = totalLessons ? Math.round((completedLessons/totalLessons)*100) : 0;
+      callback(percentage);
+    });
+}
+
+function addCourseCard(course, progress) {
+  const container = document.getElementById("coursesContainer");
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <h3>${course.title}</h3>
+    <p>${course.description}</p>
+    <div class="progress-bar"><div class="progress" style="width:${progress}%"></div></div>
+    <p>התקדמות: ${progress}%</p>
+    <a href="course.html?courseId=${course.courseId}" class="btn">פתח קורס</a>
+  `;
+  container.appendChild(card);
+}
+
+// טעינת הקורסים כשהדף נטען
+fetchCourses();
+</script>
+
+</body>
+</html>
