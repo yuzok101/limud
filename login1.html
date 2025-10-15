@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<title>כניסה לאזור אישי</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== כללי ===== */
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family: 'Assistant', sans-serif; background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; height:100vh; }
+  h2,h3 { margin-bottom: 20px; }
+
+  /* ===== כרטיס כניסה ===== */
+  #loginCard, #personalArea { background: #112f4f; padding: 40px 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); width: 350px; text-align:center; transition: all 0.5s ease; }
+
+  input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; outline:none; font-size:16px; }
+  input:focus { box-shadow: 0 0 10px #00bfff; }
+
+  button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; transition: all 0.3s ease; }
+  button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,191,255,0.4); }
+
+  /* ===== אזור אישי ===== */
+  #personalArea { display:none; flex-direction: column; gap:15px; animation: fadeIn 1s ease forwards; }
+  #userContent { background: #0d2b4a; padding: 15px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s; }
+  #userContent:hover { transform: scale(1.05); }
+
+  /* ===== אנימציות ===== */
+  @keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
+
+  /* ===== אנימציה לדף ===== */
+  body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%); animation: bgMove 20s linear infinite; z-index:-1; }
+  @keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
+</style>
+</head>
+<body>
+
+<div id="loginCard">
+  <h2>התחבר לאזור האישי שלך</h2>
+  <form id="loginForm">
+    <input type="text" id="idNumber" placeholder="תעודת זהות" required>
+    <input type="email" id="email" placeholder="מייל" required>
+    <button type="submit">כניסה</button>
+  </form>
+</div>
+
+<div id="personalArea">
+  <h3>ברוך הבא, <span id="userName"></span></h3>
+  <p id="userContent"></p>
+  <button id="logout">התנתק</button>
+</div>
+
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxEN3fODo-AxRH1dUFfkkJ6rFRETS7urkiuMS8TMMk0cYbzZ8JrKe_rixKxWmLpul-v/exec';
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('idNumber').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      body: new URLSearchParams({ id, email })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      localStorage.setItem('loggedInUser', JSON.stringify(data));
+      showPersonalArea(data);
+    } else {
+      alert(data.message || "תעודת זהות או מייל שגויים");
+    }
+  } catch (err) {
+    alert("שגיאה בשרת. נסה שוב מאוחר יותר.");
+    console.error(err);
+  }
+});
+
+function showPersonalArea(user) {
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('personalArea').style.display = 'flex';
+  document.getElementById('userName').textContent = user.firstName + " " + user.lastName;
+  document.getElementById('userContent').textContent = user.personalArea;
+}
+
+document.getElementById('logout').addEventListener('click', function() {
+  localStorage.removeItem('loggedInUser');
+  location.reload();
+});
+
+// בדיקה אם המשתמש כבר מחובר
+window.addEventListener('load', function() {
+  const user = JSON.parse(localStorage.getItem('loggedInUser'));
+  if (user) showPersonalArea(user);
+});
+</script>
+
+</body>
+</html>
