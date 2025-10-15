@@ -35,14 +35,15 @@ tr:hover { background:#0c1f3d; }
     </thead>
     <tbody></tbody>
   </table>
-
+  
   <div id="chartContainer">
     <canvas id="activeChart" width="400" height="150"></canvas>
   </div>
 </div>
 
 <script>
-const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
+// התיקון: החלפת ה-Placeholder בכתובת ה-Web App שסופקה
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
 
 let activeUsers = [];
 
@@ -81,13 +82,13 @@ function renderChart(){
   window.chartInstance = new Chart(ctx,{
     type:'bar',
     data:{ labels:courses, datasets:[{label:'משתמשים פעילים', data:counts, backgroundColor:'#00aaff'}]},
-    options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, stepSize:1, ticks:{stepSize:1}}}}
   });
 }
 
-// רענון אוטומטי כל 10 שניות
-setInterval(fetchActiveUsers,10000);
+// עדכון כל 5 שניות
 fetchActiveUsers();
+setInterval(fetchActiveUsers, 5000);
 </script>
 
 </body>
