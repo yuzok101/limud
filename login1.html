@@ -47,6 +47,7 @@
 <div id="personalArea">
   <h3>ברוך הבא, <span id="userName"></span></h3>
   <p id="userContent"></p>
+  <button id="goToSecret">כניסה לדף סודי</button>
   <button id="logout">התנתק</button>
 </div>
 
@@ -84,9 +85,15 @@ function showPersonalArea(user) {
   document.getElementById('userContent').textContent = user.personalArea;
 }
 
+// כפתור התנתקות
 document.getElementById('logout').addEventListener('click', function() {
   localStorage.removeItem('loggedInUser');
   location.reload();
+});
+
+// כפתור מעבר לדף סודי
+document.getElementById('goToSecret').addEventListener('click', function() {
+  window.location.href = 'seret.html';
 });
 
 // בדיקה אם המשתמש כבר מחובר
