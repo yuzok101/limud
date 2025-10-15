@@ -131,15 +131,18 @@ async function loadMedia() {
     const container = document.getElementById('mediaGrid');
 
     rows.forEach((row, index) => {
-        const title = row[0]?.trim();
-        const link = row[1]?.trim();
+        if(index === 0) return; // דילוג על כותרות
+
+        const title = row[1]?.trim(); // עמודה B
+        const link = row[2]?.trim();  // עמודה C
         if(title && link) {
             const card = document.createElement('div');
             card.className = 'card';
 
+            // Watermark – אפשר להשאיר ריק אם רוצים ללא טקסט
             const watermark = document.createElement('div');
             watermark.className = 'watermark';
-            watermark.textContent = 'MySite';
+            // watermark.textContent = 'MySite';
             card.appendChild(watermark);
 
             const h2 = document.createElement('h2');
@@ -147,7 +150,7 @@ async function loadMedia() {
             card.appendChild(h2);
 
             let media;
-            let encodedLink = encodeURI(link); // המרה ל-URL encoded לתמיכה בשמות עבריים
+            let encodedLink = encodeURI(link); // תמיכה בשמות עבריים
 
             if(link.includes('youtube.com') || link.includes('youtu.be')) {
                 media = document.createElement('iframe');
@@ -185,6 +188,8 @@ async function loadMedia() {
 }
 
 loadMedia();
+
+// חסימת לחצן ימני
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 
