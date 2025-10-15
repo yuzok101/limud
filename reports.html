@@ -50,7 +50,8 @@ button.btn:hover { background:#00aaff; }
 </div>
 
 <script>
-const API_URL = "הכנס כאן את כתובת ה-Web App שלך";
+// התיקון: החלפת ה-Placeholder בכתובת ה-Web App שסופקה
+const API_URL = "https://script.google.com/macros/s/AKfycbxguZIdBZKUHrTy-8hLMxYIXCV7g5bsVNY3mOQgg1AU0v2giTisXG51lspgHeloXwHr/exec";
 let usersData = [];
 
 function fetchUsersData(){
@@ -65,20 +66,21 @@ function fetchUsersData(){
 }
 
 function populateFilter(data){
-  const select = document.getElementById("filter");
+  const filter = document.getElementById("filter");
   const courses = [...new Set(data.map(u=>u.course))];
   courses.forEach(c=>{
     const option = document.createElement("option");
     option.value = c;
-    option.innerText = c;
-    select.appendChild(option);
+    option.textContent = c;
+    filter.appendChild(option);
   });
 }
 
 function renderTable(data){
   const tbody = document.querySelector("#usersTable tbody");
-  const filterVal = document.getElementById("filter").value;
   tbody.innerHTML = "";
+  const filterVal = document.getElementById("filter").value;
+  
   data.filter(u=>!filterVal || u.course===filterVal)
       .forEach(u=>{
         const tr = document.createElement("tr");
@@ -105,30 +107,4 @@ function renderChart(data){
     type:'bar',
     data:{
       labels:courses,
-      datasets:[{label:'ציון ממוצע מבחנים', data:chartData, backgroundColor:'#00aaff'}]
-    },
-    options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{max:100}}}
-  });
-}
-
-// ייצוא CSV
-function exportCSV(){
-  const filterVal = document.getElementById("filter").value;
-  const filtered = usersData.filter(u=>!filterVal || u.course===filterVal);
-  let csv = 'שם משתמש,קורס,אחוז צפייה,ציון מבחן\n';
-  filtered.forEach(u=>{
-    csv += `${u.username},${u.course},${u.videoProgress},${u.quizScore}\n`;
-  });
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'report.csv';
-  a.click();
-}
-
-fetchUsersData();
-</script>
-
-</body>
-</html>
+      datasets:[{label:'ציון ממוצע מבח
