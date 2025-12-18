@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז מדיה</title>
+
+<style>
+:root {
+    --deep-blue: #0d1b2a;
+    --light-blue: #1b263b;
+    --accent-blue: #415a77;
+    --text-color: #e0e1dd;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: var(--deep-blue);
+    color: var(--text-color);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.3rem;
+    color: var(--accent-blue);
+    text-shadow: 1px 1px 4px black;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.banner {
+    position: relative;
+    height: 180px;
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.banner:hover {
+    transform: scale(1.04);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+}
+
+.banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(13,27,42,0.15),
+        rgba(13,27,42,0.85)
+    );
+}
+
+.banner span {
+    position: absolute;
+    bottom: 18px;
+    right: 20px;
+    z-index: 2;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--text-color);
+    text-shadow: 0 2px 6px black;
+}
+</style>
+</head>
+
+<body>
+
+<h1>מרכז מדיה רפואית</h1>
+
+<div class="grid">
+
+    <a class="banner" href="פודקאסטים.html">
+        <img src="images/פודקאסטים.png" alt="פודקאסטים">
+        <span>פודקאסטים</span>
+    </a>
+
+    <a class="banner" href="סרטוני-לימוד.html">
+        <img src="images/סרטוני-לימוד.png" alt="סרטוני לימוד">
+        <span>סרטוני לימוד</span>
+    </a>
+
+    <a class="banner" href="חדשות-ועדכונים.html">
+        <img src="images/חדשות-ועדכונים.png" alt="חדשות ועדכונים">
+        <span>חדשות ועדכונים מעולם הרפואה</span>
+    </a>
+
+    <a class="banner" href="הורדת-קבצים.html">
+        <img src="images/הורדת-קבצים.png" alt="הורדת קבצים">
+        <span>הורדת קבצים</span>
+    </a>
+
+</div>
+
+</body>
+</html>
