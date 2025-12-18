@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>טראומה</title>
+<style>
+:root {
+    --deep-blue: #0d1b2a;
+    --light-blue: #1b263b;
+    --accent-blue: #415a77;
+    --text-color: #e0e1dd;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--deep-blue);
+    color: var(--text-color);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: var(--accent-blue);
+    text-shadow: 1px 1px 4px black;
+}
+
+#userNameDisplay {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: var(--light-blue);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    padding: 15px;
+    text-align: center;
+    user-select: none;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.8s ease-out;
+    overflow: hidden;
+    position: relative;
+}
+
+.card.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.card h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text-color);
+    text-shadow: 0 1px 3px black;
+}
+
+.card iframe {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    border: none;
+    transition: transform 0.5s ease;
+}
+
+.card iframe:hover {
+    transform: scale(1.05);
+}
+
+/* באנר שקוף שמכסה חצי עליון של הסרטון */
+.card .top-blocker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%; /* חצי העליון */
+    z-index: 20;
+    background: rgba(255,255,255,0); /* שקוף לגמרי */
+    pointer-events: all; /* "סופג" את הלחיצות */
+    cursor: default;
+}
+
+@media (max-width: 768px) {
+    .card iframe { height: 220px; }
+}
+
+@media (max-width: 480px) {
+    .card iframe { height: 180px; }
+}
+</style>
+</head>
+<body data-category="טראומה">
+
+<h1>טראומה</h1>
+<div id="userNameDisplay"></div>
+<div class="grid" id="mediaGrid"></div>
+
+<script>
+// --- בדיקה אם המשתמש מחובר ---
+const user = JSON.parse(localStorage.getItem('loggedInUser'));
+if(!user) window.location.href = 'login1.html';
+else document.getElementById('userNameDisplay').textContent = `שלום, ${user.firstName} ${user.lastName}`;
+
+// --- URL של גיליון Google שפורסם כ-Publish to Web (CSV) ---
+const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
+
+async function loadMedia() {
+    const res = await fetch(csvUrl);
+    const text = await res.text();
+    const rows = text.split('\n').map(r => r.split(','));
+    const container = document.getElementById('mediaGrid');
+
+    const pageCategory = document.body.dataset.category;
+
+rows.forEach((row, index) => {
+    if(index === 0) return;
+
+    const title = row[1]?.trim();     // עמודה B
+    const link = row[2]?.trim();      // עמודה C
+    const category = row[3]?.trim();  // עמודה D ← קטגוריה בעברית
+
+    if(!title || !link) return;
+    if(category !== pageCategory) return; // ← הסינון
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // כותרת
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        card.appendChild(h2);
+
+        // סרטון / מצגת
+        let media;
+        const encodedLink = encodeURI(link);
+
+        if(link.includes('youtube.com') || link.includes('youtu.be')) {
+            media = document.createElement('iframe');
+            media.src = encodedLink.replace('watch?v=', 'embed/');
+            media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            media.allowFullscreen = true;
+
+        } else if(link.includes('docs.google.com/presentation')) {
+            const embedLink = encodedLink.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
+            media = document.createElement('iframe');
+            media.src = embedLink;
+
+        } else if(link.includes('drive.google.com')) {
+            let fileId = null;
+            if(link.includes('/file/d/')) {
+                const match = link.match(/\/d\/(.+?)\//);
+                if(match) fileId = match[1];
+            } else if(link.includes('open?id=')) {
+                const match = link.match(/open\?id=(.+)/);
+                if(match) fileId = match[1];
+            }
+
+            if(fileId) {
+                const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
+                media = document.createElement('iframe');
+                media.src = embedLink;
+                media.allowFullscreen = true;
+            }
+        } else {
+            media = document.createElement('iframe');
+            media.src = encodedLink;
+            media.allowFullscreen = true;
+        }
+
+        card.appendChild(media);
+
+        // באנר שקוף חצי עליון
+        const blocker = document.createElement('div');
+        blocker.className = 'top-blocker';
+        card.appendChild(blocker);
+
+        container.appendChild(card);
+        setTimeout(() => card.classList.add('show'), index*150);
+    });
+}
+
+loadMedia();
+
+// חסימת לחצן ימני
+document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+
+</body>
+</html>
