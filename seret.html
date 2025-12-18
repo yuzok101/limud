@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>סרטוני הדרכה</title>
+<title>פודקאסטים</title>
 <style>
 :root {
     --deep-blue: #0d1b2a;
@@ -104,7 +104,7 @@ h1 {
 </head>
 <body>
 
-<h1>גלריית מדיה</h1>
+<h1>פודקאסטים</h1>
 <div id="userNameDisplay"></div>
 <div class="grid" id="mediaGrid"></div>
 
@@ -123,11 +123,17 @@ async function loadMedia() {
     const rows = text.split('\n').map(r => r.split(','));
     const container = document.getElementById('mediaGrid');
 
-    rows.forEach((row, index) => {
-        if(index === 0) return; // דילוג על שורת הכותרות
-        const title = row[1]?.trim(); // עמודה B
-        const link = row[2]?.trim();  // עמודה C
-        if(!title || !link) return;
+    const pageCategory = document.body.dataset.category;
+
+rows.forEach((row, index) => {
+    if(index === 0) return;
+
+    const title = row[1]?.trim();     // עמודה B
+    const link = row[2]?.trim();      // עמודה C
+    const category = row[3]?.trim();  // עמודה D ← קטגוריה בעברית
+
+    if(!title || !link) return;
+    if(category !== pageCategory) return; // ← הסינון
 
         const card = document.createElement('div');
         card.className = 'card';
