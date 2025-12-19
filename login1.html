@@ -160,7 +160,7 @@
 </div>
 
 <script>
-const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwN22JPLnAD7rHz0OUVNj0e22RpGZVHdYZPanzepd5JUstcDn3wP9aoYJGocEuNsGjY/exec';
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -185,7 +185,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     if (data.success) {
       if (data.needEmail) {
-        // משתמש נכנס עם תעודת זהות בלבד
         let userEmail = prompt("אנא הזן את המייל שלך להשלמת ההרשמה:");
         if (userEmail) {
           await fetch(scriptURL, {
