@@ -39,7 +39,7 @@
     margin-bottom: 25px;
     transition: transform 0.3s ease;
     position: relative;
-    z-index: 2; /* מעל הלוגו הענק */
+    z-index: 2;
   }
   #loginCard img:hover { transform: scale(1.1); }
 
@@ -47,7 +47,7 @@
   #loginCard::before {
     content: "";
     background: url('logo.png') no-repeat center center;
-    background-size: 500px; /* גודל ענק */
+    background-size: 500px;
     opacity: 0.05;
     position: absolute;
     top: 50%;
@@ -144,7 +144,7 @@
   <h2>התחבר לאזור האישי שלך</h2>
   <form id="loginForm">
     <input type="text" id="idNumber" placeholder="תעודת זהות" required>
-    <input type="email" id="email" placeholder="מייל" required>
+    <input type="email" id="email" placeholder="מייל">
     <button type="submit">
       <span class="btnText">כניסה</span>
       <div class="spinner"></div>
@@ -160,12 +160,12 @@
 </div>
 
 <script>
-const scriptURL = 'https://script.google.com/macros/s/AKfycbxEN3fODo-AxRH1dUFfkkJ6rFRETS7urkiuMS8TMMk0cYbzZ8JrKe_rixKxWmLpul-v/exec';
+const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const id = document.getElementById('idNumber').value.trim();
-  const email = document.getElementById('email').value.trim();
+  let email = document.getElementById('email').value.trim();
 
   const button = e.target.querySelector('button');
   const spinner = button.querySelector('.spinner');
@@ -184,8 +184,25 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const data = await response.json();
 
     if (data.success) {
-      localStorage.setItem('loggedInUser', JSON.stringify(data));
-      showPersonalArea(data);
+      if (data.needEmail) {
+        // משתמש נכנס עם תעודת זהות בלבד
+        let userEmail = prompt("אנא הזן את המייל שלך להשלמת ההרשמה:");
+        if (userEmail) {
+          await fetch(scriptURL, {
+            method: 'POST',
+            body: new URLSearchParams({ id, email: userEmail })
+          });
+          data.email = userEmail;
+          data.needEmail = false;
+          localStorage.setItem('loggedInUser', JSON.stringify(data));
+          showPersonalArea(data);
+        } else {
+          alert("צריך להזין מייל כדי להיכנס");
+        }
+      } else {
+        localStorage.setItem('loggedInUser', JSON.stringify(data));
+        showPersonalArea(data);
+      }
     } else {
       alert(data.message || "תעודת זהות או מייל שגויים");
     }
