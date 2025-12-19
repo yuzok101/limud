@@ -198,5 +198,59 @@ loadMedia();
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 
+    <script type="module">
+import { db } from "./firebase.js";
+import { collection, doc, setDoc, addDoc, serverTimestamp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ⚡ מזהה ייחודי לכל משתמש
+let visitorId = localStorage.getItem("visitorId");
+if (!visitorId) {
+  visitorId = crypto.randomUUID();
+  localStorage.setItem("visitorId", visitorId);
+}
+
+// ⚡ פרטי משתמש (אם יש לך מידע מ־Sheets או מהטופס)
+const user = {
+  name: localStorage.getItem("userName") || null,
+  email: localStorage.getItem("userEmail") || null
+};
+
+// ⚡ עדכון liveVisitors
+async function updateLiveVisitor() {
+  try {
+    await setDoc(doc(db, "liveVisitors", visitorId), {
+      ...user,
+      page: location.pathname,
+      lastSeen: serverTimestamp()
+    });
+  } catch(e) {
+    console.error("Error updating live visitor:", e);
+  }
+}
+
+// ⚡ הוספת צפייה חדשה ל-pageViews
+async function addPageView() {
+  try {
+    await addDoc(collection(db, "pageViews"), {
+      visitorId,
+      page: location.pathname,
+      date: new Date().toISOString().slice(0,10), // YYYY-MM-DD
+      timestamp: serverTimestamp()
+    });
+  } catch(e) {
+    console.error("Error adding page view:", e);
+  }
+}
+
+// ⚡ הפעלת הפונקציות מיד
+updateLiveVisitor();
+addPageView();
+
+// ⚡ עדכון liveVisitors כל 30 שניות
+setInterval(updateLiveVisitor, 30000);
+</script>
+
+    
 </body>
 </html>
