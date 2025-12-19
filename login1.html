@@ -21,10 +21,13 @@ body::before { content:""; position:absolute; top:0; left:0; width:100%; height:
 
 h2,h3 { margin-bottom: 20px; font-weight:700; position: relative; z-index:1; }
 
-input { width: 90%; padding: 14px 15px; margin: 12px 0; border-radius: 12px; border: none; outline:none; font-size:16px; transition: all 0.3s ease; background: rgba(255,255,255,0.05); color: #fff; position: relative; z-index:1; }
+input { display: block; width: 90%; margin: 12px auto; padding: 14px 15px; border-radius: 12px; border: none; outline:none; font-size:16px; transition: all 0.3s ease; background: rgba(255,255,255,0.05); color: #fff; position: relative; z-index:1; }
 input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px #00bfff; }
 input.invalid { border: 2px solid #ff4d4d; }
+
 #emailError { color: #ff4d4d; font-size: 14px; margin-top:-8px; margin-bottom:8px; display:none; }
+
+#message { color:#00bfff; font-size:14px; margin-bottom:10px; min-height:18px; }
 
 button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; position: relative; overflow: hidden; transition: all 0.3s ease; z-index:1; }
 button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,191,255,0.5); }
@@ -48,6 +51,7 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
   <h2>התחבר לאזור האישי שלך</h2>
   <form id="loginForm">
     <input type="text" id="idNumber" placeholder="תעודת זהות" required>
+    <div id="message"></div>
     <input type="email" id="email" placeholder="מייל" style="display:none;">
     <input type="email" id="confirmEmail" placeholder="אימות מייל" style="display:none;">
     <div id="emailError">מייל לא תואם</div>
@@ -71,6 +75,7 @@ const scriptURL = 'https://script.google.com/macros/s/AKfycbwN22JPLnAD7rHz0OUVNj
 const emailInput = document.getElementById('email');
 const confirmInput = document.getElementById('confirmEmail');
 const emailError = document.getElementById('emailError');
+const messageDiv = document.getElementById('message');
 
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,32 +122,36 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
       if(data.success){
         if(data.email){ 
-          // יש מייל → מציג שדה חובה להזנה
           emailInput.style.display = 'block';
           emailInput.value = '';
           confirmInput.style.display = 'none';
-          alert("אנא הזן את המייל שלך");
+          messageDiv.textContent = "אנא הזן את המייל שלך"; // הודעה באתר
           stage = 2;
           localStorage.setItem('tempUser', JSON.stringify(data));
         } else {
-          // אין מייל → מציג שני שדות אימות
           emailInput.style.display = 'block';
           confirmInput.style.display = 'block';
-          alert("חסרים לנו כמה פרטים עליך, אנא הזן את המייל שלך פעמיים");
+          messageDiv.textContent = "חסרים לנו כמה פרטים עליך, אנא הזן את המייל שלך פעמיים"; // הודעה באתר
           stage = 2;
           localStorage.setItem('tempUser', JSON.stringify(data));
         }
       } else {
-        alert(data.message || "תעודת זהות לא נמצאה");
+        messageDiv.textContent = data.message || "תעודת זהות לא נמצאה";
       }
     } else if(stage === 2){
       // שלב שני: הזנת מייל
       const emailVal = emailInput.value.trim();
       if(confirmInput.style.display !== 'none'){
         const confirmVal = confirmInput.value.trim();
-        if(emailVal !== confirmVal){ alert("מיילים לא תואמים"); return; }
+        if(emailVal !== confirmVal){ 
+          messageDiv.textContent = "מיילים לא תואמים";
+          return; 
+        }
       }
-      if(!isValidEmail(emailVal)){ alert("מייל לא תקני"); return; }
+      if(!isValidEmail(emailVal)){ 
+        messageDiv.textContent = "מייל לא תקני";
+        return; 
+      }
 
       const tempUser = JSON.parse(localStorage.getItem('tempUser'));
       let res2 = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({id,email: emailVal}) });
@@ -150,9 +159,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       if(data2.success){
         localStorage.setItem('loggedInUser', JSON.stringify(data2));
         localStorage.removeItem('tempUser');
+        messageDiv.textContent = "";
         showPersonalArea(data2);
       } else {
-        alert(data2.message || "שגיאה בשרת");
+        messageDiv.textContent = data2.message || "שגיאה בשרת";
       }
     }
   } catch(err){
