@@ -32,14 +32,14 @@ header img {
     height: 120px;
 }
 
-/* גריד 2x2 */
+/* גריד 2x2 – מחשב */
 .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     padding: 20px;
-    min-height: calc(100vh - 160px);
+    max-height: 800px; /* גובה מקסימלי לגריד במחשב */
     box-sizing: border-box;
 }
 
@@ -48,6 +48,7 @@ header img {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
+    max-height: 380px; /* מגביל גובה באנר במחשב */
     overflow: hidden;
     cursor: pointer;
     border-radius: 12px;
@@ -99,10 +100,13 @@ header img {
     .grid {
         grid-template-columns: 1fr;
         grid-template-rows: repeat(4, auto);
+        max-height: none;
+        padding: 10px;
     }
     .banner {
         aspect-ratio: auto;
         height: 200px;
+        max-height: none;
     }
     .banner span {
         font-size: 1.4rem;
@@ -147,7 +151,7 @@ function revealOnScroll() {
     const windowHeight = window.innerHeight;
     banners.forEach(banner => {
         const position = banner.getBoundingClientRect().top;
-        if(position < windowHeight - 50) { // קצת לפני שנכנס למסך
+        if(position < windowHeight - 50) {
             banner.classList.add('visible');
         }
     });
