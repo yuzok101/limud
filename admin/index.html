@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד Analytics מקצועי</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:'Assistant', sans-serif; }
+  body { background:#0d1b2a; color:#fff; min-height:100vh; padding:20px; }
+  h1 { text-align:center; margin-bottom:25px; color:#00bfff; }
+  .summary { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:20px; }
+  .summary div { flex:1; min-width:150px; background:#0d2b4a; padding:15px; border-radius:15px; text-align:center; box-shadow:0 4px 15px rgba(0,191,255,0.3); }
+  .summary div h3 { color:#00bfff; margin-bottom:5px; }
+  .dashboard { display:grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+  .card { background: rgba(17,47,79,0.9); padding:20px; border-radius:20px; box-shadow:0 8px 30px rgba(0,191,255,0.3); transition:0.3s; }
+  .card:hover { transform: translateY(-5px); box-shadow:0 12px 40px rgba(0,191,255,0.5); }
+  .card h2 { margin-bottom:15px; color:#00bfff; }
+  .user { background: #0d2b4a; margin-bottom:10px; padding:10px; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,0.3); }
+  .scrollable { max-height:300px; overflow-y:auto; padding-right:5px; }
+  input { margin-bottom:10px; padding:8px; border-radius:8px; border:none; outline:none; width:100%; }
+  canvas { background: rgba(0,191,255,0.05); border-radius:15px; padding:10px; }
+  .btn { background:#00bfff; color:#fff; padding:8px 12px; border:none; border-radius:10px; cursor:pointer; margin-top:10px; }
+  .btn:hover { background:#0099cc; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th,td { padding:8px; text-align:center; border-bottom:1px solid #00bfff; }
+  th { cursor:pointer; background:#0d2b4a; color:#00bfff; }
+</style>
+</head>
+<body>
+
+<h1>דשבורד Analytics מקצועי</h1>
+
+<div class="summary">
+  <div><h3>משתמשים אונליין</h3><div id="onlineCount">0</div></div>
+  <div><h3>צפיות היום</h3><div id="viewsToday">0</div></div>
+  <div><h3>צפיות החודש</h3><div id="viewsMonth">0</div></div>
+  <div><h3>סה"כ צפיות</h3><div id="viewsTotal">0</div></div>
+</div>
+
+<div class="dashboard">
+  <div class="card">
+    <h2>משתמשים אונליין</h2>
+    <input type="text" id="filterUser" placeholder="סנן לפי שם או דף...">
+    <div id="liveUsers" class="scrollable"></div>
+    <button class="btn" id="exportLive">Export CSV</button>
+  </div>
+  
+  <div class="card">
+    <h2>צפיות לפי דף (לחץ לגרף פאי)</h2>
+    <canvas id="pageViewsChart"></canvas>
+    <button class="btn" id="exportPages">Export CSV</button>
+  </div>
+  
+  <div class="card">
+    <h2>צפיות לפי יום</h2>
+    <canvas id="dailyViewsChart"></canvas>
+  </div>
+  
+  <div class="card">
+    <h2>טבלת משתמשים עם מיון</h2>
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th data-key="name">שם</th>
+          <th data-key="email">מייל</th>
+          <th data-key="page">דף</th>
+          <th data-key="lastSeen">זמן אחרון</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  
+  <div class="card">
+    <h2>עדכוני משתמשים אחרונים</h2>
+    <div id="userUpdates" class="scrollable"></div>
+  </div>
+</div>
+
+<script type="module">
+import { db } from "../firebase.js";
+import { collection, getDocs, query, orderBy, limit, onSnapshot } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ===== Live Users =====
+const liveUsersDiv = document.getElementById('liveUsers');
+const onlineCountDiv = document.getElementById('onlineCount');
+const filterInput = document.getElementById('filterUser');
+const usersTableBody = document.querySelector('#usersTable tbody');
+
+let liveUsers = [];
+let pageFilter = null;
+
+function renderLiveUsers() {
+  const filter = filterInput.value.toLowerCase();
+  liveUsersDiv.innerHTML = '';
+  const filtered = liveUsers.filter(u => {
+    const matchesSearch = (u.name && u.name.toLowerCase().includes(filter)) || (u.page && u.page.toLowerCase().includes(filter));
+    const matchesPage = pageFilter ? u.page === pageFilter : true;
+    return matchesSearch && matchesPage;
+  });
+  filtered.forEach(user => {
+    const div = document.createElement('div');
+    div.className='user';
+    div.textContent=`${user.name || 'לא ידוע'} | ${user.email || '-'} | ${user.page} | ${new Date(user.lastSeen?.seconds*1000).toLocaleTimeString()}`;
+    liveUsersDiv.appendChild(div);
+  });
+  renderUsersTable(filtered);
+  onlineCountDiv.textContent=liveUsers.length;
+}
+
+function renderUsersTable(users){
+  usersTableBody.innerHTML='';
+  users.forEach(u=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${u.name||'לא ידוע'}</td><td>${u.email||'-'}</td><td>${u.page||'-'}</td><td>${u.lastSeen?.seconds?new Date(u.lastSeen.seconds*1000).toLocaleString():'-'}</td>`;
+    usersTableBody.appendChild(tr);
+  });
+}
+
+filterInput.addEventListener('input', renderLiveUsers);
+
+onSnapshot(collection(db, "liveVisitors"), snapshot => {
+  liveUsers = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+  renderLiveUsers();
+});
+
+// ===== Page Views Chart (Bar & Pie) =====
+const pageViewsCtx = document.getElementById('pageViewsChart').getContext('2d');
+let pageViewsChart;
+
+async function updatePageViews() {
+  const snapshot = await getDocs(collection(db, "pageViews"));
+  const counts = {};
+  snapshot.forEach(doc => {
+    const page = doc.data().page;
+    counts[page] = (counts[page] || 0) + 1;
+  });
+  const labels = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  const data = labels.map(l=>counts[l]);
+
+  if(pageViewsChart){
+    pageViewsChart.data.labels=labels;
+    pageViewsChart.data.datasets[0].data=data;
+    pageViewsChart.update();
+  } else {
+    pageViewsChart = new Chart(pageViewsCtx,{
+      type:'bar',
+      data:{labels:labels,datasets:[{label:'כניסות', data:data, backgroundColor:'#00bfff'}]},
+      options:{
+        responsive:true,
+        onClick:(evt,elements)=>{
+          if(elements.length>0){
+            const index = elements[0].index;
+            pageFilter = labels[index];
+            renderLiveUsers();
+          }
+        },
+        scales:{y:{beginAtZero:true}}
+      }
+    });
+  }
+}
+
+// ===== Daily Views Chart =====
+const dailyViewsCtx = document.getElementById('dailyViewsChart').getContext('2d');
+let dailyViewsChart;
+
+async function updateDailyViews() {
+  const snapshot = await getDocs(collection(db, "pageViews"));
+  const counts={};
+  snapshot.forEach(doc=>{
+    const date = doc.data().date;
+    counts[date] = (counts[date]||0)+1;
+  });
+  const labels = Object.keys(counts).sort();
+  const data = Object.values(counts);
+
+  if(dailyViewsChart){
+    dailyViewsChart.data.labels=labels;
+    dailyViewsChart.data.datasets[0].data=data;
+    dailyViewsChart.update();
+  } else {
+    dailyViewsChart = new Chart(dailyViewsCtx,{
+      type:'line',
+      data:{labels:labels,datasets:[{label:'כניסות יום', data:data, backgroundColor:'rgba(0,191,255,0.3)', borderColor:'#00bfff', fill:true}]},
+      options:{responsive:true, scales:{y:{beginAtZero:true}}}
+    });
+  }
+}
+
+// ===== User Updates =====
+const userUpdatesDiv = document.getElementById('userUpdates');
+onSnapshot(query(collection(db,"userUpdates"), orderBy("timestamp","desc"), limit(50)), snapshot=>{
+  userUpdatesDiv.innerHTML='';
+  snapshot.forEach(doc=>{
+    const data = doc.data();
+    const div = document.createElement('div');
+    div.className='user';
+    div.textContent=`${data.visitorId} עדכן ${data.field}: ${data.oldValue || '-'} → ${data.newValue || '-'}`;
+    userUpdatesDiv.appendChild(div);
+  });
+});
+
+// ===== Summary Counts =====
+const viewsTodayDiv=document.getElementById('viewsToday');
+const viewsMonthDiv=document.getElementById('viewsMonth');
+const viewsTotalDiv=document.getElementById('viewsTotal');
+
+let viewsToday=0, viewsMonth=0, viewsTotal=0;
+
+async function updateSummary(){
+  viewsToday=0; viewsMonth=0; viewsTotal=0;
+  const snapshot = await getDocs(collection(db,"pageViews"));
+  const today=new Date().toISOString().slice(0,10);
+  const month=today.slice(0,7);
+  snapshot.forEach(doc=>{
+    const date=doc.data().date;
+    if(date===today) viewsToday++;
+    if(date.startsWith(month)) viewsMonth++;
+    viewsTotal++;
+  });
+  viewsTodayDiv.textContent=viewsToday;
+  viewsMonthDiv.textContent=viewsMonth;
+  viewsTotalDiv.textContent=viewsTotal;
+}
+
+// ===== Export CSV =====
+function downloadCSV(filename, rows) {
+  const csvContent = rows.map(e => e.join(",")).join("\n");
+  const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+
+document.getElementById('exportLive').addEventListener('click', () => {
+  const rows = [['Name','Email','Page','LastSeen']];
+  liveUsers.forEach(u=>{
+    rows.push([u.name||'לא ידוע', u.email||'-', u.page||'-', u.lastSeen?.seconds ? new Date(u.lastSeen.seconds*1000).toLocaleString() : '-']);
+  });
+  downloadCSV('live_users.csv', rows);
+});
+
+document.getElementById('exportPages').addEventListener('click', async () => {
+  const snapshot = await getDocs(collection(db, "pageViews"));
+  const rows = [['Page','Date','VisitorId']];
+  snapshot.forEach(doc=>{
+    const d = doc.data();
+    rows.push([d.page||'-', d.date||'-', d.visitorId||'-']);
+  });
+  downloadCSV('page_views.csv', rows);
+});
+
+// ===== Table Sorting =====
+document.querySelectorAll('#usersTable th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key;
+    liveUsers.sort((a,b)=>{
+      if(key==='lastSeen') return (b.lastSeen?.seconds||0)-(a.lastSeen?.seconds||0);
+      return (''+(a[key]||'')).localeCompare(b[key]||'');
+    });
+    renderUsersTable(liveUsers);
+  });
+});
+
+// ===== Auto Refresh =====
+function refreshAll(){
+  updatePageViews();
+  updateDailyViews();
+  updateSummary();
+}
+refreshAll();
+setInterval(refreshAll,10000);
+
+</script>
+</body>
+</html>
