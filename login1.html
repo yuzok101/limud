@@ -200,17 +200,39 @@ window.addEventListener('load', function(){
 </script>
 
 
-  
-  <script type="module">
-import { db } from "/firebase.js";
-import { collection, addDoc, serverTimestamp } from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-addDoc(collection(db, "test"), {
-  message: "hello firebase",
-  time: serverTimestamp()
-});
+ 
+  
+ <!-- סקריפט Firebase מלא ומוכן -->
+<script type="module">
+  // ⚡ הנתיב ל-firebase.js יחסית לדף
+  import { db } from "./firebase.js"; 
+  import { collection, addDoc, serverTimestamp } from
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  async function sendTest() {
+    // בדיקת db
+    if(!db) {
+      console.error("Firebase DB לא נטען! בדוק את הנתיב ל-firebase.js");
+      return;
+    }
+
+    try {
+      // שליחת מסמך ראשון ל-collection "test"
+      const docRef = await addDoc(collection(db, "test"), {
+        message: "hello firebase",
+        time: serverTimestamp()
+      });
+      console.log("Document successfully written! ID:", docRef.id);
+    } catch(e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
+  // שליחת הנתון ברגע שהדף נטען
+  window.addEventListener('load', sendTest);
 </script>
+
 
 
  
