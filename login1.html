@@ -6,103 +6,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== כללי ===== */
 * { box-sizing: border-box; margin:0; padding:0; font-family: 'Assistant', sans-serif; }
 body { background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; position:relative; }
-
-/* ===== רקע דינמי ===== */
-body::before {
-  content:""; position:absolute; top:0; left:0; width:100%; height:100%;
-  background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%);
-  animation: bgMove 30s linear infinite;
-  z-index:-1;
-}
+body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%); animation: bgMove 30s linear infinite; z-index:-1; }
 @keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
 
-/* ===== כרטיס כניסה ===== */
-#loginCard, #personalArea {
-  background: rgba(17,47,79,0.9);
-  padding: 40px 30px;
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  width: 380px;
-  text-align:center;
-  transition: all 0.5s ease, transform 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
+#loginCard, #personalArea { background: rgba(17,47,79,0.9); padding: 40px 30px; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); width: 380px; text-align:center; transition: all 0.5s ease, transform 0.3s ease; position: relative; overflow: hidden; }
 #loginCard:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(0,191,255,0.5); }
 
-/* ===== לוגו ===== */
 #loginCard img { width: 120px; margin-bottom: 25px; transition: transform 0.3s ease; position: relative; z-index: 2; }
 #loginCard img:hover { transform: scale(1.1); }
 
-#loginCard::before {
-  content: "";
-  background: url('logo.png') no-repeat center center;
-  background-size: 500px;
-  opacity: 0.05;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(2);
-  z-index: 0;
-  pointer-events: none;
-}
+#loginCard::before { content: ""; background: url('logo.png') no-repeat center center; background-size: 500px; opacity: 0.05; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(2); z-index: 0; pointer-events: none; }
 
 h2,h3 { margin-bottom: 20px; font-weight:700; position: relative; z-index:1; }
 
-input {
-  width: 90%;
-  padding: 14px 15px;
-  margin: 12px 0;
-  border-radius: 12px;
-  border: none;
-  outline:none;
-  font-size:16px;
-  transition: all 0.3s ease;
-  background: rgba(255,255,255,0.05);
-  color: #fff;
-  position: relative;
-  z-index:1;
-}
+input { width: 90%; padding: 14px 15px; margin: 12px 0; border-radius: 12px; border: none; outline:none; font-size:16px; transition: all 0.3s ease; background: rgba(255,255,255,0.05); color: #fff; position: relative; z-index:1; }
 input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px #00bfff; }
-
-/* שדות מייל לא תואם */
 input.invalid { border: 2px solid #ff4d4d; }
 #emailError { color: #ff4d4d; font-size: 14px; margin-top:-8px; margin-bottom:8px; display:none; }
 
-/* כפתור */
-button {
-  margin-top: 15px;
-  padding: 12px 25px;
-  border:none;
-  border-radius: 12px;
-  background: #00bfff;
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-  font-size:16px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  z-index:1;
-}
+button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; position: relative; overflow: hidden; transition: all 0.3s ease; z-index:1; }
 button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,191,255,0.5); }
 
-.spinner {
-  border: 3px solid rgba(255,255,255,0.3);
-  border-top: 3px solid #fff;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  animation: spin 1s linear infinite;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: none;
-}
+.spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; }
 @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
 .loadingButton { animation: pulse 1s infinite; box-shadow: 0 0 18px rgba(0,191,255,0.6); }
@@ -111,7 +38,6 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 #personalArea { display:none; flex-direction: column; gap:15px; animation: fadeIn 1s ease forwards; position: relative; z-index:1; }
 #userContent { background: #0d2b4a; padding: 15px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s; }
 #userContent:hover { transform: scale(1.05); }
-
 @keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
 </style>
 </head>
@@ -122,8 +48,8 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
   <h2>התחבר לאזור האישי שלך</h2>
   <form id="loginForm">
     <input type="text" id="idNumber" placeholder="תעודת זהות" required>
-    <input type="email" id="email" placeholder="מייל" required>
-    <input type="email" id="confirmEmail" placeholder="אימות מייל" required>
+    <input type="email" id="email" placeholder="מייל" style="display:none;">
+    <input type="email" id="confirmEmail" placeholder="אימות מייל" style="display:none;">
     <div id="emailError">מייל לא תואם</div>
     <button type="submit">
       <span class="btnText">כניסה</span>
@@ -142,24 +68,18 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 <script>
 const scriptURL = 'https://script.google.com/macros/s/AKfycbwN22JPLnAD7rHz0OUVNj0e22RpGZVHdYZPanzepd5JUstcDn3wP9aoYJGocEuNsGjY/exec';
 
-// בדיקת מייל תקני
+const emailInput = document.getElementById('email');
+const confirmInput = document.getElementById('confirmEmail');
+const emailError = document.getElementById('emailError');
+
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
 
-// אימות בזמן אמת
-const emailInput = document.getElementById('email');
-const confirmInput = document.getElementById('confirmEmail');
-const emailError = document.getElementById('emailError');
-
 function validateEmails() {
-  if(confirmInput.value === "") { 
-    emailInput.classList.remove('invalid'); 
-    confirmInput.classList.remove('invalid'); 
-    emailError.style.display = 'none';
-    return true;
-  }
+  if(confirmInput.style.display === 'none') return true;
+  if(confirmInput.value === "") return false;
   if(emailInput.value !== confirmInput.value){
     emailInput.classList.add('invalid');
     confirmInput.classList.add('invalid');
@@ -176,15 +96,11 @@ function validateEmails() {
 emailInput.addEventListener('input', validateEmails);
 confirmInput.addEventListener('input', validateEmails);
 
+let stage = 1; // שלב כניסה
+
 document.getElementById('loginForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  if(!validateEmails()){ return; }
-
   const id = document.getElementById('idNumber').value.trim();
-  const email = emailInput.value.trim();
-
-  if(!isValidEmail(email)){ alert("מייל לא תקני"); return; }
-
   const button = e.target.querySelector('button');
   const spinner = button.querySelector('.spinner');
   const btnText = button.querySelector('.btnText');
@@ -194,22 +110,54 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   button.classList.add('loadingButton');
 
   try{
-    const response = await fetch(scriptURL,{
-      method:'POST',
-      body: new URLSearchParams({id,email})
-    });
-    const data = await response.json();
+    if(stage === 1){
+      // שלב ראשון: שולח רק ת.ז כדי לבדוק מייל בגיליון
+      let res = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({id}) });
+      let data = await res.json();
 
-    if(data.success){
-      localStorage.setItem('loggedInUser', JSON.stringify(data));
-      showPersonalArea(data);
-    } else {
-      alert(data.message || "תעודת זהות או מייל שגויים");
+      if(data.success){
+        if(data.email){ 
+          // יש מייל → מציג שדה חובה להזנה
+          emailInput.style.display = 'block';
+          emailInput.value = '';
+          confirmInput.style.display = 'none';
+          alert("אנא הזן את המייל שלך");
+          stage = 2;
+          localStorage.setItem('tempUser', JSON.stringify(data));
+        } else {
+          // אין מייל → מציג שני שדות אימות
+          emailInput.style.display = 'block';
+          confirmInput.style.display = 'block';
+          alert("חסרים לנו כמה פרטים עליך, אנא הזן את המייל שלך פעמיים");
+          stage = 2;
+          localStorage.setItem('tempUser', JSON.stringify(data));
+        }
+      } else {
+        alert(data.message || "תעודת זהות לא נמצאה");
+      }
+    } else if(stage === 2){
+      // שלב שני: הזנת מייל
+      const emailVal = emailInput.value.trim();
+      if(confirmInput.style.display !== 'none'){
+        const confirmVal = confirmInput.value.trim();
+        if(emailVal !== confirmVal){ alert("מיילים לא תואמים"); return; }
+      }
+      if(!isValidEmail(emailVal)){ alert("מייל לא תקני"); return; }
+
+      const tempUser = JSON.parse(localStorage.getItem('tempUser'));
+      let res2 = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({id,email: emailVal}) });
+      let data2 = await res2.json();
+      if(data2.success){
+        localStorage.setItem('loggedInUser', JSON.stringify(data2));
+        localStorage.removeItem('tempUser');
+        showPersonalArea(data2);
+      } else {
+        alert(data2.message || "שגיאה בשרת");
+      }
     }
   } catch(err){
-    alert("שגיאה בשרת, נסה שוב מאוחר יותר");
     console.error(err);
-  } finally {
+  } finally{
     spinner.style.display = 'none';
     btnText.style.visibility = 'visible';
     button.disabled = false;
@@ -238,6 +186,5 @@ window.addEventListener('load', function(){
   if(user) showPersonalArea(user);
 });
 </script>
-
 </body>
 </html>
