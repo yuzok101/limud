@@ -45,20 +45,7 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 </style>
 </head>
 
-
-  <script type="module">
-import { db } from "/firebase.js";
-import { collection, addDoc, serverTimestamp } from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-addDoc(collection(db, "test"), {
-  message: "hello firebase",
-  time: serverTimestamp()
-});
-</script>
-
-
-  
+ 
 <body>
 
 <div id="loginCard">
@@ -211,5 +198,21 @@ window.addEventListener('load', function(){
   if(user) showPersonalArea(user);
 });
 </script>
+
+
+  
+  <script type="module">
+import { db } from "/firebase.js";
+import { collection, addDoc, serverTimestamp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+addDoc(collection(db, "test"), {
+  message: "hello firebase",
+  time: serverTimestamp()
+});
+</script>
+
+
+ 
 </body>
 </html>
