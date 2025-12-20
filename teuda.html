@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>תעודה</title>
-  <link rel="icon" type="image/png" href="logo.png">
-
+<title>תכונה בעבודה</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
 
@@ -23,7 +21,7 @@
   }
 
   .logo {
-    width: 250px; /* הלוגו גדול יותר */
+    width: 250px;
     margin-bottom: 30px;
     animation: bounce 2s infinite;
   }
@@ -48,12 +46,31 @@
     font-weight: 600;
     color: #ffffff;
     background: rgba(27,59,122,0.6);
-    display: inline-block;
+    display: none; /* מתחיל מוסתר */
     padding: 10px 20px;
     border-radius: 10px;
-    animation: fadeIn 3s ease-in-out forwards;
-    opacity: 0; /* מתחיל מוסתר */
-    animation-delay: 2s; /* מופיע אחרי 2 שניות */
+    margin-top: 20px;
+    animation: fadeIn 1s ease-in-out forwards;
+  }
+
+  button {
+    margin-top: 30px;
+    padding: 12px 25px;
+    font-size: 1em;
+    font-weight: 600;
+    color: #fff;
+    background: #1b3b7a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  button:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
   }
 
   @keyframes bounce {
@@ -104,8 +121,24 @@
   <img src="logo.png" alt="לוגו" class="logo">
   <h1>תכונה זאת עדיין לא פעילה</h1>
   <p>אנחנו עובדים על זה כדי להביא לכם את החוויה הטובה ביותר!</p>
-  <div class="thank-you">תודה על הסבלנות!</div>
+  <button id="understandBtn">הבנתי</button>
+  <div class="thank-you" id="thankYouText">תודה על הסבלנות!</div>
 </div>
+
+<script>
+  const button = document.getElementById('understandBtn');
+  const thankYou = document.getElementById('thankYouText');
+
+  button.addEventListener('click', () => {
+    // מציג את ההודעה באתר
+    thankYou.style.display = 'inline-block';
+
+    // מחכה 2 שניות ואז מעביר ל-profile.html
+    setTimeout(() => {
+      window.location.href = 'profile.html';
+    }, 2000);
+  });
+</script>
 
 </body>
 </html>
