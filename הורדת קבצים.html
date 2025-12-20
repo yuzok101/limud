@@ -179,67 +179,67 @@ async function loadMedia(){
         const h2 = document.createElement('h2');
         h2.textContent = title;
 
-        let downloadSrc = link;
-        let canPreview = true; // האם אפשר להציג ב-iframe
         const iframe = document.createElement('iframe');
+        let previewSrc  = link;
+        let downloadSrc = link;
 
         /* YouTube */
         if(link.includes('youtube')){
-            iframe.src = link.replace('watch?v=','embed/');
-            iframe.allowFullscreen = true;
+            previewSrc = link.replace('watch?v=', 'embed/');
             downloadSrc = null;
         }
-        /* Google Drive */
+
+        /* Google Drive (כולל PDF, וידאו וכו') */
         else if(link.includes('drive.google.com')){
             let id = null;
+
+            // נסה /d/FILE_ID/
             let match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if(match) id = match[1];
+
+            // נסה id=FILE_ID
             if(!id){
                 match = link.match(/id=([a-zA-Z0-9_-]+)/);
                 if(match) id = match[1];
             }
+
             if(id){
+                previewSrc  = `https://drive.google.com/file/d/${id}/preview`;
                 downloadSrc = `https://drive.google.com/uc?export=download&id=${id}`;
-                canPreview = false; // Drive preview לא תמיד אפשרי ב-iframe
             } else {
-                canPreview = false;
+                // לא זוהה ID → הורדה בלבד
+                previewSrc  = '';
+                downloadSrc = link;
             }
         }
-        /* PDF רגיל */
-        else if(link.toLowerCase().endsWith('.pdf')){
-            canPreview = false;
+
+        /* כל קובץ אחר */
+        else {
+            previewSrc  = link;
+            downloadSrc = link;
         }
 
-        card.appendChild(h2);
+        iframe.src = previewSrc;
+        iframe.allowFullscreen = true;
 
-        if(canPreview){
-            iframe.src = link;
-            iframe.allowFullscreen = true;
-            card.appendChild(iframe);
-        } else {
-            const info = document.createElement('div');
-            info.textContent = "Preview לא זמין – לחץ על הורדה";
-            info.style.margin = "10px 0";
-            info.style.color = "#fff";
-            card.appendChild(info);
-        }
+        card.append(h2, iframe);
 
         if(downloadSrc){
             const btn = document.createElement('button');
             btn.className = 'download-btn';
             btn.textContent = 'הורדה';
-            btn.onclick = () => window.open(downloadSrc,'_blank');
+            btn.onclick = () => window.open(downloadSrc, '_blank');
             card.appendChild(btn);
         }
 
         grid.appendChild(card);
-        setTimeout(()=>card.classList.add('show'), i*120);
+        setTimeout(()=>card.classList.add('show'), i * 120);
     });
 }
 
 (async ()=>{
     await loadMedia();
-    splash.style.display='none';
+    splash.style.display = 'none';
     document.body.classList.remove('loading');
 })();
 </script>
