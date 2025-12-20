@@ -20,16 +20,26 @@
     text-align: center;
   }
 
-  .logo {
-    width: 250px;
-    margin-bottom: 30px;
+  .banner {
+    width: 100%;
+    background: rgba(27,59,122,0.8);
+    padding: 20px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+  }
+
+  .banner img {
+    width: 200px;
     animation: bounce 2s infinite;
   }
 
   h1 {
     font-size: 3em;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin: 30px 0 10px;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
     animation: fadeIn 2s ease-in-out;
   }
@@ -42,15 +52,13 @@
   }
 
   .thank-you {
-    font-size: 1.3em;
-    font-weight: 600;
+    font-size: 2em;
+    font-weight: 700;
     color: #ffffff;
-    background: rgba(27,59,122,0.6);
-    display: none; /* מתחיל מוסתר */
-    padding: 10px 20px;
+    padding: 20px 40px;
     border-radius: 10px;
-    margin-top: 20px;
-    animation: fadeIn 1s ease-in-out forwards;
+    background: rgba(27,59,122,0.8);
+    animation: fadeIn 1.5s ease-in-out forwards;
   }
 
   button {
@@ -109,6 +117,7 @@
     position: relative;
     z-index: 1;
     max-width: 90%;
+    padding-top: 120px; /* כדי שהטקסט לא יתכסה ע"י הבאנר */
   }
 
 </style>
@@ -117,21 +126,23 @@
 
 <div class="background-animation"></div>
 
-<div class="content">
-  <img src="logo.png" alt="לוגו" class="logo">
+<div class="banner">
+  <img src="logo.png" alt="לוגו">
+</div>
+
+<div class="content" id="mainContent">
   <h1>תכונה זאת עדיין לא פעילה</h1>
   <p>אנחנו עובדים על זה כדי להביא לכם את החוויה הטובה ביותר!</p>
   <button id="understandBtn">הבנתי</button>
-  <div class="thank-you" id="thankYouText">תודה על הסבלנות!</div>
 </div>
 
 <script>
   const button = document.getElementById('understandBtn');
-  const thankYou = document.getElementById('thankYouText');
+  const mainContent = document.getElementById('mainContent');
 
   button.addEventListener('click', () => {
-    // מציג את ההודעה באתר
-    thankYou.style.display = 'inline-block';
+    // מוחק את כל התוכן הקיים
+    mainContent.innerHTML = '<div class="thank-you">תודה על הסבלנות!</div>';
 
     // מחכה 2 שניות ואז מעביר ל-profile.html
     setTimeout(() => {
