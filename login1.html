@@ -67,7 +67,11 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 <div id="personalArea">
   <h3>ברוך הבא, <span id="userName"></span></h3>
   <p id="userContent"></p>
-  <button id="goToSecret">כניסה</button>
+  <button id="goToSecret">מערכת המדיה</button>
+ <button id="viewProfile"
+          style="background:#415a77;">
+    👤 צפייה בפרטים האישיים
+  </button>
   <button id="logout">התנתק</button>
 </div>
 
@@ -191,6 +195,10 @@ document.getElementById('logout').addEventListener('click', function(){
 
 document.getElementById('goToSecret').addEventListener('click', function(){
   window.location.href = 'media-index.html';
+});
+
+ document.getElementById('viewProfile').addEventListener('click', function(){
+  window.location.href = 'profile.html';
 });
 
 window.addEventListener('load', function(){
