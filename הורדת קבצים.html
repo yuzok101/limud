@@ -7,7 +7,8 @@
 <link rel="icon" type="image/png" href="logo.png">
 
 <!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.min.js" defer></script>
+
 <style>
 :root {
     --deep-blue:#0d1b2a;
@@ -104,106 +105,105 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
 <div id="userNameDisplay"></div>
 <div class="grid" id="mediaGrid"></div>
 
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.worker.min.js';
+<script defer>
+document.addEventListener('DOMContentLoaded', async ()=>{
+    // ⚡ PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.worker.min.js';
 
-const user = JSON.parse(localStorage.getItem('loggedInUser'));
-if(!user) location.href='login1.html';
-else userNameDisplay.textContent = `שלום, ${user.firstName} ${user.lastName}`;
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if(!user) location.href='login1.html';
+    else userNameDisplay.textContent = `שלום, ${user.firstName} ${user.lastName}`;
 
-profileBtn.onclick = () => location.href='login1.html';
-topLogo.onclick   = () => location.href='media-index.html';
+    profileBtn.onclick = () => location.href='login1.html';
+    topLogo.onclick   = () => location.href='media-index.html';
 
-const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
+    const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
-async function loadMedia(){
-    const res = await fetch(csvUrl);
-    const text = await res.text();
-    const rows = text.split('\n').map(r=>r.split(','));
-    const grid = document.getElementById('mediaGrid');
-    const category = document.body.dataset.category;
+    async function loadMedia(){
+        const res = await fetch(csvUrl);
+        const text = await res.text();
+        const rows = text.split('\n').map(r=>r.split(','));
+        const grid = document.getElementById('mediaGrid');
+        const category = document.body.dataset.category;
 
-    for(let i=1;i<rows.length;i++){
-        const r = rows[i];
-        const title = r[1]?.trim();
-        let link = r[2]?.replace(/^"+|"+$/g,'').replace(/\r/g,'').trim();
-        const cat = r[3]?.trim();
-        if(!title || !link || cat!==category) continue;
+        for(let i=1;i<rows.length;i++){
+            const r = rows[i];
+            const title = r[1]?.trim();
+            let link = r[2]?.replace(/^"+|"+$/g,'').replace(/\r/g,'').trim();
+            const cat = r[3]?.trim();
+            if(!title || !link || cat!==category) continue;
 
-        const card = document.createElement('div');
-        card.className='card';
+            const card = document.createElement('div');
+            card.className='card';
 
-        const h2 = document.createElement('h2');
-        h2.textContent = title;
-        card.appendChild(h2);
+            const h2 = document.createElement('h2');
+            h2.textContent = title;
+            card.appendChild(h2);
 
-        let downloadSrc = link;
+            let downloadSrc = link;
 
-        // YouTube
-        if(link.includes('youtube')){
-            const iframe = document.createElement('iframe');
-            iframe.src = link.replace('watch?v=','embed/');
-            iframe.allowFullscreen = true;
-            card.appendChild(iframe);
-            downloadSrc=null;
-        }
-        // PDF מקומי
-        else if(link.toLowerCase().endsWith('.pdf')){
-            const pdfCanvas = document.createElement('canvas');
-            pdfCanvas.className='pdf-canvas';
-            card.appendChild(pdfCanvas);
+            // YouTube
+            if(link.includes('youtube')){
+                const iframe = document.createElement('iframe');
+                iframe.src = link.replace('watch?v=','embed/');
+                iframe.allowFullscreen = true;
+                card.appendChild(iframe);
+                downloadSrc=null;
+            }
+            // PDF מקומי
+            else if(link.toLowerCase().endsWith('.pdf')){
+                const pdfCanvas = document.createElement('canvas');
+                pdfCanvas.className='pdf-canvas';
+                card.appendChild(pdfCanvas);
 
-            // נתיב ל-PDF מקומי
-            const pdfPath = 'הורדה/sefer.pdf';
+                const pdfPath = 'הורדה/sefer.pdf';
 
-            // טען PDF עם PDF.js
-            const loadingTask = pdfjsLib.getDocument(pdfPath);
-            loadingTask.promise.then(pdf=>{
-                pdf.getPage(1).then(page=>{
-                    const viewport = page.getViewport({scale:1.2});
-                    pdfCanvas.width = viewport.width;
-                    pdfCanvas.height = viewport.height;
-                    const renderContext = {
-                        canvasContext: pdfCanvas.getContext('2d'),
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
+                const loadingTask = pdfjsLib.getDocument(pdfPath);
+                loadingTask.promise.then(pdf=>{
+                    pdf.getPage(1).then(page=>{
+                        const viewport = page.getViewport({scale:1.2});
+                        pdfCanvas.width = viewport.width;
+                        pdfCanvas.height = viewport.height;
+                        const renderContext = {
+                            canvasContext: pdfCanvas.getContext('2d'),
+                            viewport: viewport
+                        };
+                        page.render(renderContext);
+                    });
+                }).catch(err=>{
+                    pdfCanvas.remove();
+                    const info = document.createElement('div');
+                    info.textContent='Preview לא זמין – לחץ על הורדה';
+                    info.style.color='#fff';
+                    card.appendChild(info);
                 });
-            }).catch(err=>{
-                pdfCanvas.remove();
+            }
+            // קבצים אחרים
+            else{
                 const info = document.createElement('div');
                 info.textContent='Preview לא זמין – לחץ על הורדה';
                 info.style.color='#fff';
                 card.appendChild(info);
-            });
-        }
-        // קבצים אחרים
-        else{
-            const info = document.createElement('div');
-            info.textContent='Preview לא זמין – לחץ על הורדה';
-            info.style.color='#fff';
-            card.appendChild(info);
-        }
+            }
 
-        // כפתור הורדה
-        if(downloadSrc){
-            const btn = document.createElement('button');
-            btn.className='download-btn';
-            btn.textContent='הורדה';
-            btn.onclick = ()=>window.open(downloadSrc,'_blank');
-            card.appendChild(btn);
-        }
+            // כפתור הורדה
+            if(downloadSrc){
+                const btn = document.createElement('button');
+                btn.className='download-btn';
+                btn.textContent='הורדה';
+                btn.onclick = ()=>window.open(downloadSrc,'_blank');
+                card.appendChild(btn);
+            }
 
-        grid.appendChild(card);
-        setTimeout(()=>card.classList.add('show'),i*120);
+            grid.appendChild(card);
+            setTimeout(()=>card.classList.add('show'),i*120);
+        }
     }
-}
 
-(async()=>{
     await loadMedia();
     splash.style.display='none';
     document.body.classList.remove('loading');
-})();
+});
 </script>
 
 </body>
