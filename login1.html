@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>כניסה לאזור אישי</title>
- <link rel="icon" type="image/png" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -46,7 +46,6 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 </style>
 </head>
 
- 
 <body>
 
 <div id="loginCard">
@@ -69,7 +68,7 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
   <h3>ברוך הבא, <span id="userName"></span></h3>
   <p id="userContent"></p>
   <button id="goToSecret">מערכת המדיה</button>
- <button id="viewProfile">👤 צפייה בפרטים האישיים</button>
+  <button id="viewProfile">👤 צפייה בפרטים האישיים</button>
   <button id="logout">התנתק</button>
 </div>
 
@@ -180,11 +179,32 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   }
 });
 
+// ⚡ הצגת אזור אישי עם בדיקת תאריך תפוגה
 function showPersonalArea(user){
   document.getElementById('loginCard').style.display = 'none';
   document.getElementById('personalArea').style.display = 'flex';
   document.getElementById('userName').textContent = (user.firstName || "") + " " + (user.lastName || "");
   document.getElementById('userContent').textContent = user.personalArea || "";
+
+  // ⚡ בדיקת תאריך תפוגה
+  if(user.expiryDate){  // אם יש שדה תאריך תפוגה
+    const parts = user.expiryDate.split('.');
+    if(parts.length === 3){
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      const expiry = new Date(year, month, day);
+      const today = new Date();
+      const threeMonthsLater = new Date();
+      threeMonthsLater.setMonth(today.getMonth() + 3);
+
+      if(expiry <= threeMonthsLater){
+        messageDiv.style.display = 'block';
+        messageDiv.style.color = '#ff4d4d';
+        messageDiv.textContent = "תאריך התעודה עומד לפוג תוך 3 חודשים, יש לחדש אותה!";
+      }
+    }
+  }
 }
 
 document.getElementById('logout').addEventListener('click', function(){
@@ -196,20 +216,17 @@ document.getElementById('goToSecret').addEventListener('click', function(){
   window.location.href = 'media-index.html';
 });
 
- document.getElementById('viewProfile').addEventListener('click', function(){
+document.getElementById('viewProfile').addEventListener('click', function(){
   window.location.href = 'profile.html';
 });
 
+// ⚡ טעינת משתמש אם כבר מחובר
 window.addEventListener('load', function(){
   const user = JSON.parse(localStorage.getItem('loggedInUser'));
   if(user) showPersonalArea(user);
 });
 </script>
 
-
-
- 
-  
 <script type="module">
 import { db } from "./firebase.js";
 import { collection, doc, setDoc, addDoc, serverTimestamp } from
@@ -263,8 +280,5 @@ addPageView();
 setInterval(updateLiveVisitor, 30000);
 </script>
 
-
-
- 
 </body>
 </html>
