@@ -70,7 +70,6 @@ button {
 button:hover { background:#0d1b75; }
 .notice {
   margin-top:10px;
-  background: rgba(26,35,126,0.6);
   color:#fff;
   padding:12px;
   border-radius:12px;
@@ -121,15 +120,17 @@ const user = JSON.parse(localStorage.getItem('loggedInUser'));
 if(!user){ alert("לא מחובר"); location.href="login1.html"; }
 const id = user.id;
 
+let originalData = {};
+
 async function loadProfile(){
   try{
     const res = await fetch(scriptURL,{ method:'POST', body:new URLSearchParams({ action:'getProfile', id }) });
     const data = await res.json();
+    originalData = { ...data };
     renderProfile(data);
     checkExpiry(data.expiryDate);
     document.getElementById('spinner').style.display='none';
     document.getElementById('profile').style.display='block';
-    document.getElementById('saveBtn').style.display='block';
     document.getElementById('backBtn').style.display='block';
   }catch(err){ console.error(err); alert("שגיאה בטעינת נתונים"); }
 }
@@ -147,11 +148,24 @@ function renderProfile(d){
     <div class="field-card"><div><strong>תוקף ההכשרה:</strong> ${d.expiryDate}</div></div>
     <div class="field-card"><div><strong>תעודה:</strong> <button onclick="goTeuda()">להורדה</button></div></div>
   `;
+
+  // מאזינים לשינויים
+  ['email','phone','address'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', checkChanges);
+  });
 }
 
 function toggleEdit(id){ 
   const input = document.getElementById(id);
   input.disabled = !input.disabled;
+  if(!input.disabled) input.focus();
+}
+
+function checkChanges(){
+  const emailChanged = document.getElementById('email').value !== (originalData.email || '');
+  const phoneChanged = document.getElementById('phone').value !== (originalData.phone || '');
+  const addressChanged = document.getElementById('address').value !== (originalData.address || '');
+  document.getElementById('saveBtn').style.display = (emailChanged || phoneChanged || addressChanged) ? 'block' : 'none';
 }
 
 async function saveChanges(){
@@ -192,7 +206,7 @@ function checkExpiry(dateStr){
   const sixMonths = 1000*60*60*24*180;
   if(expiry - now <= sixMonths){
     document.getElementById('courseNotice').innerHTML=`
-      <div class="notice">
+      <div class="notice" style="background:red;">
         תוקף ההכשרה שלך עומד לפוג בקרוב. כדאי כבר להירשם לקורס חדש.<br>
         <button onclick="window.location.href='https://yuzok101.github.io/yuzukmedic/courses.html'" style="background:#1a237e;color:#fff;">להרשמה לקורס חדש</button>
       </div>
