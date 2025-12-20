@@ -189,13 +189,27 @@ async function loadMedia(){
             downloadSrc = null;
         }
 
-        /* Google Drive (כולל PDF, וידאו, הכל) */
+        /* Google Drive (כולל PDF, וידאו וכו') */
         else if(link.includes('drive.google.com')){
-            const match = link.match(/\/d\/(.+?)\//) || link.match(/id=(.+)/);
-            if(match){
-                const id = match[1];
+            let id = null;
+
+            // נסה /d/FILE_ID/
+            let match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if(match) id = match[1];
+
+            // נסה id=FILE_ID
+            if(!id){
+                match = link.match(/id=([a-zA-Z0-9_-]+)/);
+                if(match) id = match[1];
+            }
+
+            if(id){
                 previewSrc  = `https://drive.google.com/file/d/${id}/preview`;
                 downloadSrc = `https://drive.google.com/uc?export=download&id=${id}`;
+            } else {
+                // לא זוהה ID → הורדה בלבד
+                previewSrc  = '';
+                downloadSrc = link;
             }
         }
 
