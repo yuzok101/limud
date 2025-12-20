@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>פודקאסט החייאה</title>
-    <link rel="icon" type="image/png" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 
 <style>
 :root {
@@ -111,18 +111,17 @@ async function loadMedia() {
     const text = await res.text();
     const rows = text.split('\n').map(r => r.split(','));
     const container = document.getElementById('mediaGrid');
-
     const pageCategory = document.body.dataset.category;
 
-rows.forEach((row, index) => {
-    if(index === 0) return;
+    rows.forEach((row, index) => {
+        if(index === 0) return;
 
-    const title = row[1]?.trim();     // עמודה B
-    const link = row[2]?.trim();      // עמודה C
-    const category = row[3]?.trim();  // עמודה D ← קטגוריה בעברית
+        const title = row[1]?.trim();     // עמודה B
+        const link = row[2]?.trim();      // עמודה C
+        const category = row[3]?.trim();  // עמודה D ← קטגוריה בעברית
 
-    if(!title || !link) return;
-    if(category !== pageCategory) return; // ← הסינון
+        if(!title || !link) return;
+        if(category !== pageCategory) return;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -132,7 +131,7 @@ rows.forEach((row, index) => {
         h2.textContent = title;
         card.appendChild(h2);
 
-        // סרטון / מצגת
+        // מדיה
         let media;
         const encodedLink = encodeURI(link);
 
@@ -156,7 +155,6 @@ rows.forEach((row, index) => {
                 const match = link.match(/open\?id=(.+)/);
                 if(match) fileId = match[1];
             }
-
             if(fileId) {
                 const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
                 media = document.createElement('iframe');
@@ -167,37 +165,36 @@ rows.forEach((row, index) => {
             media = document.createElement('iframe');
             media.src = encodedLink;
             media.allowFullscreen = true;
-    
+        }
+
+        card.appendChild(media);
+        container.appendChild(card);
     });
 }
 
 loadMedia();
+</script>
 
-
-
-    <script type="module">
+<script type="module">
 import { db } from "./firebase.js";
 import { collection, doc, setDoc, addDoc, serverTimestamp } from
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ⚡ מזהה ייחודי לכל משתמש
 let visitorId = localStorage.getItem("visitorId");
 if (!visitorId) {
   visitorId = crypto.randomUUID();
   localStorage.setItem("visitorId", visitorId);
 }
 
-// ⚡ פרטי משתמש (אם יש לך מידע מ־Sheets או מהטופס)
-const user = {
+const userData = {
   name: localStorage.getItem("userName") || null,
   email: localStorage.getItem("userEmail") || null
 };
 
-// ⚡ עדכון liveVisitors
 async function updateLiveVisitor() {
   try {
     await setDoc(doc(db, "liveVisitors", visitorId), {
-      ...user,
+      ...userData,
       page: location.pathname,
       lastSeen: serverTimestamp()
     });
@@ -206,13 +203,12 @@ async function updateLiveVisitor() {
   }
 }
 
-// ⚡ הוספת צפייה חדשה ל-pageViews
 async function addPageView() {
   try {
     await addDoc(collection(db, "pageViews"), {
       visitorId,
       page: location.pathname,
-      date: new Date().toISOString().slice(0,10), // YYYY-MM-DD
+      date: new Date().toISOString().slice(0,10),
       timestamp: serverTimestamp()
     });
   } catch(e) {
@@ -220,14 +216,10 @@ async function addPageView() {
   }
 }
 
-// ⚡ הפעלת הפונקציות מיד
 updateLiveVisitor();
 addPageView();
-
-// ⚡ עדכון liveVisitors כל 30 שניות
 setInterval(updateLiveVisitor, 30000);
 </script>
 
-    
 </body>
 </html>
