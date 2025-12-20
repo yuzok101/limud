@@ -239,7 +239,7 @@ function checkExpiry(dateStr){
   const now = new Date();
   const sixMonths = 1000*60*60*24*180;
   if(expiry - now <= sixMonths && expiry - now >=0){
-    const message = "תוקף ההכשרה שלך עומד לפוג בחצי השנה הקרובה! כדאי כבר להירשם לקורס חדש כדי לא לאבד את ההסמכה.";
+    const message = "תוקף ההכשרה שלך עומד לפוג בבזמן הקרוב! כדאי כבר להירשם לקורס חדש כדי לא לאבד את ההסמכה.";
     document.getElementById('courseNotice').innerHTML = `
       <div class="notice">
         ${message} <br>
