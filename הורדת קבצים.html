@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>הורדת קבצים</title>
-    <link rel="icon" type="image/png" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 
 <style>
 :root {
@@ -13,7 +13,6 @@
     --accent-blue: #415a77;
     --text-color: #e0e1dd;
 }
-
 * { box-sizing: border-box; }
 
 body {
@@ -23,88 +22,85 @@ body {
     background: var(--deep-blue);
     color: var(--text-color);
 }
+body.loading { overflow: hidden; }
 
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2rem;
-    color: var(--accent-blue);
-    text-shadow: 1px 1px 4px black;
+/* ספלש מסך */
+#splash {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: var(--deep-blue);
+    display:flex; justify-content:center; align-items:center;
+    z-index:9999;
+}
+#splashLogo {
+    width:120px; height:120px;
+    animation: spin 2s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* סרגל עליון */
+#topBar {
+    position: fixed; top:10px; left:10px; right:10px;
+    display:flex; justify-content: space-between; align-items: center;
+    z-index: 1000;
+}
+#profileBtn {
+    width:50px; height:50px; border-radius:50%; border:none;
+    background-color:red; color:white; font-size:24px; cursor:pointer;
+}
+#topLogo {
+    width:50px; height:50px; cursor:pointer;
 }
 
-#userNameDisplay {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-}
+/* כותרת */
+h1 { text-align:center; margin-bottom:30px; font-size:2rem; color: var(--accent-blue); text-shadow:1px 1px 4px black; }
+#userNameDisplay { text-align:center; margin-bottom:20px; font-size:1.2rem; }
 
+/* Grid המדיה */
 .grid {
-    display: grid;
+    display:grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 25px;
+    gap:25px;
+    margin-top: 80px;
 }
-
 .card {
     background: var(--light-blue);
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.5);
     padding: 15px;
-    text-align: center;
-    user-select: none;
-    transform: scale(0.9);
-    opacity: 0;
+    text-align:center;
+    user-select:none;
+    transform: scale(0.9); opacity:0;
     transition: all 0.8s ease-out;
-    overflow: hidden;
-    position: relative;
+    overflow:hidden; position: relative;
 }
+.card.show { transform: scale(1); opacity:1; }
+.card h2 { font-size:18px; margin-bottom:12px; color: var(--text-color); text-shadow:0 1px 3px black; }
+.card iframe { width:100%; height:300px; border-radius:8px; border:none; transition: transform 0.5s ease; }
+.card iframe:hover { transform: scale(1.05); }
 
-.card.show {
-    transform: scale(1);
-    opacity: 1;
-}
-
-.card h2 {
-    font-size: 18px;
-    margin-bottom: 12px;
-    color: var(--text-color);
-    text-shadow: 0 1px 3px black;
-}
-
-.card iframe {
-    width: 100%;
-    height: 300px;
-    border-radius: 8px;
-    border: none;
-    transition: transform 0.5s ease;
-}
-
-.card iframe:hover {
-    transform: scale(1.05);
-}
-
-/* באנר שקוף שמכסה חצי עליון של הסרטון */
+/* באנר שקוף חצי עליון */
 .card .top-blocker {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50%; /* חצי העליון */
-    z-index: 20;
-    background: rgba(255,255,255,0); /* שקוף לגמרי */
-    pointer-events: all; /* "סופג" את הלחיצות */
-    cursor: default;
+    position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+    z-index: 20; background: rgba(255,255,255,0); pointer-events: all; cursor: default;
 }
 
-@media (max-width: 768px) {
-    .card iframe { height: 220px; }
-}
-
-@media (max-width: 480px) {
-    .card iframe { height: 180px; }
-}
+@media (max-width:768px){ .card iframe{ height:220px; } }
+@media (max-width:480px){ .card iframe{ height:180px; } }
 </style>
 </head>
-<body data-category="הורדת קבצים">
+
+<body class="loading" data-category="הורדת קבצים">
+
+<!-- ספלש -->
+<div id="splash">
+    <img src="logo.png" alt="Loading" id="splashLogo">
+</div>
+
+<!-- סרגל עליון -->
+<div id="topBar">
+    <button id="profileBtn" title="כניסה לאזור האישי">👤</button>
+    <img src="logo.png" alt="Logo" id="topLogo">
+</div>
 
 <h1>הורדת קבצים</h1>
 <div id="userNameDisplay"></div>
@@ -116,7 +112,12 @@ const user = JSON.parse(localStorage.getItem('loggedInUser'));
 if(!user) window.location.href = 'login1.html';
 else document.getElementById('userNameDisplay').textContent = `שלום, ${user.firstName} ${user.lastName}`;
 
-// --- URL של גיליון Google שפורסם כ-Publish to Web (CSV) ---
+// כפתור כניסה לאזור האישי
+document.getElementById('profileBtn').addEventListener('click', () => { window.location.href='login1.html'; });
+// לוגו שמחזיר ל-media-index.html
+document.getElementById('topLogo').addEventListener('click', () => { window.location.href='media-index.html'; });
+
+// --- URL Google Sheets CSV ---
 const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
 async function loadMedia() {
@@ -124,133 +125,79 @@ async function loadMedia() {
     const text = await res.text();
     const rows = text.split('\n').map(r => r.split(','));
     const container = document.getElementById('mediaGrid');
-
     const pageCategory = document.body.dataset.category;
 
-rows.forEach((row, index) => {
-    if(index === 0) return;
+    rows.forEach((row,index)=>{
+        if(index===0) return;
+        const title=row[1]?.trim();
+        const link=row[2]?.trim();
+        const category=row[3]?.trim();
+        if(!title || !link) return;
+        if(category !== pageCategory) return;
 
-    const title = row[1]?.trim();     // עמודה B
-    const link = row[2]?.trim();      // עמודה C
-    const category = row[3]?.trim();  // עמודה D ← קטגוריה בעברית
+        const card=document.createElement('div'); card.className='card';
+        const h2=document.createElement('h2'); h2.textContent=title; card.appendChild(h2);
 
-    if(!title || !link) return;
-    if(category !== pageCategory) return; // ← הסינון
-
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        // כותרת
-        const h2 = document.createElement('h2');
-        h2.textContent = title;
-        card.appendChild(h2);
-
-        // סרטון / מצגת
         let media;
         const encodedLink = encodeURI(link);
 
-        if(link.includes('youtube.com') || link.includes('youtu.be')) {
-            media = document.createElement('iframe');
-            media.src = encodedLink.replace('watch?v=', 'embed/');
-            media.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-            media.allowFullscreen = true;
-
-        } else if(link.includes('docs.google.com/presentation')) {
-            const embedLink = encodedLink.replace('/edit?usp=sharing', '/embed?start=false&loop=false&delayms=3000');
-            media = document.createElement('iframe');
-            media.src = embedLink;
-
-        } else if(link.includes('drive.google.com')) {
-            let fileId = null;
-            if(link.includes('/file/d/')) {
-                const match = link.match(/\/d\/(.+?)\//);
-                if(match) fileId = match[1];
-            } else if(link.includes('open?id=')) {
-                const match = link.match(/open\?id=(.+)/);
-                if(match) fileId = match[1];
-            }
-
-            if(fileId) {
-                const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
-                media = document.createElement('iframe');
-                media.src = embedLink;
-                media.allowFullscreen = true;
-            }
+        if(link.includes('youtube.com') || link.includes('youtu.be')){
+            media=document.createElement('iframe');
+            media.src = encodedLink.replace('watch?v=','embed/');
+            media.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            media.allowFullscreen=true;
+        } else if(link.includes('docs.google.com/presentation')){
+            media=document.createElement('iframe');
+            media.src = encodedLink.replace('/edit?usp=sharing','/embed?start=false&loop=false&delayms=3000');
+        } else if(link.includes('drive.google.com')){
+            let fileId=null;
+            if(link.includes('/file/d/')) { const match=link.match(/\/d\/(.+?)\//); if(match) fileId=match[1]; }
+            else if(link.includes('open?id=')){ const match=link.match(/open\?id=(.+)/); if(match) fileId=match[1]; }
+            if(fileId){ media=document.createElement('iframe'); media.src=`https://drive.google.com/file/d/${fileId}/preview`; media.allowFullscreen=true; }
         } else {
-            media = document.createElement('iframe');
-            media.src = encodedLink;
-            media.allowFullscreen = true;
+            media=document.createElement('iframe'); media.src=encodedLink; media.allowFullscreen=true;
         }
 
         card.appendChild(media);
-
-        // באנר שקוף חצי עליון
-        const blocker = document.createElement('div');
-        blocker.className = 'top-blocker';
-        card.appendChild(blocker);
-
+        const blocker=document.createElement('div'); blocker.className='top-blocker'; card.appendChild(blocker);
         container.appendChild(card);
-        setTimeout(() => card.classList.add('show'), index*150);
+        setTimeout(()=>card.classList.add('show'), index*150);
     });
 }
 
-loadMedia();
+async function loadMediaWithSplash(){
+    await loadMedia();
+    const splash=document.getElementById('splash');
+    if(splash) splash.style.display='none';
+    document.body.classList.remove('loading');
+}
+
+loadMediaWithSplash();
 
 // חסימת לחצן ימני
-document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('contextmenu', e=>e.preventDefault());
 </script>
 
-    <script type="module">
+<script type="module">
 import { db } from "./firebase.js";
-import { collection, doc, setDoc, addDoc, serverTimestamp } from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, setDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ⚡ מזהה ייחודי לכל משתמש
 let visitorId = localStorage.getItem("visitorId");
-if (!visitorId) {
-  visitorId = crypto.randomUUID();
-  localStorage.setItem("visitorId", visitorId);
+if(!visitorId){ visitorId=crypto.randomUUID(); localStorage.setItem("visitorId",visitorId); }
+
+const userFirebase={ name: localStorage.getItem("userName")||null, email: localStorage.getItem("userEmail")||null };
+
+async function updateLiveVisitor(){
+    try{ await setDoc(doc(db,"liveVisitors",visitorId),{...userFirebase,page:location.pathname,lastSeen:serverTimestamp()}); }
+    catch(e){ console.error("Error updating live visitor:",e); }
 }
 
-// ⚡ פרטי משתמש (אם יש לך מידע מ־Sheets או מהטופס)
-const user = {
-  name: localStorage.getItem("userName") || null,
-  email: localStorage.getItem("userEmail") || null
-};
-
-// ⚡ עדכון liveVisitors
-async function updateLiveVisitor() {
-  try {
-    await setDoc(doc(db, "liveVisitors", visitorId), {
-      ...user,
-      page: location.pathname,
-      lastSeen: serverTimestamp()
-    });
-  } catch(e) {
-    console.error("Error updating live visitor:", e);
-  }
+async function addPageView(){
+    try{ await addDoc(collection(db,"pageViews"),{visitorId,page:location.pathname,date:new Date().toISOString().slice(0,10),timestamp:serverTimestamp()}); }
+    catch(e){ console.error("Error adding page view:",e); }
 }
 
-// ⚡ הוספת צפייה חדשה ל-pageViews
-async function addPageView() {
-  try {
-    await addDoc(collection(db, "pageViews"), {
-      visitorId,
-      page: location.pathname,
-      date: new Date().toISOString().slice(0,10), // YYYY-MM-DD
-      timestamp: serverTimestamp()
-    });
-  } catch(e) {
-    console.error("Error adding page view:", e);
-  }
-}
-
-// ⚡ הפעלת הפונקציות מיד
-updateLiveVisitor();
-addPageView();
-
-// ⚡ עדכון liveVisitors כל 30 שניות
-setInterval(updateLiveVisitor, 30000);
+updateLiveVisitor(); addPageView(); setInterval(updateLiveVisitor,30000);
 </script>
 
 </body>
