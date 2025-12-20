@@ -161,6 +161,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       let data2 = await res2.json();
       if(data2.success){
         localStorage.setItem('loggedInUser', JSON.stringify(data2));
+        localStorage.setItem('userId', id);
         localStorage.removeItem('tempUser');
         messageDiv.textContent = "";
         showPersonalArea(data2);
