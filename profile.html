@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>הפרטים האישיים שלי</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: Assistant, sans-serif;
+  background: linear-gradient(135deg, #0d1b2a, #1b3b5a);
+  color: #fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.card {
+  background: rgba(17,47,79,0.95);
+  padding:30px;
+  border-radius:20px;
+  width:420px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+
+h2 { text-align:center; margin-bottom:20px; }
+
+.field { margin-bottom:12px; font-size:15px; }
+
+.field strong { color:#00bfff; }
+
+input {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:5px;
+}
+
+button {
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#00bfff;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.notice {
+  margin-top:15px;
+  background:#102c44;
+  padding:12px;
+  border-radius:12px;
+  color:#ffd966;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>הפרטים האישיים שלי</h2>
+
+  <div id="profile"></div>
+
+  <button onclick="saveChanges()">שמור שינויים</button>
+
+  <div id="courseNotice"></div>
+
+  <button onclick="goBack()">חזרה לאזור האישי</button>
+</div>
+
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwN22JPLnAD7rHz0OUVNj0e22RpGZVHdYZPanzepd5JUstcDn3wP9aoYJGocEuNsGjY/exec';
+
+const user = JSON.parse(localStorage.getItem('loggedInUser'));
+if(!user){
+  alert("לא מחובר");
+  location.href = "index.html";
+}
+
+const id = user.id;
+
+async function loadProfile(){
+  const res = await fetch(scriptURL, {
+    method:'POST',
+    body:new URLSearchParams({ action:'getProfile', id })
+  });
+  const data = await res.json();
+  if(!data.success){
+    alert("שגיאה בטעינת נתונים");
+    return;
+  }
+
+  renderProfile(data);
+  checkExpiry(data.expiryDate);
+}
+
+function renderProfile(d){
+  document.getElementById('profile').innerHTML = `
+    <div class="field"><strong>תעודת זהות:</strong> ${d.id}</div>
+    <div class="field"><strong>שם:</strong> ${d.firstName} ${d.lastName}</div>
+    <div class="field">
+      <strong>מייל:</strong>
+      <input id="email" value="${d.email || ''}">
+    </div>
+    <div class="field">
+      <strong>טלפון:</strong>
+      <input id="phone" value="${d.phone || ''}">
+    </div>
+    <div class="field">
+      <strong>כתובת:</strong>
+      <input id="address" value="${d.address || ''}">
+    </div>
+    <div class="field"><strong>הכשרה:</strong> ${d.training}</div>
+    <div class="field"><strong>תאריך סיום הקורס:</strong> ${d.courseEnd}</div>
+    <div class="field"><strong>תוקף ההכשרה:</strong> ${d.expiryDate}</div>
+    <div class="field">
+      <strong>תעודה:</strong>
+      <a href="${d.certificate}" target="_blank" style="color:#00bfff">להורדה</a>
+    </div>
+  `;
+}
+
+async function saveChanges(){
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const address = document.getElementById('address').value;
+
+  await fetch(scriptURL, {
+    method:'POST',
+    body:new URLSearchParams({
+      action:'updateProfile',
+      id,
+      email,
+      phone,
+      address
+    })
+  });
+
+  alert("הפרטים עודכנו בהצלחה");
+}
+
+function checkExpiry(dateStr){
+  const expiry = new Date(dateStr);
+  const now = new Date();
+  const sixMonths = 1000 * 60 * 60 * 24 * 180;
+
+  if(expiry - now <= sixMonths){
+    document.getElementById('courseNotice').innerHTML = `
+      <div class="notice">
+        תוקף ההכשרה עומד לפוג בקרוב<br>
+        <button onclick="location.href='https://yuzok101.github.io/yuzukmedic/courses.html'">
+          להרשמה לקורס חדש
+        </button>
+      </div>
+    `;
+  }
+}
+
+function goBack(){
+  location.href = "index.html";
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>
