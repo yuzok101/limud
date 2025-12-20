@@ -7,8 +7,7 @@
 <link rel="icon" type="image/png" href="logo.png">
 
 <!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.min.js"></script>
 <style>
 :root {
     --deep-blue:#0d1b2a;
@@ -79,7 +78,7 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
 }
 .card.show{transform:scale(1);opacity:1;}
 .card iframe, .pdf-canvas{width:100%;border-radius:8px;margin-top:10px;}
-.pdf-canvas{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);height:300px;}
+.pdf-canvas{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);}
 
 .download-btn{
     margin-top:12px;padding:8px 18px;
@@ -106,6 +105,8 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
 <div class="grid" id="mediaGrid"></div>
 
 <script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.worker.min.js';
+
 const user = JSON.parse(localStorage.getItem('loggedInUser'));
 if(!user) location.href='login1.html';
 else userNameDisplay.textContent = `שלום, ${user.firstName} ${user.lastName}`;
@@ -116,53 +117,11 @@ topLogo.onclick   = () => location.href='media-index.html';
 const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
 async function loadMedia(){
-    const grid = document.getElementById('mediaGrid');
-    const category = document.body.dataset.category;
-
-    // ⚡ הגדרת PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-    // --- כרטיס PDF מקומי קבוע בראש ---
-    const pdfCard = document.createElement('div');
-    pdfCard.className='card';
-    const pdfTitle = document.createElement('h2');
-    pdfTitle.textContent="יוז'וק מדיק, ספר הקורס, מעודכן ע''פ פרוטוקול 2025 של AHA";
-    pdfCard.appendChild(pdfTitle);
-
-    const pdfCanvas = document.createElement('canvas');
-    pdfCanvas.className='pdf-canvas';
-    pdfCard.appendChild(pdfCanvas);
-
-    const pdfUrl = 'הורדה/sefer.pdf';
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
-    loadingTask.promise.then(pdf=>{
-        pdf.getPage(1).then(page=>{
-            const viewport = page.getViewport({scale:1.2});
-            pdfCanvas.height = viewport.height;
-            pdfCanvas.width  = viewport.width;
-            page.render({canvasContext:pdfCanvas.getContext('2d'), viewport});
-        });
-    }).catch(err=>{
-        pdfCanvas.remove();
-        const info = document.createElement('div');
-        info.textContent='Preview לא זמין – לחץ על הורדה';
-        info.style.margin='10px 0';
-        info.style.color='#fff';
-        pdfCard.appendChild(info);
-    });
-
-    const btn = document.createElement('button');
-    btn.className='download-btn';
-    btn.textContent='הורדה';
-    btn.onclick=()=>window.open(pdfUrl,'_blank');
-    pdfCard.appendChild(btn);
-
-    grid.appendChild(pdfCard);
-
-    // --- שאר הכרטיסים מה-Google Sheets ---
     const res = await fetch(csvUrl);
     const text = await res.text();
     const rows = text.split('\n').map(r=>r.split(','));
+    const grid = document.getElementById('mediaGrid');
+    const category = document.body.dataset.category;
 
     for(let i=1;i<rows.length;i++){
         const r = rows[i];
@@ -173,12 +132,14 @@ async function loadMedia(){
 
         const card = document.createElement('div');
         card.className='card';
+
         const h2 = document.createElement('h2');
         h2.textContent = title;
         card.appendChild(h2);
 
         let downloadSrc = link;
 
+        // YouTube
         if(link.includes('youtube')){
             const iframe = document.createElement('iframe');
             iframe.src = link.replace('watch?v=','embed/');
@@ -186,33 +147,51 @@ async function loadMedia(){
             card.appendChild(iframe);
             downloadSrc=null;
         }
+        // PDF מקומי
         else if(link.toLowerCase().endsWith('.pdf')){
-            const pdfC = document.createElement('canvas');
-            pdfC.className='pdf-canvas';
-            card.appendChild(pdfC);
-            const loadingTask2 = pdfjsLib.getDocument(link);
-            loadingTask2.promise.then(pdf=>{
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.className='pdf-canvas';
+            card.appendChild(pdfCanvas);
+
+            // נתיב ל-PDF מקומי
+            const pdfPath = 'הורדה/sefer.pdf';
+
+            // טען PDF עם PDF.js
+            const loadingTask = pdfjsLib.getDocument(pdfPath);
+            loadingTask.promise.then(pdf=>{
                 pdf.getPage(1).then(page=>{
                     const viewport = page.getViewport({scale:1.2});
-                    pdfC.height = viewport.height;
-                    pdfC.width  = viewport.width;
-                    page.render({canvasContext:pdfC.getContext('2d'), viewport});
+                    pdfCanvas.width = viewport.width;
+                    pdfCanvas.height = viewport.height;
+                    const renderContext = {
+                        canvasContext: pdfCanvas.getContext('2d'),
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
                 });
-            }).catch(()=>{ pdfC.remove(); });
-        } else {
+            }).catch(err=>{
+                pdfCanvas.remove();
+                const info = document.createElement('div');
+                info.textContent='Preview לא זמין – לחץ על הורדה';
+                info.style.color='#fff';
+                card.appendChild(info);
+            });
+        }
+        // קבצים אחרים
+        else{
             const info = document.createElement('div');
             info.textContent='Preview לא זמין – לחץ על הורדה';
-            info.style.margin='10px 0';
             info.style.color='#fff';
             card.appendChild(info);
         }
 
+        // כפתור הורדה
         if(downloadSrc){
-            const btn2 = document.createElement('button');
-            btn2.className='download-btn';
-            btn2.textContent='הורדה';
-            btn2.onclick=()=>window.open(downloadSrc,'_blank');
-            card.appendChild(btn2);
+            const btn = document.createElement('button');
+            btn.className='download-btn';
+            btn.textContent='הורדה';
+            btn.onclick = ()=>window.open(downloadSrc,'_blank');
+            card.appendChild(btn);
         }
 
         grid.appendChild(card);
