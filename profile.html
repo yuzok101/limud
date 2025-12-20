@@ -5,7 +5,6 @@
 <title>הפרטים האישיים שלי</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
 body {
   font-family: 'Assistant', sans-serif;
@@ -13,9 +12,11 @@ body {
   padding:0;
   background: url('images/profil.png') no-repeat center center fixed;
   background-size: cover;
+  color: #0d1b2a;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  padding: 20px 10px;
   min-height: 100vh;
 }
 
@@ -33,46 +34,64 @@ body {
 
 .card img {
   width: 120px;
-  margin: 0 auto 10px;
+  margin: 0 auto 15px auto;
 }
 
 h2 {
   text-align: center;
-  color: #003366;
+  margin-bottom: 15px;
   font-weight: 700;
+  color: #003366;
 }
 
 .field-card {
-  background: #f5faff;
-  padding: 12px 15px;
+  background: #f0f8ff;
+  padding: 10px 12px;
   border-radius: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .field-card strong {
   color: #003366;
-  margin-bottom: 3px;
 }
 
 input {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #b0dfff;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #99ccff;
   outline: none;
   font-size: 14px;
-  background: #ffffff;
+  background: #fff;
   color: #0d1b2a;
+  width: 70%;
 }
 
 input:disabled {
-  background: #e0e0e0;
-  color: #555;
+  background: #e8f0ff;
 }
 
-button {
+input:focus {
+  border-color: #003366;
+  box-shadow: 0 0 6px rgba(0,51,102,0.3);
+}
+
+.edit-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border:none;
+  background:#00bfff;
+  color:white;
+  border-radius:6px;
+}
+
+.edit-btn:hover {
+  background:#0099cc;
+}
+
+button.save-btn {
   margin-top: 10px;
   padding: 12px;
   border: none;
@@ -82,38 +101,20 @@ button {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-button:hover {
+button.save-btn:hover {
   background: #0055aa;
 }
 
 .notice {
-  margin-top: 15px;
-  background: rgba(255, 255, 255, 0.7);
+  margin-top: 10px;
+  background: rgba(255,255,255,0.7);
   color: #cc0000;
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
   text-align: center;
   font-weight: 600;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.notice button {
-  margin-top: 8px;
-  padding: 10px 15px;
-  background: #003366;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.notice button:hover {
-  background: #0055aa;
 }
 
 .spinner {
@@ -126,50 +127,50 @@ button:hover {
   margin: 20px auto;
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
 
 @media (max-width: 480px){
-  .card { padding: 15px; width: 95%; }
-  input { font-size: 13px; }
-  button { font-size: 15px; }
+  .card { padding: 20px; width: 100%; }
+  input { font-size: 13px; width: 65%; }
+  .edit-btn { font-size: 11px; padding:3px 6px;}
+  button.save-btn { font-size: 14px; }
 }
 </style>
 </head>
 <body>
-
 <div class="card">
   <img src="logo.png" alt="לוגו">
   <h2>הפרטים האישיים שלי</h2>
 
   <div id="spinner" class="spinner"></div>
+
   <div id="profile" style="display:none;"></div>
 
-  <div id="courseNotice"></div>
+  <button class="save-btn" onclick="saveChanges()">💾 שמור שינויים</button>
 
-  <button onclick="goBack()">⬅ חזרה לאזור האישי</button>
+  <div id="courseNotice"></div>
 </div>
 
 <script>
 const scriptURL = 'https://script.google.com/macros/s/AKfycbz8aZ1RIeeeCjMXHVjEpd4gFYl3xVzwdTwp1YSwT8Np0KxhtdY484uriBdj_XxDQvMe/exec';
 const user = JSON.parse(localStorage.getItem('loggedInUser'));
-if(!user){
-  alert("לא מחובר");
-  location.href = "login1.html";
-}
-
+if(!user){ alert("לא מחובר"); location.href="login1.html"; }
 const id = user.id;
 
-// בדיקה אם מייל תקני
-function isValidEmail(email){
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
+function parseDateDotFormat(dateStr){
+  const parts = dateStr.split('.');
+  if(parts.length !==3) return null;
+  return new Date(parseInt(parts[2],10), parseInt(parts[1],10)-1, parseInt(parts[0],10));
 }
 
 async function loadProfile(){
   try {
     const res = await fetch(scriptURL, {
       method:'POST',
-      body:new URLSearchParams({ action:'getProfile', id })
+      body: new URLSearchParams({ action:'getProfile', id })
     });
     const data = await res.json();
     if(!data.success){ alert("שגיאה בטעינת נתונים"); return; }
@@ -178,80 +179,75 @@ async function loadProfile(){
   } catch(err){
     console.error(err);
     alert("שגיאה בטעינת נתונים");
+  } finally{
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('profile').style.display='block';
   }
 }
 
 function renderProfile(d){
-  document.getElementById('spinner').style.display = 'none';
   const profileDiv = document.getElementById('profile');
-  profileDiv.style.display = 'block';
   profileDiv.innerHTML = `
-    <div class="field-card"><strong>תעודת זהות:</strong> ${d.id}</div>
-    <div class="field-card"><strong>שם:</strong> ${d.firstName} ${d.lastName}</div>
     <div class="field-card">
-      <strong>מייל:</strong>
-      <input id="email" value="${d.email || ''}" disabled>
-      <button onclick="enableEdit('email')">עריכה ✏️</button>
+      <strong>תעודת זהות:</strong> ${d.id}
     </div>
     <div class="field-card">
-      <strong>כתובת:</strong>
-      <input id="address" value="${d.address || ''}" disabled>
-      <button onclick="enableEdit('address')">עריכה ✏️</button>
+      <strong>שם:</strong> ${d.firstName} ${d.lastName}
     </div>
-    <div class="field-card"><strong>טלפון:</strong> <input id="phone" value="${d.phone || ''}" disabled></div>
+    <div class="field-card">
+      <strong>מייל:</strong> <input id="email" value="${d.email || ''}" disabled>
+      <button class="edit-btn" onclick="enableEdit('email')">✏️</button>
+    </div>
+    <div class="field-card">
+      <strong>כתובת:</strong> <input id="address" value="${d.address || ''}" disabled>
+      <button class="edit-btn" onclick="enableEdit('address')">✏️</button>
+    </div>
+    <div class="field-card"><strong>טלפון:</strong> ${d.phone || ''}</div>
     <div class="field-card"><strong>הכשרה:</strong> ${d.training}</div>
     <div class="field-card"><strong>תאריך סיום הקורס:</strong> ${d.courseEnd}</div>
     <div class="field-card"><strong>תוקף ההכשרה:</strong> ${d.expiryDate}</div>
     <div class="field-card"><strong>תעודה:</strong> <a href="${d.certificate}" target="_blank" style="color:#003366">להורדה</a></div>
-    <button onclick="saveChanges()">שמור שינויים</button>
   `;
 }
 
-// מאפשר עריכת שדה
 function enableEdit(id){
   const input = document.getElementById(id);
   input.disabled = false;
   input.focus();
 }
 
-// שמירת שינויים
+function isValidEmail(email){
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
 async function saveChanges(){
   const email = document.getElementById('email').value.trim();
   const address = document.getElementById('address').value.trim();
-  if(!isValidEmail(email)){ alert("מייל לא תקני"); return; }
+  if(!isValidEmail(email)){ alert("המייל לא תקני"); return; }
 
-  await fetch(scriptURL, {
+  await fetch(scriptURL,{
     method:'POST',
-    body:new URLSearchParams({
-      action:'updateProfile',
-      id,
-      email,
-      address
-    })
+    body:new URLSearchParams({ action:'updateProfile', id, email, address })
   });
   alert("הפרטים עודכנו בהצלחה");
 }
 
-// בדיקה אם תוקף ההכשרה עומד לפוג בחצי שנה
 function checkExpiry(dateStr){
-  if(!dateStr) return;
-  const expiry = new Date(dateStr);
+  const expiry = parseDateDotFormat(dateStr);
+  if(!expiry) return;
   const now = new Date();
   const sixMonths = 1000*60*60*24*180;
-  if(expiry - now <= sixMonths && expiry - now >= 0){
-    const message = "תוקף ההכשרה שלך עומד לפוג בחצי השנה הקרובה! כדאי להירשם מחדש כדי לא לאבד את ההסמכה.";
+  if(expiry - now <= sixMonths && expiry - now >=0){
+    const message = "תוקף ההכשרה שלך עומד לפוג בחצי השנה הקרובה! כדאי כבר להירשם לקורס חדש כדי לא לאבד את ההסמכה.";
     document.getElementById('courseNotice').innerHTML = `
       <div class="notice">
-        ${message}<br>
-        <button onclick="window.location.href='https://yuzok101.github.io/yuzukmedic/courses.html'">
-          להרשמה לקורס חדש
-        </button>
+        ${message} <br>
+        <button onclick="window.location.href='https://yuzok101.github.io/yuzukmedic/courses.html'">להרשמה לקורס חדש</button>
       </div>
     `;
   }
 }
-
-function goBack(){ location.href = "login1.html"; }
 
 loadProfile();
 </script>
