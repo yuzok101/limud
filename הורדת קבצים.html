@@ -165,7 +165,10 @@ async function loadMedia(){
         if(i === 0) return;
 
         const title = r[1]?.trim();
-        const link  = r[2]?.trim();
+        let link  = r[2]
+          ?.replace(/^"+|"+$/g, '')  // מסיר "
+          .replace(/\r/g, '')        // מסיר \r
+          .trim();
         const cat   = r[3]?.trim();
 
         if(!title || !link || cat !== category) return;
@@ -182,11 +185,11 @@ async function loadMedia(){
 
         /* YouTube */
         if(link.includes('youtube')){
-            previewSrc = link.replace('watch?v=','embed/');
+            previewSrc = link.replace('watch?v=', 'embed/');
             downloadSrc = null;
         }
 
-        /* Google Drive */
+        /* Google Drive (כולל PDF, וידאו, הכל) */
         else if(link.includes('drive.google.com')){
             const match = link.match(/\/d\/(.+?)\//) || link.match(/id=(.+)/);
             if(match){
@@ -196,8 +199,8 @@ async function loadMedia(){
             }
         }
 
-        /* PDF רגיל */
-        else if(link.toLowerCase().endsWith('.pdf')){
+        /* כל קובץ אחר */
+        else {
             previewSrc  = link;
             downloadSrc = link;
         }
