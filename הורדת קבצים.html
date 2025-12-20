@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>הורדת קבצים עם PDF Preview</title>
+<title>הורדת קבצים</title>
 <link rel="icon" type="image/png" href="logo.png">
-
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.min.js" defer></script>
 
 <style>
 :root {
@@ -26,12 +23,10 @@ body{
 }
 body.loading{overflow:hidden}
 
+/* ספלש */
 #splash{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
     background:var(--deep-blue);
     z-index:9999;
 }
@@ -41,27 +36,33 @@ body.loading{overflow:hidden}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* סרגל עליון */
 #topBar{
     position:fixed;
-    top:10px;
-    left:10px;
-    right:10px;
+    top:10px; left:10px; right:10px;
     display:flex;
     justify-content:space-between;
-    align-items:center;
     z-index:1000;
 }
 #profileBtn{
     width:50px;height:50px;
-    border-radius:50%;border:none;
-    background:red;color:#fff;font-size:24px;
+    border-radius:50%;
+    border:none;
+    background:red;
+    color:#fff;
+    font-size:24px;
     cursor:pointer;
 }
 #topLogo{width:50px;cursor:pointer}
 
-h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
-#userNameDisplay{text-align:center;margin-bottom:25px;}
+h1{
+    margin-top:80px;
+    text-align:center;
+    color:var(--accent-blue);
+}
+#userNameDisplay{text-align:center;margin-bottom:20px}
 
+/* Grid */
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
@@ -77,25 +78,36 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
     opacity:0;
     transition:.7s;
 }
-.card.show{transform:scale(1);opacity:1;}
-.card iframe, .pdf-canvas{width:100%;border-radius:8px;margin-top:10px;}
-.pdf-canvas{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+.card.show{transform:scale(1);opacity:1}
+.card iframe{
+    width:100%;
+    height:300px;
+    border-radius:8px;
+    border:none;
+}
 
 .download-btn{
-    margin-top:12px;padding:8px 18px;
+    margin-top:12px;
+    padding:8px 16px;
     background:var(--accent-blue);
-    border:none;border-radius:8px;
-    color:#fff;cursor:pointer;font-size:16px;
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    cursor:pointer;
 }
-.download-btn:hover{opacity:.85;}
+.download-btn:hover{opacity:.85}
 
-@media(max-width:768px){.pdf-canvas{height:220px;}}
-@media(max-width:480px){.pdf-canvas{height:180px;}}
+@media(max-width:768px){.card iframe{height:220px}}
+@media(max-width:480px){.card iframe{height:180px}}
 </style>
 </head>
-<body class="loading" data-category="הורדת קבצים">
 
-<div id="splash"><img src="logo.png" id="splashLogo"></div>
+<body class="loading" data-category="הורדדת קבצים">
+
+<div id="splash">
+    <img src="logo.png" id="splashLogo">
+</div>
+
 <div id="topBar">
     <button id="profileBtn">👤</button>
     <img src="logo.png" id="topLogo">
@@ -105,105 +117,78 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
 <div id="userNameDisplay"></div>
 <div class="grid" id="mediaGrid"></div>
 
-<script defer>
-document.addEventListener('DOMContentLoaded', async ()=>{
-    // ⚡ PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.12.313/pdf.worker.min.js';
+<script>
+const user=JSON.parse(localStorage.getItem('loggedInUser'));
+if(!user) location.href='login1.html';
+else userNameDisplay.textContent=`שלום, ${user.firstName} ${user.lastName}`;
 
-    const user = JSON.parse(localStorage.getItem('loggedInUser'));
-    if(!user) location.href='login1.html';
-    else userNameDisplay.textContent = `שלום, ${user.firstName} ${user.lastName}`;
+profileBtn.onclick=()=>location.href='login1.html';
+topLogo.onclick=()=>location.href='media-index.html';
 
-    profileBtn.onclick = () => location.href='login1.html';
-    topLogo.onclick   = () => location.href='media-index.html';
+const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
-    const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
+async function loadMedia(){
+    const res=await fetch(csvUrl);
+    const rows=(await res.text()).split('\n').map(r=>r.split(','));
+    const grid=document.getElementById('mediaGrid');
+    const category=document.body.dataset.category;
 
-    async function loadMedia(){
-        const res = await fetch(csvUrl);
-        const text = await res.text();
-        const rows = text.split('\n').map(r=>r.split(','));
-        const grid = document.getElementById('mediaGrid');
-        const category = document.body.dataset.category;
+    rows.forEach((r,i)=>{
+        if(i===0) return;
+        const title=r[1]?.trim();
+        const link=r[2]?.trim();
+        const cat=r[3]?.trim();
+        if(!title||!link||cat!==category) return;
 
-        for(let i=1;i<rows.length;i++){
-            const r = rows[i];
-            const title = r[1]?.trim();
-            let link = r[2]?.replace(/^"+|"+$/g,'').replace(/\r/g,'').trim();
-            const cat = r[3]?.trim();
-            if(!title || !link || cat!==category) continue;
+        const card=document.createElement('div');
+        card.className='card';
 
-            const card = document.createElement('div');
-            card.className='card';
+        const h2=document.createElement('h2');
+        h2.textContent=title;
 
-            const h2 = document.createElement('h2');
-            h2.textContent = title;
-            card.appendChild(h2);
+        const iframe=document.createElement('iframe');
+        let previewSrc=link;
+        let downloadSrc=link;
 
-            let downloadSrc = link;
-
-            // YouTube
-            if(link.includes('youtube')){
-                const iframe = document.createElement('iframe');
-                iframe.src = link.replace('watch?v=','embed/');
-                iframe.allowFullscreen = true;
-                card.appendChild(iframe);
-                downloadSrc=null;
-            }
-            // PDF מקומי
-            else if(link.toLowerCase().endsWith('.pdf')){
-                const pdfCanvas = document.createElement('canvas');
-                pdfCanvas.className='pdf-canvas';
-                card.appendChild(pdfCanvas);
-
-                const pdfPath = 'הורדה/sefer.pdf';
-
-                const loadingTask = pdfjsLib.getDocument(pdfPath);
-                loadingTask.promise.then(pdf=>{
-                    pdf.getPage(1).then(page=>{
-                        const viewport = page.getViewport({scale:1.2});
-                        pdfCanvas.width = viewport.width;
-                        pdfCanvas.height = viewport.height;
-                        const renderContext = {
-                            canvasContext: pdfCanvas.getContext('2d'),
-                            viewport: viewport
-                        };
-                        page.render(renderContext);
-                    });
-                }).catch(err=>{
-                    pdfCanvas.remove();
-                    const info = document.createElement('div');
-                    info.textContent='Preview לא זמין – לחץ על הורדה';
-                    info.style.color='#fff';
-                    card.appendChild(info);
-                });
-            }
-            // קבצים אחרים
-            else{
-                const info = document.createElement('div');
-                info.textContent='Preview לא זמין – לחץ על הורדה';
-                info.style.color='#fff';
-                card.appendChild(info);
-            }
-
-            // כפתור הורדה
-            if(downloadSrc){
-                const btn = document.createElement('button');
-                btn.className='download-btn';
-                btn.textContent='הורדה';
-                btn.onclick = ()=>window.open(downloadSrc,'_blank');
-                card.appendChild(btn);
-            }
-
-            grid.appendChild(card);
-            setTimeout(()=>card.classList.add('show'),i*120);
+        /* YouTube */
+        if(link.includes('youtube')){
+            previewSrc=link.replace('watch?v=','embed/');
+            downloadSrc=null; // אין הורדה ליוטיוב
         }
-    }
 
+        /* Google Drive */
+        if(link.includes('drive.google.com')){
+            const match=link.match(/\/d\/(.+?)\//) || link.match(/id=(.+)/);
+            if(match){
+                const id=match[1];
+                previewSrc=`https://drive.google.com/file/d/${id}/preview`;
+                downloadSrc=`https://drive.google.com/uc?export=download&id=${id}`;
+            }
+        }
+
+        iframe.src=previewSrc;
+        iframe.allowFullscreen=true;
+
+        card.append(h2,iframe);
+
+        if(downloadSrc){
+            const btn=document.createElement('button');
+            btn.className='download-btn';
+            btn.textContent='הורדה';
+            btn.onclick=()=>window.open(downloadSrc,'_blank');
+            card.appendChild(btn);
+        }
+
+        grid.appendChild(card);
+        setTimeout(()=>card.classList.add('show'),i*120);
+    });
+}
+
+(async()=>{
     await loadMedia();
     splash.style.display='none';
     document.body.classList.remove('loading');
-});
+})();
 </script>
 
 </body>
