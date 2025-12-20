@@ -78,7 +78,7 @@ h1{margin-top:90px;text-align:center;color:var(--accent-blue);}
 }
 .card.show{transform:scale(1);opacity:1;}
 .card iframe, .pdf-canvas{width:100%;border-radius:8px;margin-top:10px;}
-.pdf-canvas{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+.pdf-canvas{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);height:300px;}
 
 .download-btn{
     margin-top:12px;padding:8px 18px;
@@ -121,6 +121,44 @@ async function loadMedia(){
     const grid = document.getElementById('mediaGrid');
     const category = document.body.dataset.category;
 
+    // קודם כל, הכרטיס PDF קבוע מהשרת
+    const pdfCard = document.createElement('div');
+    pdfCard.className='card';
+    const pdfTitle = document.createElement('h2');
+    pdfTitle.textContent="יוז'וק מדיק, ספר הקורס, מעודכן ע''פ פרוטוקול 2025 של AHA";
+    pdfCard.appendChild(pdfTitle);
+
+    const pdfCanvas = document.createElement('canvas');
+    pdfCanvas.className='pdf-canvas';
+    pdfCard.appendChild(pdfCanvas);
+
+    const pdfUrl = '/להורדה/ספר.pdf';
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    loadingTask.promise.then(pdf=>{
+        pdf.getPage(1).then(page=>{
+            const viewport = page.getViewport({scale:1.2});
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.width  = viewport.width;
+            page.render({canvasContext:pdfCanvas.getContext('2d'), viewport});
+        });
+    }).catch(err=>{
+        pdfCanvas.remove();
+        const info = document.createElement('div');
+        info.textContent='Preview לא זמין – לחץ על הורדה';
+        info.style.margin='10px 0';
+        info.style.color='#fff';
+        pdfCard.appendChild(info);
+    });
+
+    const btn = document.createElement('button');
+    btn.className='download-btn';
+    btn.textContent='הורדה';
+    btn.onclick=()=>window.open(pdfUrl,'_blank');
+    pdfCard.appendChild(btn);
+
+    grid.appendChild(pdfCard);
+
+    // עכשיו נטען את השאר מה-Google Sheets
     for(let i=1;i<rows.length;i++){
         const r = rows[i];
         const title = r[1]?.trim();
@@ -130,15 +168,12 @@ async function loadMedia(){
 
         const card = document.createElement('div');
         card.className='card';
-
         const h2 = document.createElement('h2');
         h2.textContent = title;
         card.appendChild(h2);
 
         let downloadSrc = link;
-        let canPreview = true;
 
-        // YouTube
         if(link.includes('youtube')){
             const iframe = document.createElement('iframe');
             iframe.src = link.replace('watch?v=','embed/');
@@ -146,37 +181,20 @@ async function loadMedia(){
             card.appendChild(iframe);
             downloadSrc=null;
         }
-        // Google Drive
-        else if(link.includes('drive.google.com') || link.toLowerCase().endsWith('.pdf')){
-            // השתמש ב-PDF.js להצגה
-            const pdfContainer = document.createElement('canvas');
-            pdfContainer.className='pdf-canvas';
-            card.appendChild(pdfContainer);
-
-            const url = link.includes('drive.google.com') ? `https://drive.google.com/uc?export=download&id=${(link.match(/\/d\/([a-zA-Z0-9_-]+)/)||link.match(/id=([a-zA-Z0-9_-]+)/))[1]}` : link;
-
-            // טען PDF עם PDF.js
-            const loadingTask = pdfjsLib.getDocument(url);
-            loadingTask.promise.then(pdf => {
-                pdf.getPage(1).then(page => {
+        else if(link.toLowerCase().endsWith('.pdf')){
+            const pdfC = document.createElement('canvas');
+            pdfC.className='pdf-canvas';
+            card.appendChild(pdfC);
+            const loadingTask2 = pdfjsLib.getDocument(link);
+            loadingTask2.promise.then(pdf=>{
+                pdf.getPage(1).then(page=>{
                     const viewport = page.getViewport({scale:1.2});
-                    pdfContainer.height = viewport.height;
-                    pdfContainer.width  = viewport.width;
-                    const renderContext = {canvasContext:pdfContainer.getContext('2d'),viewport:viewport};
-                    page.render(renderContext);
+                    pdfC.height = viewport.height;
+                    pdfC.width  = viewport.width;
+                    page.render({canvasContext:pdfC.getContext('2d'), viewport});
                 });
-            }).catch(err=>{
-                pdfContainer.remove();
-                const info = document.createElement('div');
-                info.textContent='Preview לא זמין – לחץ על הורדה';
-                info.style.margin='10px 0';
-                info.style.color='#fff';
-                card.appendChild(info);
-            });
-        }
-        // כל קובץ אחר
-        else{
-            canPreview=false;
+            }).catch(()=>{ pdfC.remove(); });
+        } else {
             const info = document.createElement('div');
             info.textContent='Preview לא זמין – לחץ על הורדה';
             info.style.margin='10px 0';
@@ -184,13 +202,12 @@ async function loadMedia(){
             card.appendChild(info);
         }
 
-        // כפתור הורדה
         if(downloadSrc){
-            const btn = document.createElement('button');
-            btn.className='download-btn';
-            btn.textContent='הורדה';
-            btn.onclick = ()=>window.open(downloadSrc,'_blank');
-            card.appendChild(btn);
+            const btn2 = document.createElement('button');
+            btn2.className='download-btn';
+            btn2.textContent='הורדה';
+            btn2.onclick=()=>window.open(downloadSrc,'_blank');
+            card.appendChild(btn2);
         }
 
         grid.appendChild(card);
