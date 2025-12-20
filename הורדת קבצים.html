@@ -6,7 +6,7 @@
 <title>הורדת קבצים עם PDF Preview</title>
 <link rel="icon" type="image/png" href="logo.png">
 
-<!-- PDF.js גרסה שמכניסה pdfjsLib גלובלי -->
+<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
 <style>
@@ -116,11 +116,11 @@ topLogo.onclick   = () => location.href='media-index.html';
 const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
 async function loadMedia(){
-    const res = await fetch(csvUrl);
-    const text = await res.text();
-    const rows = text.split('\n').map(r=>r.split(','));
     const grid = document.getElementById('mediaGrid');
     const category = document.body.dataset.category;
+
+    // ⚡ הגדרת PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     // --- כרטיס PDF מקומי קבוע בראש ---
     const pdfCard = document.createElement('div');
@@ -133,7 +133,7 @@ async function loadMedia(){
     pdfCanvas.className='pdf-canvas';
     pdfCard.appendChild(pdfCanvas);
 
-    const pdfUrl = '/להורדה/ספר.pdf';
+    const pdfUrl = 'הורדה/sefer.pdf';
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
     loadingTask.promise.then(pdf=>{
         pdf.getPage(1).then(page=>{
@@ -160,6 +160,10 @@ async function loadMedia(){
     grid.appendChild(pdfCard);
 
     // --- שאר הכרטיסים מה-Google Sheets ---
+    const res = await fetch(csvUrl);
+    const text = await res.text();
+    const rows = text.split('\n').map(r=>r.split(','));
+
     for(let i=1;i<rows.length;i++){
         const r = rows[i];
         const title = r[1]?.trim();
