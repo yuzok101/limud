@@ -5,7 +5,6 @@
 <title>הפרטים האישיים שלי</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
 body {
   font-family: 'Assistant', sans-serif;
@@ -126,18 +125,21 @@ button:hover {
 
   <div id="courseNotice"></div>
 
-  <button onclick="goBack()">חזרה לאזור האישי</button>
+  <button id="backBtn">חזרה לאזור האישי</button>
 </div>
 
 <script>
 const scriptURL = 'https://script.google.com/macros/s/AKfycbz8aZ1RIeeeCjMXHVjEpd4gFYl3xVzwdTwp1YSwT8Np0KxhtdY484uriBdj_XxDQvMe/exec';
 const user = JSON.parse(localStorage.getItem('loggedInUser'));
-if(!user){ alert("לא מחובר"); location.href="index.html"; }
+if(!user){ alert("לא מחובר"); location.href="login1.html"; }
 
 const id = user.id;
 const profileDiv = document.getElementById('profile');
 const spinner = document.getElementById('spinner');
 const saveBtn = document.getElementById('saveBtn');
+const backBtn = document.getElementById('backBtn');
+
+backBtn.onclick = ()=>location.href='login1.html';
 
 async function loadProfile(){
   try{
@@ -150,6 +152,7 @@ async function loadProfile(){
     checkExpiry(data.expiryDate);
   } catch(err){ console.error(err); alert("שגיאה בטעינת הנתונים"); }
 }
+
 function renderProfile(d){
   profileDiv.style.display="block";
   spinner.style.display="none";
@@ -185,7 +188,7 @@ async function saveChanges(id){
     body:new URLSearchParams({action:'updateProfile',id,email,phone,address})
   });
   alert("השינויים נשמרו");
-  goBack();
+  location.href='login1.html';
 }
 
 function validateEmail(email){
@@ -193,8 +196,10 @@ function validateEmail(email){
   return re.test(email);
 }
 
+// בודק אם התוקף עומד לפוג בחצי שנה הקרובה, גם עם נקודה או מקף
 function checkExpiry(dateStr){
-  const expiry = new Date(dateStr.replace(/\./g,'-'));
+  const norm = dateStr.replace(/\./g,'-'); 
+  const expiry = new Date(norm);
   const now = new Date();
   const sixMonths = 1000*60*60*24*180;
   if(expiry - now <= sixMonths){
@@ -206,8 +211,6 @@ function checkExpiry(dateStr){
     `;
   }
 }
-
-function goBack(){ location.href="index.html"; }
 
 function goTeuda(){
   const profile = {
