@@ -8,244 +8,187 @@
 
 <style>
 :root {
-    --deep-blue: #0d1b2a;
-    --light-blue: #1b263b;
-    --accent-blue: #415a77;
-    --text-color: #e0e1dd;
+    --deep-blue:#0d1b2a;
+    --light-blue:#1b263b;
+    --accent-blue:#415a77;
+    --text-color:#e0e1dd;
 }
-* { box-sizing: border-box; }
-
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: var(--deep-blue);
-    color: var(--text-color);
+*{box-sizing:border-box}
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial;
+    background:var(--deep-blue);
+    color:var(--text-color);
 }
-body.loading { overflow: hidden; }
+body.loading{overflow:hidden}
 
 /* ספלש */
-#splash {
-    position: fixed;
-    inset: 0;
-    background: var(--deep-blue);
-    display:flex;
-    justify-content:center;
-    align-items:center;
+#splash{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--deep-blue);
     z-index:9999;
 }
-#splashLogo {
+#splashLogo{
     width:120px;
-    height:120px;
-    animation: spin 2s linear infinite;
+    animation:spin 2s linear infinite;
 }
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* סרגל עליון */
-#topBar {
-    position: fixed;
-    top:10px;
-    left:10px;
-    right:10px;
+#topBar{
+    position:fixed;
+    top:10px; left:10px; right:10px;
     display:flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
+    justify-content:space-between;
+    z-index:1000;
 }
-#profileBtn {
-    width:50px;
-    height:50px;
+#profileBtn{
+    width:50px;height:50px;
     border-radius:50%;
     border:none;
     background:red;
-    color:white;
+    color:#fff;
     font-size:24px;
     cursor:pointer;
 }
-#topLogo {
-    width:50px;
-    height:50px;
-    cursor:pointer;
-}
+#topLogo{width:50px;cursor:pointer}
 
-/* כותרת */
-h1 {
+h1{
+    margin-top:80px;
     text-align:center;
-    margin-bottom:30px;
-    font-size:2rem;
-    color: var(--accent-blue);
-    text-shadow:1px 1px 4px black;
+    color:var(--accent-blue);
 }
-#userNameDisplay {
-    text-align:center;
-    margin-bottom:20px;
-    font-size:1.2rem;
-}
+#userNameDisplay{text-align:center;margin-bottom:20px}
 
 /* Grid */
-.grid {
+.grid{
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
     gap:25px;
-    margin-top: 80px;
 }
-.card {
-    background: var(--light-blue);
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    padding: 15px;
+.card{
+    background:var(--light-blue);
+    border-radius:12px;
+    padding:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.5);
     text-align:center;
-    user-select:none;
-    transform: scale(0.9);
+    transform:scale(.9);
     opacity:0;
-    transition: all 0.8s ease-out;
+    transition:.7s;
 }
-.card.show {
-    transform: scale(1);
-    opacity:1;
-}
-.card h2 {
-    font-size:18px;
-    margin-bottom:12px;
-}
-.card iframe {
+.card.show{transform:scale(1);opacity:1}
+.card iframe{
     width:100%;
     height:300px;
     border-radius:8px;
     border:none;
-    transition: transform 0.5s ease;
-}
-.card iframe:hover {
-    transform: scale(1.05);
 }
 
-@media (max-width:768px){
-    .card iframe{ height:220px; }
+.download-btn{
+    margin-top:12px;
+    padding:8px 16px;
+    background:var(--accent-blue);
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    cursor:pointer;
 }
-@media (max-width:480px){
-    .card iframe{ height:180px; }
-}
+.download-btn:hover{opacity:.85}
+
+@media(max-width:768px){.card iframe{height:220px}}
+@media(max-width:480px){.card iframe{height:180px}}
 </style>
 </head>
 
 <body class="loading" data-category="פודקאסט החייאה">
 
-<!-- ספלש -->
 <div id="splash">
-    <img src="logo.png" id="splashLogo" alt="Loading">
+    <img src="logo.png" id="splashLogo">
 </div>
 
-<!-- סרגל עליון -->
 <div id="topBar">
     <button id="profileBtn">👤</button>
-    <img src="logo.png" id="topLogo" alt="Logo">
+    <img src="logo.png" id="topLogo">
 </div>
 
 <h1>פודקאסט החייאה</h1>
 <div id="userNameDisplay"></div>
 <div class="grid" id="mediaGrid"></div>
 
-<!-- JS רגיל -->
 <script>
-const user = JSON.parse(localStorage.getItem('loggedInUser'));
-if(!user){
-    window.location.href = 'login1.html';
-} else {
-    document.getElementById('userNameDisplay').textContent =
-        `שלום, ${user.firstName} ${user.lastName}`;
-}
+const user=JSON.parse(localStorage.getItem('loggedInUser'));
+if(!user) location.href='login1.html';
+else userNameDisplay.textContent=`שלום, ${user.firstName} ${user.lastName}`;
 
-document.getElementById('profileBtn').onclick = () =>
-    location.href = 'login1.html';
+profileBtn.onclick=()=>location.href='login1.html';
+topLogo.onclick=()=>location.href='media-index.html';
 
-document.getElementById('topLogo').onclick = () =>
-    location.href = 'media-index.html';
-
-const csvUrl =
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
+const csvUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSDcF3fujTQ-PQG1vd2QJkFWkzXoUOTwPsQ1gglHXKeN1XynSddJVs4EMGK744t3D2hnRuM891-HVzU/pub?output=csv';
 
 async function loadMedia(){
-    const res = await fetch(csvUrl);
-    const text = await res.text();
-    const rows = text.split('\n').map(r => r.split(','));
-    const container = document.getElementById('mediaGrid');
-    const pageCategory = document.body.dataset.category;
+    const res=await fetch(csvUrl);
+    const rows=(await res.text()).split('\n').map(r=>r.split(','));
+    const grid=document.getElementById('mediaGrid');
+    const category=document.body.dataset.category;
 
-    rows.forEach((row, index) => {
-        if(index === 0) return;
+    rows.forEach((r,i)=>{
+        if(i===0) return;
+        const title=r[1]?.trim();
+        const link=r[2]?.trim();
+        const cat=r[3]?.trim();
+        if(!title||!link||cat!==category) return;
 
-        const title = row[1]?.trim();
-        const link = row[2]?.trim();
-        const category = row[3]?.trim();
-        if(!title || !link || category !== pageCategory) return;
+        const card=document.createElement('div');
+        card.className='card';
 
-        const card = document.createElement('div');
-        card.className = 'card';
+        const h2=document.createElement('h2');
+        h2.textContent=title;
 
-        const h2 = document.createElement('h2');
-        h2.textContent = title;
-        card.appendChild(h2);
+        const iframe=document.createElement('iframe');
+        let previewSrc=link;
+        let downloadSrc=link;
 
-        const iframe = document.createElement('iframe');
-        iframe.src = link.includes('watch?v=')
-            ? link.replace('watch?v=','embed/')
-            : link;
-        iframe.allowFullscreen = true;
+        /* YouTube */
+        if(link.includes('youtube')){
+            previewSrc=link.replace('watch?v=','embed/');
+            downloadSrc=null; // אין הורדה ליוטיוב
+        }
 
-        card.appendChild(iframe);
-        container.appendChild(card);
+        /* Google Drive */
+        if(link.includes('drive.google.com')){
+            const match=link.match(/\/d\/(.+?)\//) || link.match(/id=(.+)/);
+            if(match){
+                const id=match[1];
+                previewSrc=`https://drive.google.com/file/d/${id}/preview`;
+                downloadSrc=`https://drive.google.com/uc?export=download&id=${id}`;
+            }
+        }
 
-        setTimeout(() => card.classList.add('show'), index * 150);
+        iframe.src=previewSrc;
+        iframe.allowFullscreen=true;
+
+        card.append(h2,iframe);
+
+        if(downloadSrc){
+            const btn=document.createElement('button');
+            btn.className='download-btn';
+            btn.textContent='הורדה';
+            btn.onclick=()=>window.open(downloadSrc,'_blank');
+            card.appendChild(btn);
+        }
+
+        grid.appendChild(card);
+        setTimeout(()=>card.classList.add('show'),i*120);
     });
 }
 
-async function loadMediaWithSplash(){
+(async()=>{
     await loadMedia();
-    document.getElementById('splash').style.display = 'none';
+    splash.style.display='none';
     document.body.classList.remove('loading');
-}
-
-loadMediaWithSplash();
-</script>
-
-<!-- Firebase -->
-<script type="module">
-import { db } from "./firebase.js";
-import {
-    collection,
-    doc,
-    setDoc,
-    addDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-let visitorId = localStorage.getItem("visitorId");
-if(!visitorId){
-    visitorId = crypto.randomUUID();
-    localStorage.setItem("visitorId", visitorId);
-}
-
-async function updateLiveVisitor(){
-    await setDoc(doc(db,"liveVisitors",visitorId),{
-        page: location.pathname,
-        lastSeen: serverTimestamp()
-    });
-}
-
-async function addPageView(){
-    await addDoc(collection(db,"pageViews"),{
-        visitorId,
-        page: location.pathname,
-        timestamp: serverTimestamp()
-    });
-}
-
-updateLiveVisitor();
-addPageView();
-setInterval(updateLiveVisitor, 30000);
+})();
 </script>
 
 </body>
