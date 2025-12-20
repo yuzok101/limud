@@ -73,9 +73,8 @@ input:focus {
 }
 
 input[readonly] {
-  background: #e0f0ff;
-  color: #555;
-  border: 1px solid #b0dfff;
+  background: #e0e7ef;
+  cursor: not-allowed;
 }
 
 button {
@@ -135,7 +134,7 @@ const scriptURL = 'https://script.google.com/macros/s/AKfycbwN22JPLnAD7rHz0OUVNj
 const user = JSON.parse(localStorage.getItem('loggedInUser'));
 if(!user){
   alert("לא מחובר");
-  location.href = "login1.html";
+  location.href = "index.html";
 }
 
 const id = user.id;
@@ -148,7 +147,7 @@ async function loadProfile(){
     });
     const data = await res.json();
     if(!data.success){
-      alert("שגיאה בטעינת נתונים: " + (data.message || ""));
+      alert("שגיאה בטעינת נתונים");
       return;
     }
     renderProfile(data);
@@ -162,9 +161,9 @@ async function loadProfile(){
 function renderProfile(d){
   const profileDiv = document.getElementById('profile');
   profileDiv.innerHTML = `
-    <div class="field-card"><strong>תעודת זהות:</strong> <input value="${d.id}" readonly></div>
-    <div class="field-card"><strong>שם:</strong> <input value="${d.firstName} ${d.lastName}" readonly></div>
-    <div class="field-card"><strong>מייל:</strong> <input value="${d.email || ''}" readonly></div>
+    <div class="field-card"><strong>תעודת זהות:</strong> ${d.id}</div>
+    <div class="field-card"><strong>שם:</strong> ${d.firstName} ${d.lastName}</div>
+    <div class="field-card"><strong>מייל:</strong><input id="email" value="${d.email || ''}" readonly></div>
     <div class="field-card"><strong>טלפון:</strong><input id="phone" value="${d.phone || ''}"></div>
     <div class="field-card"><strong>כתובת:</strong><input id="address" value="${d.address || ''}"></div>
     <div class="field-card"><strong>הכשרה:</strong> ${d.training}</div>
@@ -178,30 +177,25 @@ async function saveChanges(){
   const phone = document.getElementById('phone').value;
   const address = document.getElementById('address').value;
 
-  try{
-    const res = await fetch(scriptURL, {
-      method:'POST',
-      body:new URLSearchParams({
-        action:'updateProfile',
-        id,
-        phone,
-        address
-      })
-    });
-    const data = await res.json();
-    if(data.success){
-      alert("הפרטים עודכנו בהצלחה");
-    } else {
-      alert("שגיאה בעדכון: " + (data.message || ""));
-    }
-  } catch(err){
-    console.error(err);
-    alert("שגיאה בעדכון הפרטים");
+  const res = await fetch(scriptURL, {
+    method:'POST',
+    body:new URLSearchParams({
+      action:'updateProfile',
+      id,
+      phone,
+      address
+    })
+  });
+
+  const data = await res.json();
+  if(data.success){
+    alert("הפרטים עודכנו בהצלחה");
+  } else {
+    alert(data.message || "שגיאה בעדכון");
   }
 }
 
 function checkExpiry(dateStr){
-  if(!dateStr) return;
   const expiry = new Date(dateStr);
   const now = new Date();
   const sixMonths = 1000*60*60*24*180;
@@ -218,7 +212,7 @@ function checkExpiry(dateStr){
   }
 }
 
-function goBack(){ location.href = "login1.html"; }
+function goBack(){ location.href = "index.html"; }
 
 loadProfile();
 </script>
