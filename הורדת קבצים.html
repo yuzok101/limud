@@ -26,7 +26,7 @@ body.loading{overflow:hidden}
 /* ספלש */
 #splash{
     position:fixed; inset:0;
-    display:flex; align-items:center; justify-content:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
     background:var(--deep-blue);
     z-index:9999;
 }
@@ -35,6 +35,29 @@ body.loading{overflow:hidden}
     animation:spin 2s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* אנימציית הנקודות */
+#loadingText{
+    color:white; 
+    margin-top:20px; 
+    font-size:18px; 
+    display:flex; 
+    justify-content:center; 
+    align-items:center;
+}
+.dot{
+    opacity:0;
+    margin-left:2px;
+    animation:fadeDots 1.5s infinite;
+}
+.dot:nth-child(1){animation-delay:0s}
+.dot:nth-child(2){animation-delay:0.5s}
+.dot:nth-child(3){animation-delay:1s}
+@keyframes fadeDots{
+    0%,20%{opacity:0}
+    40%,60%{opacity:1}
+    80%,100%{opacity:0}
+}
 
 /* סרגל עליון */
 #topBar{
@@ -106,6 +129,7 @@ h1{
 
 <div id="splash">
     <img src="logo.png" id="splashLogo">
+    <div id="loadingText">אנא המתן<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
 </div>
 
 <div id="topBar">
@@ -150,13 +174,11 @@ async function loadMedia(){
         let previewSrc=link;
         let downloadSrc=link;
 
-        /* YouTube */
         if(link.includes('youtube')){
             previewSrc=link.replace('watch?v=','embed/');
-            downloadSrc=null; // אין הורדה ליוטיוב
+            downloadSrc=null;
         }
 
-        /* Google Drive */
         if(link.includes('drive.google.com')){
             const match=link.match(/\/d\/(.+?)\//) || link.match(/id=(.+)/);
             if(match){
@@ -171,7 +193,6 @@ async function loadMedia(){
 
         card.append(h2,iframe);
 
-        // בדיקה מיוחדת עבור כותרת מסוימת
         if(title === "יוז'וק מדיק, ספר הקורס, מעודכן ע''פ פרוטוקול 2025 של AHA"){
             downloadSrc = "https://drive.google.com/open?id=1noeB72pL5k2yAr4wbuOXRQ-YGJGDJ_b_";
         }
@@ -187,12 +208,13 @@ async function loadMedia(){
         grid.appendChild(card);
         setTimeout(()=>card.classList.add('show'),i*120);
     });
+
+    splash.style.display='none';
+    document.body.classList.remove('loading');
 }
 
 (async()=>{
     await loadMedia();
-    splash.style.display='none';
-    document.body.classList.remove('loading');
 })();
 </script>
 
