@@ -72,6 +72,40 @@ h1{
     transform:scale(1);
 }
 
+/* כפתור Play מעוצב עם אנימציית Pulsate + Fade-out */
+@keyframes pulsate {
+    0% { transform: translate(-50%,-50%) scale(1); opacity:0.7; }
+    50% { transform: translate(-50%,-50%) scale(1.1); opacity:1; }
+    100% { transform: translate(-50%,-50%) scale(1); opacity:0.7; }
+}
+#playBtn{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:50px;
+    color:rgba(255,255,255,0.9);
+    background:rgba(255,255,255,0.3);
+    border:none;
+    border-radius:50%;
+    width:100px;
+    height:100px;
+    cursor:pointer;
+    z-index:50;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    animation: pulsate 1.5s infinite;
+    transition:opacity 0.5s ease;
+}
+#playBtn.fadeOut{
+    opacity:0;
+    pointer-events:none;
+}
+#playBtn:hover{
+    background:rgba(255,255,255,0.5);
+}
+
 /* ניווט */
 .nav{
     position:absolute;
@@ -144,6 +178,7 @@ button,input{
 <h1>מצגת החייאה</h1>
 
 <div id="viewer">
+    <button id="playBtn">▶</button>
     <button class="nav" id="prev">❯</button>
     <button class="nav" id="next">❮</button>
     <img id="slide">
@@ -168,6 +203,7 @@ let firstLoad=true;
 const slide=document.getElementById("slide");
 const thumbs=document.getElementById("thumbs");
 const viewer=document.getElementById("viewer");
+const playBtn=document.getElementById("playBtn");
 
 /* טעינה חכמה – PNG + JPG */
 (async()=>{
@@ -189,7 +225,6 @@ const viewer=document.getElementById("viewer");
         if(!found) break;
     }
     buildThumbs();
-    showSlide(); // 🔥 הצגה מיידית של התמונה הראשונה
 })();
 
 /* הצגה */
@@ -289,6 +324,12 @@ document.addEventListener("keydown",e=>{
 /* עליון */
 profileBtn.onclick=()=>location.href="login1.html";
 topLogo.onclick=()=>location.href="media-index.html";
+
+/* כפתור Play עם fade-out */
+playBtn.onclick=()=>{
+    playBtn.classList.add("fadeOut");
+    setTimeout(showSlide,500); // אחרי חצי שניה מציג את התמונה הראשונה
+};
 </script>
 
 </body>
