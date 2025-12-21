@@ -163,6 +163,11 @@ const folder="מצגות/מצגת החייאה/";
 const extensions=["png","jpg","jpeg"];
 
 let slides=[], index=0, zoom=1, auto=null;
+let firstLoad=true;
+
+const slide=document.getElementById("slide");
+const thumbs=document.getElementById("thumbs");
+const viewer=document.getElementById("viewer");
 
 /* טעינה חכמה – PNG + JPG */
 (async()=>{
@@ -184,21 +189,28 @@ let slides=[], index=0, zoom=1, auto=null;
         if(!found) break;
     }
     buildThumbs();
-    showSlide();
+    showSlide(); // 🔥 הצגה מיידית של התמונה הראשונה
 })();
 
-const slide=document.getElementById("slide");
-const thumbs=document.getElementById("thumbs");
-
-/* הצגה עם מעבר */
+/* הצגה */
 function showSlide(){
-    slide.classList.remove("show");
-    setTimeout(()=>{
+    if(firstLoad){
         slide.src=slides[index];
         slide.style.transform=`scale(${zoom})`;
-        slide.onload=()=>slide.classList.add("show");
-        [...thumbs.children].forEach((t,i)=>t.classList.toggle("active",i===index));
-    },150);
+        slide.classList.add("show");
+        firstLoad=false;
+    }else{
+        slide.classList.remove("show");
+        setTimeout(()=>{
+            slide.src=slides[index];
+            slide.style.transform=`scale(${zoom})`;
+            slide.onload=()=>slide.classList.add("show");
+        },150);
+    }
+
+    [...thumbs.children].forEach((t,i)=>
+        t.classList.toggle("active",i===index)
+    );
 }
 
 /* Thumbnails */
