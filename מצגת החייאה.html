@@ -276,10 +276,17 @@ function toggleAuto(){
     },30000);
 }
 
-/* מסך מלא */
+/* מסך מלא תואם מובייל */
 function toggleFull(){
-    if(!document.fullscreenElement) viewer.requestFullscreen();
-    else document.exitFullscreen();
+    if(!document.fullscreenElement){
+        if(viewer.requestFullscreen) viewer.requestFullscreen();
+        else if(viewer.webkitRequestFullscreen) viewer.webkitRequestFullscreen();
+        else if(viewer.msRequestFullscreen) viewer.msRequestFullscreen();
+    } else {
+        if(document.exitFullscreen) document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if(document.msExitFullscreen) document.msExitFullscreen();
+    }
 }
 
 /* החלקה */
@@ -325,10 +332,13 @@ document.addEventListener("keydown",e=>{
 profileBtn.onclick=()=>location.href="login1.html";
 topLogo.onclick=()=>location.href="media-index.html";
 
-/* כפתור Play עם fade-out */
+/* כפתור Play עם fade-out ומוסרה לגמרי */
 playBtn.onclick=()=>{
     playBtn.classList.add("fadeOut");
-    setTimeout(showSlide,500); // אחרי חצי שניה מציג את התמונה הראשונה
+    setTimeout(()=>{
+        playBtn.style.display="none";
+        showSlide();
+    }, 500); // חצי שניה fade-out
 };
 </script>
 
