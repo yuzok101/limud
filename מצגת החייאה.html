@@ -45,7 +45,7 @@ h1{
     color:var(--accent-blue);
 }
 
-/* אזור מצגת */
+/* Viewer */
 #viewer{
     position:relative;
     width:96vw;
@@ -58,11 +58,18 @@ h1{
     touch-action:none;
 }
 
-#viewer img{
+/* תמונה עם מעבר */
+#slide{
     width:100%;
     height:100%;
     object-fit:contain;
-    transition:transform .15s ease;
+    opacity:0;
+    transform:scale(.97);
+    transition:opacity .6s ease, transform .6s ease;
+}
+#slide.show{
+    opacity:1;
+    transform:scale(1);
 }
 
 /* ניווט */
@@ -102,7 +109,7 @@ h1{
     outline:2px solid var(--accent-blue);
 }
 
-/* כפתורים */
+/* Controls */
 #controls{
     display:flex;
     justify-content:center;
@@ -153,32 +160,45 @@ button,input{
 
 <script>
 const folder="מצגות/מצגת החייאה/";
-const ext="png";
+const extensions=["png","jpg","jpeg"];
 
 let slides=[], index=0, zoom=1, auto=null;
 
-/* טעינה חכמה */
+/* טעינה חכמה – PNG + JPG */
 (async()=>{
     for(let i=1;i<500;i++){
-        const img=new Image();
-        img.src=`${folder}${i}.${ext}`;
-        await new Promise(r=>{
-            img.onload=()=>{slides.push(img.src);r()}
-            img.onerror=()=>r(false)
-        });
-        if(img.onerror) break;
+        let found=false;
+        for(const ext of extensions){
+            const img=new Image();
+            img.src=`${folder}${i}.${ext}`;
+            await new Promise(res=>{
+                img.onload=()=>{
+                    slides.push(img.src);
+                    found=true;
+                    res();
+                };
+                img.onerror=()=>res();
+            });
+            if(found) break;
+        }
+        if(!found) break;
     }
     buildThumbs();
-    show();
+    showSlide();
 })();
 
 const slide=document.getElementById("slide");
 const thumbs=document.getElementById("thumbs");
 
-function show(){
-    slide.src=slides[index];
-    slide.style.transform=`scale(${zoom})`;
-    [...thumbs.children].forEach((t,i)=>t.classList.toggle("active",i===index));
+/* הצגה עם מעבר */
+function showSlide(){
+    slide.classList.remove("show");
+    setTimeout(()=>{
+        slide.src=slides[index];
+        slide.style.transform=`scale(${zoom})`;
+        slide.onload=()=>slide.classList.add("show");
+        [...thumbs.children].forEach((t,i)=>t.classList.toggle("active",i===index));
+    },150);
 }
 
 /* Thumbnails */
@@ -186,24 +206,27 @@ function buildThumbs(){
     slides.forEach((src,i)=>{
         const t=document.createElement("img");
         t.src=src;
-        t.onclick=()=>{index=i;resetZoom();show()}
+        t.onclick=()=>{index=i;resetZoom();showSlide();}
         thumbs.appendChild(t);
     });
 }
 
 /* ניווט */
-next.onclick=()=>{if(index<slides.length-1){index++;resetZoom();show()}}
-prev.onclick=()=>{if(index>0){index--;resetZoom();show()}}
+next.onclick=()=>{if(index<slides.length-1){index++;resetZoom();showSlide();}}
+prev.onclick=()=>{if(index>0){index--;resetZoom();showSlide();}}
 
 /* זום */
-function zoomIn(){zoom=Math.min(4,zoom+.2);show()}
-function zoomOut(){zoom=Math.max(1,zoom-.2);show()}
+function zoomIn(){zoom=Math.min(4,zoom+.2);showSlide();}
+function zoomOut(){zoom=Math.max(1,zoom-.2);showSlide();}
 function resetZoom(){zoom=1}
 
 /* מצגת אוטומטית */
 function toggleAuto(){
     if(auto){clearInterval(auto);auto=null;return}
-    auto=setInterval(()=>{index=(index+1)%slides.length;resetZoom();show()},30000);
+    auto=setInterval(()=>{
+        index=(index+1)%slides.length;
+        resetZoom();showSlide();
+    },30000);
 }
 
 /* מסך מלא */
@@ -241,7 +264,7 @@ viewer.addEventListener("touchmove",e=>{
         const dist=Math.hypot(dx,dy);
         zoom=Math.min(4,Math.max(1,zoom*(dist/startDist)));
         startDist=dist;
-        show();
+        slide.style.transform=`scale(${zoom})`;
     }
 });
 
