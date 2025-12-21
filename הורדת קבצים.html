@@ -171,6 +171,11 @@ async function loadMedia(){
 
         card.append(h2,iframe);
 
+        // בדיקה מיוחדת עבור כותרת מסוימת
+        if(title === "יוז'וק מדיק, ספר הקורס, מעודכן ע''פ פרוטוקול 2025 של AHA"){
+            downloadSrc = "https://drive.google.com/open?id=1noeB72pL5k2yAr4wbuOXRQ-YGJGDJ_b_";
+        }
+
         if(downloadSrc){
             const btn=document.createElement('button');
             btn.className='download-btn';
