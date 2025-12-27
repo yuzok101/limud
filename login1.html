@@ -6,168 +6,278 @@
 <link rel="icon" type="image/png" href="logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Assistant',sans-serif}
-body{
-  background:linear-gradient(135deg,#0d1b2a,#1b3b5a);
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center
-}
-.card{
-  background:rgba(17,47,79,.95);
-  padding:35px;
-  width:380px;
-  border-radius:20px;
-  box-shadow:0 12px 40px rgba(0,0,0,.5);
-  text-align:center
-}
-input{
-  width:90%;
-  padding:14px;
-  margin:10px auto;
-  display:block;
-  border-radius:12px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  font-size:16px
-}
-input.invalid{border:2px solid #ff4d4d}
-button{
-  margin-top:15px;
-  padding:12px 25px;
-  border:none;
-  border-radius:12px;
-  background:#00bfff;
-  color:#fff;
-  font-size:16px;
-  cursor:pointer
-}
-button:hover{background:#0099cc}
-.hidden{display:none}
-.alert{
-  background:#ff4d4d;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:15px;
-  font-weight:600
-}
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Assistant', sans-serif; }
+body { background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; position:relative; }
+body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%); animation: bgMove 30s linear infinite; z-index:-1; }
+@keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
+
+#loginCard, #personalArea { background: rgba(17,47,79,0.9); padding: 40px 30px; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); width: 380px; text-align:center; transition: all 0.5s ease, transform 0.3s ease; position: relative; overflow: hidden; }
+#loginCard:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(0,191,255,0.5); }
+
+#loginCard img { width: 120px; margin-bottom: 25px; transition: transform 0.3s ease; position: relative; z-index: 2; }
+#loginCard img:hover { transform: scale(1.1); }
+
+#loginCard::before { content: ""; background: url('logo.png') no-repeat center center; background-size: 500px; opacity: 0.05; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(2); z-index: 0; pointer-events: none; }
+
+h2,h3 { margin-bottom: 20px; font-weight:700; position: relative; z-index:1; }
+
+input { display: block; width: 90%; margin: 12px auto; padding: 14px 15px; border-radius: 12px; border: none; outline:none; font-size:16px; transition: all 0.3s ease; background: rgba(255,255,255,0.05); color: #fff; position: relative; z-index:1; }
+input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px #00bfff; }
+input.invalid { border: 2px solid #ff4d4d; }
+
+#emailError { color: #ff4d4d; font-size: 14px; margin-top:-8px; margin-bottom:8px; display:none; }
+
+#message { color:#00bfff; font-size:14px; margin-bottom:10px; min-height:18px; }
+
+button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; position: relative; overflow: hidden; transition: all 0.3s ease; z-index:1; }
+button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,191,255,0.5); }
+
+.spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; }
+@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.loadingButton { animation: pulse 1s infinite; box-shadow: 0 0 18px rgba(0,191,255,0.6); }
+@keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); } 50% { transform: scale(1.05); box-shadow: 0 0 28px rgba(0,191,255,0.8); } 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); } }
+
+#personalArea { display:none; flex-direction: column; gap:15px; animation: fadeIn 1s ease forwards; position: relative; z-index:1; }
+#userContent { background: #0d2b4a; padding: 15px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s; }
+#userContent:hover { transform: scale(1.05); }
+@keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
 </style>
 </head>
 
 <body>
 
-<!-- התחברות -->
-<div id="loginCard" class="card">
-  <img src="logo.png" width="120">
-  <h2>כניסה לאזור אישי</h2>
+<div id="loginCard">
+  <img src="logo.png" alt="לוגו">
+  <h2>התחבר לאזור האישי שלך</h2>
   <form id="loginForm">
-    <input id="idNumber" placeholder="תעודת זהות" required>
-    <input id="phone" placeholder="טלפון" class="hidden">
-    <input id="confirmPhone" placeholder="אימות טלפון" class="hidden">
+    <input type="text" id="idNumber" placeholder="תעודת זהות" required>
     <div id="message"></div>
-    <button>המשך</button>
+    <input type="email" id="email" placeholder="מייל" style="display:none;">
+    <input type="email" id="confirmEmail" placeholder="אימות מייל" style="display:none;">
+    <div id="emailError">מייל לא תואם</div>
+    <button type="submit">
+      <span class="btnText">כניסה</span>
+      <div class="spinner"></div>
+    </button>
   </form>
 </div>
 
-<!-- השלמת פרטים -->
-<div id="completeCard" class="card hidden">
-  <h3>השלמת פרטים</h3>
-  <input id="email" placeholder="מייל">
-  <input id="address" placeholder="כתובת">
-  <input id="birthYear" placeholder="שנת לידה">
-  <button id="saveDetails">שמירה והמשך</button>
-</div>
-
-<!-- אזור אישי -->
-<div id="personalArea" class="card hidden">
-  <div id="expiryWarning" class="alert hidden"></div>
-  <h3>ברוך הבא <span id="userName"></span></h3>
-  <button onclick="location.href='media-index.html'">📁 מערכת המדיה</button>
-  <button onclick="location.href='profile.html'">👤 פרטים אישיים</button>
-  <button onclick="logout()">התנתק</button>
+<div id="personalArea">
+  <h3>ברוך הבא, <span id="userName"></span></h3>
+  <p id="userContent"></p>
+  <button id="goToSecret">מערכת המדיה</button>
+  <button id="viewProfile">👤 צפייה בפרטים האישיים</button>
+  <button id="logout">התנתק</button>
 </div>
 
 <script>
 const scriptURL = 'https://script.google.com/macros/s/AKfycbz8aZ1RIeeeCjMXHVjEpd4gFYl3xVzwdTwp1YSwT8Np0KxhtdY484uriBdj_XxDQvMe/exec';
 
-let stage = 1;
-let tempUser = null;
+const emailInput = document.getElementById('email');
+const confirmInput = document.getElementById('confirmEmail');
+const emailError = document.getElementById('emailError');
+const messageDiv = document.getElementById('message');
 
-const idInput = document.getElementById('idNumber');
-const phoneInput = document.getElementById('phone');
-const confirmPhone = document.getElementById('confirmPhone');
-const msg = document.getElementById('message');
+function isValidEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
 
-document.getElementById('loginForm').onsubmit = async e=>{
+function validateEmails() {
+  if(confirmInput.style.display === 'none') return true;
+  if(confirmInput.value === "") return false;
+  if(emailInput.value !== confirmInput.value){
+    emailInput.classList.add('invalid');
+    confirmInput.classList.add('invalid');
+    emailError.style.display = 'block';
+    return false;
+  } else {
+    emailInput.classList.remove('invalid');
+    confirmInput.classList.remove('invalid');
+    emailError.style.display = 'none';
+    return true;
+  }
+}
+
+emailInput.addEventListener('input', validateEmails);
+confirmInput.addEventListener('input', validateEmails);
+
+let stage = 1; // שלב כניסה
+
+document.getElementById('loginForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  const id=idInput.value.trim();
+  const id = document.getElementById('idNumber').value.trim();
+  const button = e.target.querySelector('button');
+  const spinner = button.querySelector('.spinner');
+  const btnText = button.querySelector('.btnText');
+  spinner.style.display = 'block';
+  btnText.style.visibility = 'hidden';
+  button.disabled = true;
+  button.classList.add('loadingButton');
 
-  if(stage===1){
-    const r=await fetch(scriptURL,{method:'POST',body:new URLSearchParams({id})});
-    const d=await r.json();
-    if(!d.success){msg.textContent="תעודת זהות לא נמצאה";return}
-    tempUser=d;
-    phoneInput.classList.remove('hidden');
-    if(!d.phone) confirmPhone.classList.remove('hidden');
-    stage=2;
-    msg.textContent="הזן טלפון לאימות";
-  }else{
-    const p=phoneInput.value.trim();
-    if(!/^\d{9,10}$/.test(p)){msg.textContent="טלפון לא תקין";return}
-    if(!confirmPhone.classList.contains('hidden') && p!==confirmPhone.value.trim()){
-      msg.textContent="טלפונים לא תואמים";return;
+  try{
+    if(stage === 1){
+      // שלב ראשון: שולח רק ת.ז כדי לבדוק מייל בגיליון
+      let res = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({id}) });
+      let data = await res.json();
+
+      if(data.success){
+        if(data.email){ 
+          emailInput.style.display = 'block';
+          emailInput.value = '';
+          confirmInput.style.display = 'none';
+          messageDiv.textContent = "אנא הזן את המייל שלך"; // הודעה באתר
+          stage = 2;
+          localStorage.setItem('tempUser', JSON.stringify(data));
+        } else {
+          emailInput.style.display = 'block';
+          confirmInput.style.display = 'block';
+          messageDiv.textContent = "חסרים לנו כמה פרטים עליך, אנא הזן את המייל שלך פעמיים"; // הודעה באתר
+          stage = 2;
+          localStorage.setItem('tempUser', JSON.stringify(data));
+        }
+      } else {
+        messageDiv.textContent = data.message || "תעודת זהות לא נמצאה";
+      }
+    } else if(stage === 2){
+      // שלב שני: הזנת מייל
+      const emailVal = emailInput.value.trim();
+      if(confirmInput.style.display !== 'none'){
+        const confirmVal = confirmInput.value.trim();
+        if(emailVal !== confirmVal){ 
+          messageDiv.textContent = "מיילים לא תואמים";
+          return; 
+        }
+      }
+      if(!isValidEmail(emailVal)){ 
+        messageDiv.textContent = "מייל לא תקני";
+        return; 
+      }
+
+      const tempUser = JSON.parse(localStorage.getItem('tempUser'));
+      let res2 = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({id,email: emailVal}) });
+      let data2 = await res2.json();
+      if(data2.success){
+        localStorage.setItem('loggedInUser', JSON.stringify(data2));
+        localStorage.setItem('userId', id);
+        localStorage.removeItem('tempUser');
+        messageDiv.textContent = "";
+        showPersonalArea(data2);
+      } else {
+        messageDiv.textContent = data2.message || "שגיאה בשרת";
+      }
     }
-    const r=await fetch(scriptURL,{method:'POST',body:new URLSearchParams({id,phone:p})});
-    const d=await r.json();
-    if(d.needDetails){
-      localStorage.setItem('tempUser',JSON.stringify(d));
-      document.getElementById('loginCard').classList.add('hidden');
-      document.getElementById('completeCard').classList.remove('hidden');
-    }else{
-      loginSuccess(d);
+  } catch(err){
+    console.error(err);
+  } finally{
+    spinner.style.display = 'none';
+    btnText.style.visibility = 'visible';
+    button.disabled = false;
+    button.classList.remove('loadingButton');
+  }
+});
+
+// ⚡ הצגת אזור אישי עם בדיקת תאריך תפוגה
+function showPersonalArea(user){
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('personalArea').style.display = 'flex';
+  document.getElementById('userName').textContent = (user.firstName || "") + " " + (user.lastName || "");
+  document.getElementById('userContent').textContent = user.personalArea || "";
+
+  // ⚡ בדיקת תאריך תפוגה
+  if(user.expiryDate){  // אם יש שדה תאריך תפוגה
+    const parts = user.expiryDate.split('.');
+    if(parts.length === 3){
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      const expiry = new Date(year, month, day);
+      const today = new Date();
+      const threeMonthsLater = new Date();
+      threeMonthsLater.setMonth(today.getMonth() + 3);
+
+      if(expiry <= threeMonthsLater){
+        messageDiv.style.display = 'block';
+        messageDiv.style.color = '#ff4d4d';
+        messageDiv.textContent = "תאריך התעודה עומד לפוג תוך 3 חודשים, יש לחדש אותה!";
+      }
     }
   }
-};
-
-document.getElementById('saveDetails').onclick=async()=>{
-  const u=JSON.parse(localStorage.getItem('tempUser'));
-  const email=email.value,addr=address.value,year=birthYear.value;
-  const r=await fetch(scriptURL,{method:'POST',body:new URLSearchParams({
-    id:u.id,email,addr,year
-  })});
-  const d=await r.json();
-  loginSuccess(d);
-};
-
-function loginSuccess(user){
-  localStorage.setItem('loggedInUser',JSON.stringify(user));
-  document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
-  document.getElementById('personalArea').classList.remove('hidden');
-  document.getElementById('userName').textContent=user.firstName||"";
-  checkExpiry(user);
 }
 
-function checkExpiry(user){
-  if(!user.expiryDate) return;
-  const [d,m,y]=user.expiryDate.split('.');
-  const exp=new Date(y,m-1,d);
-  const six=new Date(); six.setMonth(six.getMonth()+6);
-  if(exp<=six){
-    const w=document.getElementById('expiryWarning');
-    w.textContent="⚠ התעודה עומדת לפוג בחצי השנה הקרובה – יש לחדש";
-    w.classList.remove('hidden');
-  }
-}
-
-function logout(){
-  localStorage.clear();
+document.getElementById('logout').addEventListener('click', function(){
+  localStorage.removeItem('loggedInUser');
   location.reload();
+});
+
+document.getElementById('goToSecret').addEventListener('click', function(){
+  window.location.href = 'media-index.html';
+});
+
+document.getElementById('viewProfile').addEventListener('click', function(){
+  window.location.href = 'profile.html';
+});
+
+// ⚡ טעינת משתמש אם כבר מחובר
+window.addEventListener('load', function(){
+  const user = JSON.parse(localStorage.getItem('loggedInUser'));
+  if(user) showPersonalArea(user);
+});
+</script>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { collection, doc, setDoc, addDoc, serverTimestamp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ⚡ מזהה ייחודי לכל משתמש
+let visitorId = localStorage.getItem("visitorId");
+if (!visitorId) {
+  visitorId = crypto.randomUUID();
+  localStorage.setItem("visitorId", visitorId);
 }
+
+// ⚡ פרטי משתמש (אם יש לך מידע מ־Sheets או מהטופס)
+const user = {
+  name: localStorage.getItem("userName") || null,
+  email: localStorage.getItem("userEmail") || null
+};
+
+// ⚡ עדכון liveVisitors
+async function updateLiveVisitor() {
+  try {
+    await setDoc(doc(db, "liveVisitors", visitorId), {
+      ...user,
+      page: location.pathname,
+      lastSeen: serverTimestamp()
+    });
+  } catch(e) {
+    console.error("Error updating live visitor:", e);
+  }
+}
+
+// ⚡ הוספת צפייה חדשה ל-pageViews
+async function addPageView() {
+  try {
+    await addDoc(collection(db, "pageViews"), {
+      visitorId,
+      page: location.pathname,
+      date: new Date().toISOString().slice(0,10), // YYYY-MM-DD
+      timestamp: serverTimestamp()
+    });
+  } catch(e) {
+    console.error("Error adding page view:", e);
+  }
+}
+
+// ⚡ הפעלת הפונקציות מיד
+updateLiveVisitor();
+addPageView();
+
+// ⚡ עדכון liveVisitors כל 30 שניות
+setInterval(updateLiveVisitor, 30000);
 </script>
 
 </body>
