@@ -1,151 +1,256 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-    <meta charset="UTF-8">
-    <title>כניסה לאזור אישי</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin:0; padding:0; font-family: 'Assistant', sans-serif; }
-        body { background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; }
-        #loginCard, #personalArea { background: rgba(17,47,79,0.9); padding: 40px 30px; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); width: 380px; text-align:center; }
-        h2 { margin-bottom: 20px; }
-        input { display: block; width: 100%; margin: 12px auto; padding: 14px 15px; border-radius: 12px; border: none; outline:none; font-size:16px; background: rgba(255,255,255,0.1); color: #fff; text-align: center; }
-        input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px #00bfff; }
-        button { margin-top: 15px; width: 100%; padding: 12px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; transition: 0.3s; }
-        button:hover { background: #0099cc; transform: translateY(-2px); }
-        #message { color:#00bfff; font-size:14px; margin-bottom:10px; min-height:18px; }
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: none; margin: 0 auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8">
+<title>כניסה לאזור אישי</title>
+<link rel="icon" type="image/png" href="logo.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Assistant', sans-serif; }
+body { background: linear-gradient(135deg, #0d1b2a, #1b3b5a); color: #fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; position:relative; }
+body::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, rgba(0,191,255,0.05) 0%, rgba(0,0,0,0) 70%); animation: bgMove 30s linear infinite; z-index:-1; }
+@keyframes bgMove { 0%{background-position:0 0;} 100%{background-position:100% 100%;} }
+
+#loginCard, #personalArea { background: rgba(17,47,79,0.9); padding: 40px 30px; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); width: 380px; text-align:center; transition: all 0.5s ease, transform 0.3s ease; position: relative; overflow: hidden; }
+#loginCard:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(0,191,255,0.5); }
+
+#loginCard img { width: 120px; margin-bottom: 25px; transition: transform 0.3s ease; position: relative; z-index: 2; }
+#loginCard img:hover { transform: scale(1.1); }
+
+#loginCard::before { content: ""; background: url('logo.png') no-repeat center center; background-size: 500px; opacity: 0.05; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(2); z-index: 0; pointer-events: none; }
+
+h2,h3 { margin-bottom: 20px; font-weight:700; position: relative; z-index:1; }
+
+input { display: block; width: 90%; margin: 12px auto; padding: 14px 15px; border-radius: 12px; border: none; outline:none; font-size:16px; transition: all 0.3s ease; background: rgba(255,255,255,0.05); color: #fff; position: relative; z-index:1; text-align: center; }
+input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px #00bfff; }
+input.invalid { border: 2px solid #ff4d4d; }
+
+#errorMsg { color: #ff4d4d; font-size: 14px; margin-top:-8px; margin-bottom:8px; display:none; }
+
+#message { color:#00bfff; font-size:14px; margin-bottom:10px; min-height:18px; }
+
+button { margin-top: 15px; padding: 12px 25px; border:none; border-radius: 12px; background: #00bfff; color:#fff; font-weight:600; cursor:pointer; font-size:16px; position: relative; overflow: hidden; transition: all 0.3s ease; z-index:1; width: 80%; }
+button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,191,255,0.5); }
+
+.spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; }
+@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.loadingButton { animation: pulse 1s infinite; box-shadow: 0 0 18px rgba(0,191,255,0.6); }
+@keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); } 50% { transform: scale(1.05); box-shadow: 0 0 28px rgba(0,191,255,0.8); } 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6); } }
+
+#personalArea { display:none; flex-direction: column; gap:15px; animation: fadeIn 1s ease forwards; position: relative; z-index:1; }
+#userContent { background: #0d2b4a; padding: 15px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s; line-height: 1.6; }
+#userContent:hover { transform: scale(1.05); }
+@keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
+</style>
 </head>
+
 <body>
 
 <div id="loginCard">
-    <h2>כניסה לאזור אישי</h2>
-    <form id="loginForm">
-        <input type="text" id="idNumber" placeholder="תעודת זהות" required>
-        <div id="message"></div>
-        
-        <input type="tel" id="phone" placeholder="מספר טלפון (או +972)" style="display:none;">
-        <input type="tel" id="confirmPhone" placeholder="אימות טלפון" style="display:none;">
-        
-        <button type="submit" id="submitBtn">
-            <span class="btnText">המשך</span>
-            <div class="spinner"></div>
-        </button>
-    </form>
+  <img src="logo.png" alt="לוגו">
+  <h2>התחבר לאזור האישי</h2>
+  <form id="loginForm">
+    <input type="text" id="idNumber" placeholder="תעודת זהות" required>
+    <div id="message"></div>
+    
+    <input type="tel" id="phone" placeholder="מספר טלפון" style="display:none;">
+    <input type="tel" id="confirmPhone" placeholder="אימות טלפון" style="display:none;">
+    <div id="errorMsg">הנתונים אינם תואמים</div>
+
+    <button type="submit" id="submitBtn">
+      <span class="btnText">כניסה</span>
+      <div class="spinner"></div>
+    </button>
+  </form>
 </div>
 
-<div id="personalArea" style="display:none;">
-    <h3>ברוך הבא, <span id="userName"></span></h3>
-    <div id="userContent" style="margin-top:20px; text-align: right; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;"></div>
-    <button onclick="logout()" style="background:#ff4d4d; margin-top:20px;">התנתק</button>
+<div id="personalArea">
+  <h3>ברוך הבא, <span id="userName"></span></h3>
+  <div id="userContent"></div>
+  <button id="goToSecret">מערכת המדיה</button>
+  <button id="viewProfile">👤 צפייה בפרטים האישיים</button>
+  <button id="logout" style="background: #ff4d4d;">התנתק</button>
 </div>
 
 <script>
-    // === הכנס כאן את ה-URL שקיבלת מה-Deploy של ה-Apps Script ===
-    const scriptURL = 'החלף_בכתובת_הסקריפט_שלך'; 
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxMK9w0d9xOF_X2WnYPNp7PW-sUXzJBh6mu9MLxZ0AE3OxlF4wyEarIksipK4aBMr6E/exec';
 
-    let stage = 1;
-    const messageDiv = document.getElementById('message');
-    const phoneInput = document.getElementById('phone');
-    const confirmInput = document.getElementById('confirmPhone');
-    const btn = document.getElementById('submitBtn');
-    const spinner = btn.querySelector('.spinner');
-    const btnText = btn.querySelector('.btnText');
+let stage = 1;
+const messageDiv = document.getElementById('message');
+const phoneInput = document.getElementById('phone');
+const confirmPhoneInput = document.getElementById('confirmPhone');
+const errorMsg = document.getElementById('errorMsg');
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('idNumber').value.trim();
-        setLoading(true);
+// פונקציית ניקוי מספר טלפון להשוואה (9 ספרות אחרונות)
+const normalize = (p) => {
+  if (!p) return "";
+  let cleaned = String(p).replace(/\D/g, ""); 
+  return cleaned.length >= 9 ? cleaned.slice(-9) : cleaned;
+};
 
-        try {
-            if (stage === 1) {
-                // שלב 1: בדיקת תעודת זהות
-                let res = await fetch(scriptURL, { method:'POST', body: new URLSearchParams({ id, action: 'login' }) });
-                let data = await res.json();
-                
-                if (data.success) {
-                    if (data.needPhone) {
-                        messageDiv.textContent = "אנא הזן טלפון פעמיים לרישום:";
-                        confirmInput.style.display = 'block';
-                    } else {
-                        messageDiv.textContent = "אנא הזן טלפון לאימות:";
-                    }
-                    phoneInput.style.display = 'block';
-                    stage = 2;
-                } else {
-                    messageDiv.textContent = data.message;
-                }
-            } 
-            else if (stage === 2) {
-                // שלב 2: אימות טלפון (כולל ניקוי קידומות)
-                const clean = (val) => val.replace(/\D/g, "").slice(-9);
-                const phoneVal = phoneInput.value.trim();
-                const phoneCleaned = clean(phoneVal);
-                
-                if (phoneCleaned.length < 9) {
-                    messageDiv.textContent = "מספר טלפון לא תקין";
-                    setLoading(false);
-                    return;
-                }
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const id = document.getElementById('idNumber').value.trim();
+  const button = document.getElementById('submitBtn');
+  const spinner = button.querySelector('.spinner');
+  const btnText = button.querySelector('.btnText');
 
-                if (confirmInput.style.display !== 'none') {
-                    if (phoneCleaned !== clean(confirmInput.value)) {
-                        messageDiv.textContent = "מספרי הטלפון אינם תואמים";
-                        setLoading(false);
-                        return;
-                    }
-                }
+  setLoading(true, button, spinner, btnText);
 
-                let res = await fetch(scriptURL, { 
-                    method:'POST', 
-                    body: new URLSearchParams({ id, phone: phoneVal, action: 'login' }) 
-                });
-                let data = await res.json();
+  try {
+    if (stage === 1) {
+      // שלב 1: בדיקת תעודת זהות
+      let res = await fetch(scriptURL, { 
+        method:'POST', 
+        body: new URLSearchParams({ id: id, action: 'login' }) 
+      });
+      let data = await res.json();
 
-                if (data.success) {
-                    localStorage.setItem('loggedInUser', JSON.stringify(data));
-                    showPersonalArea(data);
-                } else {
-                    messageDiv.textContent = data.message;
-                }
-            }
-        } catch (err) {
-            messageDiv.textContent = "שגיאת תקשורת";
-        } finally {
-            setLoading(false);
+      if (data.success) {
+        if (data.needPhone) {
+          // רישום ראשוני
+          messageDiv.textContent = "אנא הזן את מספר הטלפון שלך פעמיים לרישום:";
+          phoneInput.style.display = 'block';
+          confirmPhoneInput.style.display = 'block';
+        } else {
+          // אימות קיים
+          messageDiv.textContent = "אנא הזן מספר טלפון לאימות:";
+          phoneInput.style.display = 'block';
+          confirmPhoneInput.style.display = 'none';
         }
+        stage = 2;
+      } else {
+        messageDiv.textContent = data.message || "תעודת זהות לא נמצאה";
+      }
+    } 
+    else if (stage === 2) {
+      // שלב 2: אימות/רישום טלפון
+      const phoneVal = phoneInput.value.trim();
+      
+      if (confirmPhoneInput.style.display !== 'none') {
+        if (normalize(phoneVal) !== normalize(confirmPhoneInput.value.trim())) {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = "מספרי הטלפון אינם תואמים";
+          setLoading(false, button, spinner, btnText);
+          return;
+        }
+      }
+
+      let res = await fetch(scriptURL, { 
+        method:'POST', 
+        body: new URLSearchParams({ id: id, phone: phoneVal, action: 'login' }) 
+      });
+      let data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('loggedInUser', JSON.stringify(data));
+        showPersonalArea(data);
+      } else {
+        messageDiv.textContent = data.message;
+      }
+    }
+  } catch (err) {
+    messageDiv.textContent = "שגיאת תקשורת עם השרת";
+  } finally {
+    setLoading(false, button, spinner, btnText);
+  }
+});
+
+function setLoading(isLoading, button, spinner, btnText) {
+  spinner.style.display = isLoading ? 'block' : 'none';
+  btnText.style.visibility = isLoading ? 'hidden' : 'visible';
+  button.disabled = isLoading;
+  if (isLoading) button.classList.add('loadingButton');
+  else button.classList.remove('loadingButton');
+}
+
+function showPersonalArea(user){
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('personalArea').style.display = 'flex';
+  document.getElementById('userName').textContent = user.firstName + " " + user.lastName;
+  
+  let content = `
+    <p><b>טלפון:</b> ${user.phone}</p>
+    <p><b>תוקף תעודה:</b> ${user.expiryDate || 'לא צוין'}</p>
+    <hr style="margin:10px 0; opacity:0.1;">
+    <p>${user.personalArea || ""}</p>
+  `;
+  document.getElementById('userContent').innerHTML = content;
+
+  // בדיקת תאריך תפוגה (3 חודשים)
+  if(user.expiryDate){
+    const parts = user.expiryDate.split('.');
+    if(parts.length === 3){
+      const expiry = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+      const limit = new Date();
+      limit.setMonth(limit.getMonth() + 3);
+      if(expiry <= limit){
+        const alertDiv = document.createElement('div');
+        alertDiv.style.color = '#ff4d4d';
+        alertDiv.style.marginTop = '10px';
+        alertDiv.style.fontWeight = 'bold';
+        alertDiv.textContent = "שים לב: תוקף התעודה יפוג בקרוב, יש לחדשה!";
+        document.getElementById('userContent').appendChild(alertDiv);
+      }
+    }
+  }
+}
+
+document.getElementById('logout').addEventListener('click', function(){
+  localStorage.removeItem('loggedInUser');
+  location.reload();
+});
+
+document.getElementById('goToSecret').addEventListener('click', function(){
+  window.location.href = 'media-index.html';
+});
+
+document.getElementById('viewProfile').addEventListener('click', function(){
+  window.location.href = 'profile.html';
+});
+
+window.addEventListener('load', function(){
+  const user = JSON.parse(localStorage.getItem('loggedInUser'));
+  if(user) showPersonalArea(user);
+});
+</script>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { collection, doc, setDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+let visitorId = localStorage.getItem("visitorId") || crypto.randomUUID();
+localStorage.setItem("visitorId", visitorId);
+
+const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+async function updateLiveVisitor() {
+  try {
+    await setDoc(doc(db, "liveVisitors", visitorId), {
+      name: loggedUser ? (loggedUser.firstName + " " + loggedUser.lastName) : "אורח",
+      phone: loggedUser ? loggedUser.phone : null,
+      page: location.pathname,
+      lastSeen: serverTimestamp()
     });
+  } catch(e) {}
+}
 
-    function setLoading(isLoading) {
-        spinner.style.display = isLoading ? 'block' : 'none';
-        btnText.style.visibility = isLoading ? 'hidden' : 'visible';
-        btn.disabled = isLoading;
-    }
+async function addPageView() {
+  try {
+    await addDoc(collection(db, "pageViews"), {
+      visitorId,
+      page: location.pathname,
+      date: new Date().toISOString().slice(0,10),
+      timestamp: serverTimestamp()
+    });
+  } catch(e) {}
+}
 
-    function showPersonalArea(user) {
-        document.getElementById('loginCard').style.display = 'none';
-        document.getElementById('personalArea').style.display = 'block';
-        document.getElementById('userName').textContent = user.firstName + " " + user.lastName;
-        document.getElementById('userContent').innerHTML = `
-            <p><b>טלפון במערכת:</b> ${user.phone}</p>
-            <p><b>תאריך תוקף:</b> ${user.expiryDate || 'לא הוזן'}</p>
-            <hr style="margin: 10px 0; opacity: 0.2;">
-            <p>${user.personalArea || "אין מידע נוסף להצגה"}</p>
-        `;
-    }
-
-    function logout() {
-        localStorage.removeItem('loggedInUser');
-        location.reload();
-    }
-
-    window.onload = () => {
-        const savedUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (savedUser) showPersonalArea(savedUser);
-    };
+updateLiveVisitor();
+addPageView();
+setInterval(updateLiveVisitor, 30000);
 </script>
 
 </body>
