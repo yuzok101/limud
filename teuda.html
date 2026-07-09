@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <title>התעודה שלי</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
             background: #0d1b2a; 
             display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; font-family: 'Assistant', sans-serif; margin: 0; padding: 20px;
+            min-height: 100vh; font-family: 'Assistant', sans-serif; margin: 0; padding: 20px; 
         }
         
-        /* אנימציית הופעה לתעודה */
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
         .certificate-wrapper { 
             background: white; padding: 10px; border: 8px solid #ffd700; border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeIn 0.8s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeIn 0.5s ease;
             position: relative; width: 800px; max-width: 95%;
         }
 
@@ -24,11 +24,10 @@
 
         .text { 
             position: absolute; font-weight: 700; color: #0d1b2a; font-size: 22px; 
-            /* מחק את ה-border לאחר שתסיים לכוון את המיקומים */
-            border: 1px dashed transparent; 
+            pointer-events: none; /* שלא יפריע בלחיצה על התמונה */
         }
 
-        /* כאן תבצע כיוונונים עדינים לפי הפיקסלים בתמונה שלך */
+        /* כאן תבצע כיוונונים עדינים למיקומים בפיקסלים */
         .name { top: 320px; left: 200px; }
         .id-number { top: 405px; left: 200px; }
         .course { top: 485px; left: 200px; }
@@ -61,10 +60,8 @@
     <button class="btn-png" id="downloadPng">הורד כ-PNG</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <script>
-    // 1. טעינת הנתונים מה-LocalStorage
+    // טעינת הנתונים מה-LocalStorage
     const data = JSON.parse(localStorage.getItem('profileForTeuda'));
     
     if (data) {
@@ -73,7 +70,7 @@
         document.getElementById('course').innerText = data.training || '';
         document.getElementById('date').innerText = data.courseEnd || '';
 
-        // 2. חישוב שעות אוטומטי
+        // חישוב שעות אוטומטי
         let training = (data.training || "").toString();
         let hoursText = "לפי מערכת";
         if (training.includes("מע\"ר 44")) hoursText = "44 שעות";
@@ -81,10 +78,10 @@
         else if (training.includes("חובש")) hoursText = "227 שעות";
         document.getElementById('hours').innerText = hoursText;
     } else {
-        alert("לא נמצאו נתונים, נא לחזור לדף הפרטים.");
+        alert("לא נמצאו נתונים, אנא חזור לדף הפרופיל ונסה שנית.");
     }
 
-    // 3. לוגיקת הורדת PNG
+    // לוגיקת הורדת PNG
     document.getElementById('downloadPng').addEventListener('click', () => {
         const captureElement = document.querySelector("#capture");
         html2canvas(captureElement, { scale: 2 }).then(canvas => {
@@ -95,5 +92,6 @@
         });
     });
 </script>
+
 </body>
 </html>
