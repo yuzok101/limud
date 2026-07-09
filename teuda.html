@@ -11,10 +11,11 @@
             min-height: 100vh; font-family: 'Assistant', sans-serif; margin: 0; padding: 20px;
         }
         
+        /* אנימציית הופעה לתעודה */
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         
         .certificate-wrapper { 
-            background: white; padding: 15px; border: 8px solid #ffd700; border-radius: 10px;
+            background: white; padding: 10px; border: 8px solid #ffd700; border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeIn 0.8s ease;
             position: relative; width: 800px; max-width: 95%;
         }
@@ -23,11 +24,11 @@
 
         .text { 
             position: absolute; font-weight: 700; color: #0d1b2a; font-size: 22px; 
-            /* הסר את ה-border אחרי שתכוון את המיקומים */
+            /* מחק את ה-border לאחר שתסיים לכוון את המיקומים */
             border: 1px dashed transparent; 
         }
 
-        /* כאן תבצע כיוונונים עדינים למיקומים */
+        /* כאן תבצע כיוונונים עדינים לפי הפיקסלים בתמונה שלך */
         .name { top: 320px; left: 200px; }
         .id-number { top: 405px; left: 200px; }
         .course { top: 485px; left: 200px; }
@@ -63,22 +64,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
-    // 1. טעינת הנתונים
+    // 1. טעינת הנתונים מה-LocalStorage
     const data = JSON.parse(localStorage.getItem('profileForTeuda'));
     
     if (data) {
-        document.getElementById('name').innerText = data.firstName + ' ' + data.lastName;
-        document.getElementById('id').innerText = data.id;
-        document.getElementById('course').innerText = data.training;
-        document.getElementById('date').innerText = data.courseEnd;
+        document.getElementById('name').innerText = (data.firstName || '') + ' ' + (data.lastName || '');
+        document.getElementById('id').innerText = data.id || '';
+        document.getElementById('course').innerText = data.training || '';
+        document.getElementById('date').innerText = data.courseEnd || '';
 
-        // 2. חישוב שעות
+        // 2. חישוב שעות אוטומטי
         let training = (data.training || "").toString();
         let hoursText = "לפי מערכת";
         if (training.includes("מע\"ר 44")) hoursText = "44 שעות";
         else if (training.includes("מע\"ר 60")) hoursText = "60 שעות";
         else if (training.includes("חובש")) hoursText = "227 שעות";
         document.getElementById('hours').innerText = hoursText;
+    } else {
+        alert("לא נמצאו נתונים, נא לחזור לדף הפרטים.");
     }
 
     // 3. לוגיקת הורדת PNG
@@ -92,6 +95,5 @@
         });
     });
 </script>
-
 </body>
 </html>
