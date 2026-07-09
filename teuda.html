@@ -2,41 +2,42 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>תעודה</title>
+    <title>התעודה שלי</title>
     <style>
         body { 
-            margin: 0; padding: 0; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; background-color: #f0f0f0; 
+            margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+            background-color: #f0f0f0; 
         }
         
         #certificate {
             position: relative;
-            width: 800px; /* התאם לרוחב התמונה המקורי שלך */
+            width: 800px; /* רוחב התעודה */
+            max-width: 100%;
         }
 
         .cert-img { width: 100%; display: block; }
 
         .text {
             position: absolute;
-            font-family: 'Assistant', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             font-weight: bold;
             color: #0d1b2a;
             font-size: 22px;
+            /* הוספתי מסגרת אדומה כדי שתראה איפה הטקסט נוחת. מחק את השורה הזו כשזה ייראה טוב */
+            border: 1px solid red; 
         }
 
-        /* כאן יש לכוון את המיקומים (top/right) לפי התמונה שלך.
-           ערכים אלו הם דוגמה בלבד.
-        */
-        .name { top: 320px; right: 200px; }
-        .id-number { top: 405px; right: 200px; }
-        .course { top: 485px; right: 200px; }
-        .hours { top: 565px; right: 200px; }
-        .date { top: 600px; right: 200px; }
+        /* כאן תכוון את המיקומים בפיקסלים */
+        .name { top: 320px; left: 200px; }
+        .id-number { top: 405px; left: 200px; }
+        .course { top: 485px; left: 200px; }
+        .hours { top: 565px; left: 200px; }
+        .date { top: 600px; left: 200px; }
 
         @media print {
             button { display: none; }
-            body { background: white; }
+            body { background: white; padding: 0; }
         }
     </style>
 </head>
@@ -44,7 +45,6 @@
 
 <div id="certificate">
     <img src="image.png" class="cert-img">
-    
     <div class="text name" id="name"></div>
     <div class="text id-number" id="id"></div>
     <div class="text course" id="course"></div>
@@ -53,35 +53,28 @@
 </div>
 
 <br>
-<button onclick="window.print()" style="padding:10px 20px; cursor:pointer;">הדפס/שמור כ-PDF</button>
+<button onclick="window.print()" style="padding:15px 30px; font-size:16px; cursor:pointer;">הדפס/שמור כ-PDF</button>
 
 <script>
-    // שליפת הנתונים מה-LocalStorage
     const data = JSON.parse(localStorage.getItem('profileForTeuda'));
     
     if (data) {
-        document.getElementById('name').innerText = data.firstName + ' ' + data.lastName;
-        document.getElementById('id').innerText = data.id;
-        document.getElementById('course').innerText = data.training;
-        document.getElementById('date').innerText = data.courseEnd;
+        document.getElementById('name').innerText = (data.firstName || '') + ' ' + (data.lastName || '');
+        document.getElementById('id').innerText = data.id || '';
+        document.getElementById('course').innerText = data.training || '';
+        document.getElementById('date').innerText = data.courseEnd || '';
 
-        // לוגיקת חישוב שעות לפי ההכשרה
-        let training = data.training || "";
-        let hoursText = "";
-
-        if (training.includes("מע\"ר 44")) {
-            hoursText = "44 שעות";
-        } else if (training.includes("מע\"ר 60")) {
-            hoursText = "60 שעות";
-        } else if (training.includes("חובש") || training.includes("חובש רפואת חירום")) {
-            hoursText = "227 שעות";
-        } else {
-            hoursText = "נתון חסר";
-        }
+        // חישוב שעות
+        let training = (data.training || "").toString();
+        let hoursText = "לפי מערכת";
+        
+        if (training.includes("מע\"ר 44")) hoursText = "44 שעות";
+        else if (training.includes("מע\"ר 60")) hoursText = "60 שעות";
+        else if (training.includes("חובש")) hoursText = "227 שעות";
 
         document.getElementById('hours').innerText = hoursText;
     } else {
-        alert("לא נמצאו נתוני תעודה. אנא חזור לדף הפרטים.");
+        alert("לא נמצאו נתונים, נא לחזור לדף הקודם.");
     }
 </script>
 
