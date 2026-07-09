@@ -3,47 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title>התעודה שלי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { 
-            margin: 0; padding: 20px; 
+            background: #0d1b2a; 
             display: flex; flex-direction: column; align-items: center; 
-            background-color: #f0f0f0; 
+            min-height: 100vh; font-family: 'Assistant', sans-serif; margin: 0; padding: 20px;
         }
         
-        #certificate {
-            position: relative;
-            width: 800px; /* רוחב התעודה */
-            max-width: 100%;
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        
+        .certificate-wrapper { 
+            background: white; padding: 15px; border: 8px solid #ffd700; border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeIn 0.8s ease;
+            position: relative; width: 800px; max-width: 95%;
         }
 
         .cert-img { width: 100%; display: block; }
 
-        .text {
-            position: absolute;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            color: #0d1b2a;
-            font-size: 22px;
-            /* הוספתי מסגרת אדומה כדי שתראה איפה הטקסט נוחת. מחק את השורה הזו כשזה ייראה טוב */
-            border: 1px solid red; 
+        .text { 
+            position: absolute; font-weight: 700; color: #0d1b2a; font-size: 22px; 
+            /* הסר את ה-border אחרי שתכוון את המיקומים */
+            border: 1px dashed transparent; 
         }
 
-        /* כאן תכוון את המיקומים בפיקסלים */
+        /* כאן תבצע כיוונונים עדינים למיקומים */
         .name { top: 320px; left: 200px; }
         .id-number { top: 405px; left: 200px; }
         .course { top: 485px; left: 200px; }
         .hours { top: 565px; left: 200px; }
         .date { top: 600px; left: 200px; }
 
-        @media print {
-            button { display: none; }
-            body { background: white; padding: 0; }
+        .btn-container { margin-top: 30px; display: flex; gap: 20px; }
+        button { 
+            padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; 
+            font-size: 16px; font-weight: bold; transition: 0.3s; color: white;
         }
+        .btn-pdf { background: #d32f2f; }
+        .btn-png { background: #2e7d32; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-<div id="certificate">
+<div class="certificate-wrapper" id="capture">
     <img src="image.png" class="cert-img">
     <div class="text name" id="name"></div>
     <div class="text id-number" id="id"></div>
@@ -52,30 +55,42 @@
     <div class="text date" id="date"></div>
 </div>
 
-<br>
-<button onclick="window.print()" style="padding:15px 30px; font-size:16px; cursor:pointer;">הדפס/שמור כ-PDF</button>
+<div class="btn-container">
+    <button class="btn-pdf" onclick="window.print()">הורד כ-PDF</button>
+    <button class="btn-png" id="downloadPng">הורד כ-PNG</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
+    // 1. טעינת הנתונים
     const data = JSON.parse(localStorage.getItem('profileForTeuda'));
     
     if (data) {
-        document.getElementById('name').innerText = (data.firstName || '') + ' ' + (data.lastName || '');
-        document.getElementById('id').innerText = data.id || '';
-        document.getElementById('course').innerText = data.training || '';
-        document.getElementById('date').innerText = data.courseEnd || '';
+        document.getElementById('name').innerText = data.firstName + ' ' + data.lastName;
+        document.getElementById('id').innerText = data.id;
+        document.getElementById('course').innerText = data.training;
+        document.getElementById('date').innerText = data.courseEnd;
 
-        // חישוב שעות
+        // 2. חישוב שעות
         let training = (data.training || "").toString();
         let hoursText = "לפי מערכת";
-        
         if (training.includes("מע\"ר 44")) hoursText = "44 שעות";
         else if (training.includes("מע\"ר 60")) hoursText = "60 שעות";
         else if (training.includes("חובש")) hoursText = "227 שעות";
-
         document.getElementById('hours').innerText = hoursText;
-    } else {
-        alert("לא נמצאו נתונים, נא לחזור לדף הקודם.");
     }
+
+    // 3. לוגיקת הורדת PNG
+    document.getElementById('downloadPng').addEventListener('click', () => {
+        const captureElement = document.querySelector("#capture");
+        html2canvas(captureElement, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'התעודה_שלי.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    });
 </script>
 
 </body>
