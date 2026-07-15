@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>התעודה שלי - יוזוק מדיק</title>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ספרייה להמרת HTML ל-PDF/תמונה ישירות בדפדפן (לצורך שליחה עתידית למייל) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
   /* עיצוב כללי יוקרתי ואלגנטי */
   body {
@@ -75,33 +79,56 @@
     transform: translateY(-2px);
   }
 
-  /* כפתור הורדה צף (תמיד על המסך) */
-  .floating-download {
+  /* אזור כפתורים צפים (בצד שמאל וימין למטה) */
+  .floating-actions {
     position: fixed;
     bottom: 30px;
+    left: 30px;
     right: 30px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none; /* מאפשר ללחוץ על מה שמתחת לאזור הריק */
     z-index: 100;
-    background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-    color: #0d1b2a;
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+  }
+
+  .floating-btn {
+    pointer-events: auto; /* מחזיר את יכולת הלחיצה לכפתורים עצמם */
     border: none;
-    padding: 16px 32px;
-    font-size: 17px;
+    padding: 16px 28px;
+    font-size: 16px;
     font-weight: 800;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
     gap: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   }
 
-  .floating-download:hover {
+  /* כפתור הורדה צף */
+  .btn-download {
+    background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+    color: #0d1b2a;
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+  }
+  .btn-download:hover {
     transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 15px 30px rgba(255, 215, 0, 0.5);
   }
 
-  /* קונטיינר התעודה - יחס גובה-רוחב מדויק של A4 */
+  /* כפתור שליחה למייל צף */
+  .btn-email {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(0, 114, 255, 0.3);
+  }
+  .btn-email:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 15px 30px rgba(0, 114, 255, 0.5);
+  }
+
+  /* קונטיינר התעודה */
   .certificate-wrapper {
     background: rgba(255, 255, 255, 0.03);
     padding: 15px;
@@ -125,10 +152,10 @@
 
   /* מיקומים אבסולוטיים מדויקים על גבי התעודה */
   
-  /* שם פרטי ומשפחה (הועלה מעט למעלה) */
+  /* שם פרטי ומשפחה */
   .field-name {
     position: absolute;
-    top: 35%;
+    top: 38%; /* החזרתי למיקום האופטימלי לפי העין, ניתן לשחק מעט עם האחוזים במידת הצורך */
     left: 10%;
     right: 10%;
     text-align: center;
@@ -150,7 +177,7 @@
     direction: ltr;
   }
 
-  /* שם הקורס/הכשרה (הורד מעט למטה) */
+  /* שם הקורס/הכשרה */
   .field-training {
     position: absolute;
     top: 53.5%;
@@ -186,33 +213,47 @@
     color: #0d1b2a;
   }
 
-  /* תצוגת הדפסה ושמירת PDF */
+  /* תצוגת הדפסה משופרת - מונעת דפים חלקים לחלוטין */
   @media print {
-    body {
-      background: #fff;
-      padding: 0;
+    html, body {
+      background: #fff !important;
+      color: #000 !important;
+      width: 210mm;
+      height: 297mm;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important; /* מכריח הדפסת צבעי רקע ותמונות רקע */
+      print-color-adjust: exact !important;
     }
-    header, .controls-top, .floating-download {
+    
+    header, .controls-top, .floating-actions {
       display: none !important;
     }
+    
     .certificate-wrapper {
-      padding: 0;
-      border: none;
-      box-shadow: none;
-      background: transparent;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      margin: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
     }
+    
     .certificate-container {
-      box-shadow: none;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 0;
-      page-break-after: avoid;
-      page-break-inside: avoid;
+      box-shadow: none !important;
+      margin: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      border-radius: 0 !important;
+      display: block !important;
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
     }
+    
     @page {
       size: A4 portrait;
-      margin: 0;
+      margin: 0 !important;
     }
   }
 </style>
@@ -233,14 +274,23 @@
     </button>
   </div>
 
-  <!-- כפתור הורדה צף ומעוצב תמיד על המסך -->
-  <button class="floating-download" onclick="window.print()">
-    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-    שמור והורד תעודה (PDF)
-  </button>
+  <!-- כפתורי פעולה צפים (תמיד זמינים על המסך) -->
+  <div class="floating-actions">
+    <!-- כפתור שליחה למייל -->
+    <button class="floating-btn btn-email" onclick="sendToEmail()">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/></svg>
+      שלח למייל שלי
+    </button>
+
+    <!-- כפתור שמירה והורדה -->
+    <button class="floating-btn btn-download" onclick="downloadPDF()">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+      הורד תעודה (PDF)
+    </button>
+  </div>
 
   <!-- תצוגת התעודה -->
-  <div class="certificate-wrapper">
+  <div class="certificate-wrapper" id="printArea">
     <div class="certificate-container">
       <div class="field-name" id="certName">טוען שם...</div>
       <div class="field-id" id="certId">טוען ת.ז...</div>
@@ -251,6 +301,7 @@
   </div>
 
 <script>
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbz8aZ1RIeeeCjMXHVjEpd4gFYl3xVzwdTwp1YSwT8Np0KxhtdY484uriBdj_XxDQvMe/exec';
   const profileData = JSON.parse(localStorage.getItem('profileForTeuda'));
 
   if (!profileData) {
@@ -263,7 +314,7 @@
     document.getElementById('certTraining').textContent = profileData.training;
     document.getElementById('certDate').textContent = profileData.courseEnd;
 
-    // חישוב היקף השעות על פי הגדרות קשיחות ובדיקה דינמית:
+    // חישוב היקף השעות על פי התנאים שהגדרת:
     const trainingText = (profileData.training || "").trim();
     let hoursValue = "";
 
@@ -274,7 +325,7 @@
     } else if (trainingText.includes('חובש')) {
       hoursValue = "207 שעות";
     } else {
-      // חילוץ גיבוי במקרה שיש מספרים אחרים בטקסט (למשל: "מע"ר 22")
+      // ברירת מחדל חכמה: מחלץ מספר מהמחרוזת אם הוא קיים
       const matchedNumber = trainingText.match(/\d+/);
       if (matchedNumber) {
         hoursValue = matchedNumber[0] + " שעות";
@@ -284,6 +335,68 @@
     }
 
     document.getElementById('certHours').textContent = hoursValue;
+  }
+
+  // פונקציית הורדה מקומית בטוחה המשתמשת במנוע ההדפסה של הדפדפן (מותאם כעת ללא דפים לבנים)
+  function downloadPDF() {
+    window.print();
+  }
+
+  // פונקציה אופציונלית לשליחת התעודה ישירות למייל של המשתמש
+  async function sendToEmail() {
+    if (!profileData.email) {
+      alert("לא מוגדרת כתובת מייל עבור פרופיל זה.");
+      return;
+    }
+
+    const confirmSend = confirm(`האם לשלוח את התעודה לכתובת המייל: ${profileData.email}?`);
+    if (!confirmSend) return;
+
+    // הצגת חיווי טעינה קטן
+    const originalBtnText = document.querySelector('.btn-email').innerHTML;
+    document.querySelector('.btn-email').textContent = "שולח... אנא המתן";
+    document.querySelector('.btn-email').style.opacity = "0.7";
+
+    try {
+      const element = document.getElementById('printArea');
+      const opt = {
+        margin:       0,
+        filename:     `Teuda_${profileData.id}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // יצירת קובץ ה-PDF בדפדפן כ-Base64
+      const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+      const base64Data = pdfBase64.split(',')[1]; // חילוץ הנתונים הנקיים
+
+      // שליחת ה-PDF ל-Google Apps Script שלך
+      const response = await fetch(scriptURL, {
+        method: 'POST',
+        body: new URLSearchParams({
+          action: 'sendCertificateEmail',
+          email: profileData.email,
+          fullName: `${profileData.firstName} ${profileData.lastName}`,
+          pdfData: base64Data,
+          fileName: `Teuda_${profileData.id}.pdf`
+        })
+      });
+
+      const result = await response.json();
+      if (result.status === 'success' || response.ok) {
+        alert("התעודה נשלחה למייל שלך בהצלחה! ✉️");
+      } else {
+        alert("הייתה בעיה בשליחת המייל מהשרת.");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("שגיאה בתהליך השליחה למייל.");
+    } finally {
+      // החזרת עיצוב הכפתור
+      document.querySelector('.btn-email').innerHTML = originalBtnText;
+      document.querySelector('.btn-email').style.opacity = "1";
+    }
   }
 
   function goBack() {
