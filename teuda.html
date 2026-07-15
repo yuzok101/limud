@@ -5,82 +5,139 @@
 <title>התעודה שלי - יוזוק מדיק</title>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* הגדרות כלליות */
+  /* עיצוב כללי יוקרתי ואלגנטי */
   body {
     font-family: 'Assistant', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5;
+    background: radial-gradient(circle at top, #1a237e 0%, #0d1b2a 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    color: #fff;
+    padding-bottom: 50px;
   }
 
-  /* כפתורי שליטה בראש הדף */
-  .controls {
-    margin: 20px 0;
+  /* כותרת עליונה דקורטיבית */
+  header {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    letter-spacing: 1px;
+    background: linear-gradient(45deg, #ffd700, #ffa500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  header p {
+    font-size: 16px;
+    color: #e0e0e0;
+    margin: 0;
+  }
+
+  /* כפתורי שליטה עליונים */
+  .controls-top {
     display: flex;
     gap: 15px;
+    margin-bottom: 25px;
     z-index: 10;
   }
   
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: 600;
+  .btn {
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 700;
     border: none;
-    border-radius: 8px;
+    border-radius: 30px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Assistant', sans-serif;
-  }
-
-  .btn-print {
-    background-color: #1a237e;
-    color: #fff;
-  }
-  .btn-print:hover {
-    background-color: #0d1b75;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
 
   .btn-back {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   .btn-back:hover {
-    background-color: #bdbdbd;
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
   }
 
-  /* קונטיינר התעודה - שומר על פרופורציות של דף A4 עומד */
+  /* כפתור הורדה צף (תמיד על המסך) */
+  .floating-download {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+    color: #0d1b2a;
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    border: none;
+    padding: 16px 32px;
+    font-size: 17px;
+    font-weight: 800;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .floating-download:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6);
+  }
+
+  /* קונטיינר התעודה - יחס גובה-רוחב מדויק של A4 */
+  .certificate-wrapper {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+
   .certificate-container {
     position: relative;
     width: 210mm;
     height: 297mm;
     background-image: url('image.png');
-    background-size: cover;
+    background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     box-sizing: border-box;
-    margin-bottom: 40px;
+    border-radius: 12px;
+    overflow: hidden;
   }
 
-  /* מיקומים אבסולוטיים של הטקסטים על גבי התמונה */
+  /* מיקומים אבסולוטיים מדויקים על גבי התעודה */
   
-  /* שם פרטי ומשפחה */
+  /* שם פרטי ומשפחה (הועלה מעט למעלה) */
   .field-name {
     position: absolute;
-    top: 38.5%;
+    top: 36.5%;
     left: 10%;
     right: 10%;
     text-align: center;
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 34px;
+    font-weight: 800;
     color: #1a237e;
   }
 
-  /* מספר זהות - מיושר לשמאל לקו הקיים בתעודה */
+  /* מספר זהות */
   .field-id {
     position: absolute;
     top: 46%;
@@ -90,13 +147,13 @@
     font-size: 24px;
     font-weight: 600;
     color: #0d1b2a;
-    direction: ltr; /* מונע היפוך מספרים */
+    direction: ltr;
   }
 
-  /* שם הקורס (הכשרה) */
+  /* שם הקורס/הכשרה (הורד מעט למטה) */
   .field-training {
     position: absolute;
-    top: 51.5%;
+    top: 53.5%;
     left: 10%;
     right: 10%;
     text-align: center;
@@ -105,7 +162,7 @@
     color: #1a237e;
   }
 
-  /* היקף שעות - הערך מוכנס מעט שמאלה מהכותרת "היקף שעות:" */
+  /* היקף שעות */
   .field-hours {
     position: absolute;
     top: 57.5%;
@@ -117,7 +174,7 @@
     color: #0d1b2a;
   }
 
-  /* תאריך הנפקה (תאריך סיום הקורס) */
+  /* תאריך הנפקה */
   .field-date {
     position: absolute;
     top: 62.3%;
@@ -129,19 +186,27 @@
     color: #0d1b2a;
   }
 
-  /* התאמה מיוחדת להדפסה (מסתיר כפתורים ומבטל שוליים חיצוניים) */
+  /* תצוגת הדפסה ושמירת PDF */
   @media print {
     body {
-      background-color: #fff;
+      background: #fff;
+      padding: 0;
     }
-    .controls {
-      display: none;
+    header, .controls-top, .floating-download {
+      display: none !important;
+    }
+    .certificate-wrapper {
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      background: transparent;
     }
     .certificate-container {
       box-shadow: none;
       margin: 0;
       width: 100%;
       height: 100%;
+      border-radius: 0;
       page-break-after: avoid;
       page-break-inside: avoid;
     }
@@ -154,47 +219,74 @@
 </head>
 <body>
 
-  <!-- כפתורי שליטה עליונים -->
-  <div class="controls">
-    <button class="btn-print" onclick="window.print()">הדפסה / שמירה כ-PDF</button>
-    <button class="btn-back" onclick="goBack()">חזרה לפרופיל</button>
+  <!-- כותרת האתר -->
+  <header>
+    <h1>פורטל התעודות הדיגיטלי</h1>
+    <p>יוזוק מדיק - לדעת, להציל חיים</p>
+  </header>
+
+  <!-- כפתור חזרה עליון -->
+  <div class="controls-top">
+    <button class="btn btn-back" onclick="goBack()">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transform: scaleX(-1);"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
+      חזרה לאזור האישי
+    </button>
   </div>
 
-  <!-- קונטיינר התעודה עם השדות המולבשים -->
-  <div class="certificate-container">
-    <div class="field-name" id="certName">טוען שם...</div>
-    <div class="field-id" id="certId">טוען ת.ז...</div>
-    <div class="field-training" id="certTraining">טוען קורס...</div>
-    <div class="field-hours" id="certHours">שעות</div> <!-- מילוי אוטומטי ייכתב פה (למשל: 44 שעות) -->
-    <div class="field-date" id="certDate">טוען תאריך...</div>
+  <!-- כפתור הורדה צף ומעוצב תמיד על המסך -->
+  <button class="floating-download" onclick="window.print()">
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+    שמור והורד תעודה (PDF)
+  </button>
+
+  <!-- תצוגת התעודה -->
+  <div class="certificate-wrapper">
+    <div class="certificate-container">
+      <div class="field-name" id="certName">טוען שם...</div>
+      <div class="field-id" id="certId">טוען ת.ז...</div>
+      <div class="field-training" id="certTraining">טוען קורס...</div>
+      <div class="field-hours" id="certHours">שעות</div>
+      <div class="field-date" id="certDate">טוען תאריך...</div>
+    </div>
   </div>
 
 <script>
-  // קבלת הנתונים שהעברנו דרך ה-localStorage בדף הקודם
   const profileData = JSON.parse(localStorage.getItem('profileForTeuda'));
 
   if (!profileData) {
     alert("לא נמצאו נתוני תעודה. אנא היכנס דרך דף הפרופיל.");
-    window.location.href = "profile.html"; // שנה לשם דף הפרופיל שלך אם הוא שונה
+    window.location.href = "login1.html"; 
   } else {
-    // השתלת הנתונים במיקומים המדויקים על התעודה
+    // מילוי הנתונים
     document.getElementById('certName').textContent = `${profileData.firstName} ${profileData.lastName}`;
     document.getElementById('certId').textContent = profileData.id;
     document.getElementById('certTraining').textContent = profileData.training;
     document.getElementById('certDate').textContent = profileData.courseEnd;
 
-    // קביעת היקף השעות באופן דינמי לפי סוג הקורס (דוגמה) או ערך ברירת מחדל
-    let hours = "44 שעות"; // ברירת מחדל
-    if (profileData.training && profileData.training.includes("רענון")) {
-      hours = "8 שעות";
-    } else if (profileData.training && profileData.training.includes("מגיש עזרה ראשונה")) {
-      hours = "44 שעות";
+    // חישוב היקף השעות על פי הגדרות קשיחות ובדיקה דינמית:
+    const trainingText = (profileData.training || "").trim();
+    let hoursValue = "";
+
+    if (trainingText.includes('מע"ר 44')) {
+      hoursValue = "44 שעות";
+    } else if (trainingText.includes('מע"ר 60')) {
+      hoursValue = "60 שעות";
+    } else if (trainingText.includes('חובש')) {
+      hoursValue = "207 שעות";
+    } else {
+      // חילוץ גיבוי במקרה שיש מספרים אחרים בטקסט (למשל: "מע"ר 22")
+      const matchedNumber = trainingText.match(/\d+/);
+      if (matchedNumber) {
+        hoursValue = matchedNumber[0] + " שעות";
+      } else {
+        hoursValue = "-- שעות";
+      }
     }
-    document.getElementById('certHours').textContent = hours;
+
+    document.getElementById('certHours').textContent = hoursValue;
   }
 
   function goBack() {
-    // חזרה לדף הפרופיל
     window.history.back();
   }
 </script>
