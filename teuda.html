@@ -155,7 +155,7 @@
   /* שם פרטי ומשפחה */
   .field-name {
     position: absolute;
-    top: 35%; /* החזרתי למיקום האופטימלי לפי העין, ניתן לשחק מעט עם האחוזים במידת הצורך */
+    top: 35%;
     left: 10%;
     right: 10%;
     text-align: center;
@@ -222,7 +222,7 @@
       height: 297mm;
       margin: 0 !important;
       padding: 0 !important;
-      -webkit-print-color-adjust: exact !important; /* מכריח הדפסת צבעי רקע ותמונות רקע */
+      -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
     
@@ -314,7 +314,7 @@
     document.getElementById('certTraining').textContent = profileData.training;
     document.getElementById('certDate').textContent = profileData.courseEnd;
 
-    // חישוב היקף השעות על פי התנאים שהגדרת:
+    // חישוב היקף השעות על פי התנאים שהגדרת
     const trainingText = (profileData.training || "").trim();
     let hoursValue = "";
 
@@ -325,7 +325,6 @@
     } else if (trainingText.includes('חובש')) {
       hoursValue = "207 שעות";
     } else {
-      // ברירת מחדל חכמה: מחלץ מספר מהמחרוזת אם הוא קיים
       const matchedNumber = trainingText.match(/\d+/);
       if (matchedNumber) {
         hoursValue = matchedNumber[0] + " שעות";
@@ -337,24 +336,22 @@
     document.getElementById('certHours').textContent = hoursValue;
   }
 
-  // פונקציית הורדה מקומית בטוחה המשתמשת במנוע ההדפסה של הדפדפן (מותאם כעת ללא דפים לבנים)
   function downloadPDF() {
     window.print();
   }
 
-  // פונקציה אופציונלית לשליחת התעודה ישירות למייל של המשתמש
   async function sendToEmail() {
-    if (!profileData.email) {
-      alert("לא מוגדרת כתובת מייל עבור פרופיל זה.");
+    if (!profileData || !profileData.email) {
+      alert("לא מוגדרת כתובת מייל עבור פרופיל זה במערכת.");
       return;
     }
 
     const confirmSend = confirm(`האם לשלוח את התעודה לכתובת המייל: ${profileData.email}?`);
     if (!confirmSend) return;
 
-    // הצגת חיווי טעינה קטן
+    // הצגת חיווי טעינה
     const originalBtnText = document.querySelector('.btn-email').innerHTML;
-    document.querySelector('.btn-email').textContent = "שולח... אנא המתן";
+    document.querySelector('.btn-email').textContent = "מייצר PDF...";
     document.querySelector('.btn-email').style.opacity = "0.7";
 
     try {
@@ -362,38 +359,44 @@
       const opt = {
         margin:       0,
         filename:     `Teuda_${profileData.id}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        image:        { type: 'jpeg', quality: 0.95 },
+        html2canvas:  { scale: 1.5, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // יצירת קובץ ה-PDF בדפדפן כ-Base64
+      // יצירת ה-PDF בדפדפן כ-Base64
       const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-      const base64Data = pdfBase64.split(',')[1]; // חילוץ הנתונים הנקיים
+      const base64Data = pdfBase64.split(',')[1]; 
 
-      // שליחת ה-PDF ל-Google Apps Script שלך
+      document.querySelector('.btn-email').textContent = "שולח למייל...";
+
+      // שימוש ב-URLSearchParams לשליחת הטופס בצורה אמינה ל-Google Web App
+      const formData = new URLSearchParams();
+      formData.append('action', 'sendCertificateEmail');
+      formData.append('email', profileData.email.trim());
+      formData.append('fullName', `${profileData.firstName} ${profileData.lastName}`);
+      formData.append('pdfData', base64Data);
+      formData.append('fileName', `Teuda_${profileData.id}.pdf`);
+
       const response = await fetch(scriptURL, {
         method: 'POST',
-        body: new URLSearchParams({
-          action: 'sendCertificateEmail',
-          email: profileData.email,
-          fullName: `${profileData.firstName} ${profileData.lastName}`,
-          pdfData: base64Data,
-          fileName: `Teuda_${profileData.id}.pdf`
-        })
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData.toString()
       });
 
       const result = await response.json();
-      if (result.status === 'success' || response.ok) {
-        alert("התעודה נשלחה למייל שלך בהצלחה! ✉️");
+
+      if (result.success === true) {
+        alert("התעודה נשלחה למייל שלך בהצלחה! ✉️ (בדוק גם בתיקיית הספאם)");
       } else {
-        alert("הייתה בעיה בשליחת המייל מהשרת.");
+        alert("שגיאה מהשרת: " + (result.message || "שגיאה לא ידועה"));
       }
     } catch (error) {
       console.error("Error sending email:", error);
-      alert("שגיאה בתהליך השליחה למייל.");
+      alert("שגיאה בתקשורת עם השרת: " + error.message);
     } finally {
-      // החזרת עיצוב הכפתור
       document.querySelector('.btn-email').innerHTML = originalBtnText;
       document.querySelector('.btn-email').style.opacity = "1";
     }
