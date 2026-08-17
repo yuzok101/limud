@@ -279,10 +279,6 @@
     background: #071522;
   }
 
-  /* =========================================================
-     תעודה
-     ========================================================= */
-
   .certificate-container {
     position: relative;
     width: 210mm;
@@ -291,9 +287,6 @@
 
     background-image: url('certificate-template.jpg');
 
-    /*
-      הרקע מעט מוגדל ומוזז למעלה כדי למנוע פס לבן
-    */
     background-size: 100.5% 100.5%;
     background-position: center -1.2mm;
     background-repeat: no-repeat;
@@ -303,15 +296,6 @@
     page-break-after: always;
     overflow: hidden;
   }
-
-  /*
-    =========================================================
-    שם פרטי + שם משפחה
-    =========================================================
-
-    הועלה מעט למעלה כדי להיות ממש מעל הקו.
-    בנוסף יש רווח גדול וברור יותר בין השם הפרטי למשפחה.
-  */
 
   .field-name {
     position: absolute;
@@ -345,15 +329,6 @@
     display: inline-block;
   }
 
-  /*
-    =========================================================
-    מספר תעודת זהות
-    =========================================================
-
-    המספר עולה מעט למעלה ונצמד לקצה השמאלי
-    של השורה.
-  */
-
   .field-id {
     position: absolute;
 
@@ -375,15 +350,6 @@
 
     white-space: nowrap;
   }
-
-  /*
-    =========================================================
-    הכשרה
-    =========================================================
-
-    עולה למעלה כדי להיות ממש מתחת ל:
-    "עבר/ה בהצלחה קורס:"
-  */
 
   .field-course {
     position: absolute;
@@ -407,14 +373,6 @@
     white-space: nowrap;
   }
 
-  /*
-    =========================================================
-    היקף שעות
-    =========================================================
-
-    עולה ומוצמד לקצה השמאלי של השורה.
-  */
-
   .field-hours {
     position: absolute;
 
@@ -436,14 +394,6 @@
 
     white-space: nowrap;
   }
-
-  /*
-    =========================================================
-    תאריך הנפקה
-    =========================================================
-
-    עולה ומוצמד לקצה השמאלי של השורה.
-  */
 
   .field-date {
     position: absolute;
@@ -566,6 +516,7 @@
       </div>
 
       <div class="top-actions">
+
         <button class="btn btn-dark" onclick="loadData()">
           🔄 רענן נתונים
         </button>
@@ -573,6 +524,7 @@
         <button class="btn btn-dark" onclick="clearSelection()">
           ✕ נקה בחירה
         </button>
+
       </div>
 
     </div>
@@ -671,10 +623,12 @@
       </div>
 
       <div class="progress-bar-bg">
+
         <div
           id="progressBarFill"
           class="progress-bar-fill"
         ></div>
+
       </div>
 
     </div>
@@ -710,12 +664,15 @@
         <tbody id="certificatesTableBody">
 
           <tr>
+
             <td
               colspan="7"
               style="text-align:center;"
             >
               טוען נתונים...
+
             </td>
+
           </tr>
 
         </tbody>
@@ -728,9 +685,7 @@
 
 </div>
 
-
 <div id="certificatesContainer"></div>
-
 
 <script>
 
@@ -1125,13 +1080,11 @@
       String(trainingText || "").trim();
 
 
-    // חובש = תמיד 207 שעות
     if (/חובש/i.test(text)) {
       return "207 שעות";
     }
 
 
-    // מע"ר
     if (/מע[״"'׳]?ר/.test(text)) {
 
       const decimal =
@@ -1160,7 +1113,6 @@
     }
 
 
-    // כל הכשרה אחרת
     const matched =
       text.match(
         /\d+(?:[.,]\d+)?/
@@ -1183,7 +1135,6 @@
     }
 
 
-    // תמיכה גם בטקסט "שעה וחצי"
     if (/שעה\s*וחצי/.test(text)) {
       return "שעה וחצי";
     }
@@ -1222,7 +1173,6 @@
       String(raw).trim();
 
 
-    // תאריך ישראלי
     if (
       /^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/
         .test(value)
@@ -1236,7 +1186,6 @@
     }
 
 
-    // תאריך ISO / Google Sheets
     const d =
       new Date(value);
 
@@ -2030,137 +1979,46 @@
     =========================================================
     POST ל-Google Apps Script
     =========================================================
+
+    מותאם ל-Safari / iPhone:
+    במקום iframe נסתר משתמשים ב-fetch עם no-cors.
   */
 
   function postToAppsScript(formData) {
 
-    return new Promise(
-      (resolve) => {
+    return fetch(
+      scriptURL,
+      {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      }
+    )
+    .then(
+      () => {
 
-        const iframeName =
-          'gasPostFrame_' +
-          Date.now();
-
-
-        const iframe =
-          document.createElement(
-            'iframe'
-          );
-
-
-        iframe.name =
-          iframeName;
-
-
-        iframe.style.display =
-          'none';
-
-
-        document.body.appendChild(
-          iframe
-        );
-
-
-        const form =
-          document.createElement(
-            'form'
-          );
-
-
-        form.method =
-          'POST';
-
-
-        form.action =
-          scriptURL;
-
-
-        form.target =
-          iframeName;
-
-
-        form.style.display =
-          'none';
-
-
-        for (
-          const [key, value]
-          of formData.entries()
-        ) {
-
-          const input =
-            document.createElement(
-              'input'
-            );
-
-
-          input.type =
-            'hidden';
-
-
-          input.name =
-            key;
-
-
-          input.value =
-            value;
-
-
-          form.appendChild(
-            input
-          );
-
-        }
-
-
-        document.body.appendChild(
-          form
-        );
-
-
-        iframe.onload =
-          function() {
+        return new Promise(
+          resolve => {
 
             setTimeout(
-              () => {
-
-                form.remove();
-                iframe.remove();
-
-                resolve();
-
-              },
-              300
+              resolve,
+              500
             );
 
-          };
-
-
-        form.submit();
-
-
-        setTimeout(
-          () => {
-
-            if (
-              document.body.contains(form)
-            ) {
-              form.remove();
-            }
-
-
-            if (
-              document.body.contains(iframe)
-            ) {
-              iframe.remove();
-            }
-
-
-            resolve();
-
-          },
-          15000
+          }
         );
+
+      }
+    )
+    .catch(
+      error => {
+
+        console.error(
+          'Google Apps Script POST error:',
+          error
+        );
+
+        throw error;
 
       }
     );
