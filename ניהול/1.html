@@ -102,38 +102,90 @@
   }
 
   .certificate-container {
-    position:relative; width:210mm; height:297mm; flex:0 0 auto;
+    position:relative;
+    width:210mm;
+    height:297mm;
+    flex:0 0 auto;
     background-image:url('certificate-template.jpg');
-    background-size:100% 100%; background-position:center; background-repeat:no-repeat;
-    background-color:#fff; box-sizing:border-box; page-break-after:always;
+    /* הזזה עדינה של הרקע למעלה + הגדלה זעירה כדי שלא יישאר פס לבן */
+    background-size:100.5% 100.5%;
+    background-position:center -1.2mm;
+    background-repeat:no-repeat;
+    background-color:#fff;
+    box-sizing:border-box;
+    page-break-after:always;
     overflow:hidden;
   }
 
-  /* טקסט שמונח מעל התמונה */
+  /* הטקסט מונח בדיוק באזורים הריקים של התבנית */
   .field-name {
-    position:absolute; top:48.0%; left:18%; right:18%;
-    text-align:center; font-size:31px; font-weight:800; color:#172c72;
-    line-height:1.05; direction:rtl;
+    position:absolute;
+    top:37.0%;
+    left:14%;
+    right:14%;
+    text-align:center;
+    font-size:31px;
+    font-weight:800;
+    color:#172c72;
+    line-height:1.05;
+    direction:rtl;
+    white-space:nowrap;
   }
+
   .field-id {
-    position:absolute; top:63.5%; left:26%; right:19%;
-    text-align:center; font-size:22px; font-weight:700; color:#1d2d54;
-    direction:ltr; line-height:1;
+    position:absolute;
+    top:48.0%;
+    left:20%;
+    right:20%;
+    text-align:center;
+    font-size:22px;
+    font-weight:700;
+    color:#1d2d54;
+    direction:ltr;
+    line-height:1;
+    white-space:nowrap;
   }
+
   .field-course {
-    position:absolute; top:74.0%; left:16%; right:16%;
-    text-align:center; font-size:26px; font-weight:800; color:#172c72;
-    line-height:1.05; direction:rtl;
+    position:absolute;
+    top:56.2%;
+    left:16%;
+    right:16%;
+    text-align:center;
+    font-size:27px;
+    font-weight:800;
+    color:#172c72;
+    line-height:1.05;
+    direction:rtl;
+    white-space:nowrap;
   }
+
   .field-hours {
-    position:absolute; top:84.0%; left:31%; right:15%;
-    text-align:center; font-size:21px; font-weight:700; color:#1d2d54;
-    direction:rtl; line-height:1;
+    position:absolute;
+    top:67.4%;
+    left:20%;
+    right:20%;
+    text-align:center;
+    font-size:21px;
+    font-weight:700;
+    color:#1d2d54;
+    direction:rtl;
+    line-height:1;
+    white-space:nowrap;
   }
+
   .field-date {
-    position:absolute; top:88.8%; left:31%; right:15%;
-    text-align:center; font-size:21px; font-weight:700; color:#1d2d54;
-    direction:ltr; line-height:1;
+    position:absolute;
+    top:73.1%;
+    left:20%;
+    right:20%;
+    text-align:center;
+    font-size:21px;
+    font-weight:700;
+    color:#1d2d54;
+    direction:ltr;
+    line-height:1;
+    white-space:nowrap;
   }
 
   .certificate-label {
@@ -368,12 +420,72 @@
 
 
   function calculateHours(trainingText) {
-    const text = (trainingText || "").trim();
-    if (text.includes('מע"ר 44')) return "44 שעות";
-    if (text.includes('מע"ר 60')) return "60 שעות";
-    if (text.includes('חובש')) return "207 שעות";
-    const matched = text.match(/\d+/);
-    return matched ? matched[0] + " שעות" : "-- שעות";
+    const text = String(trainingText || "").trim();
+
+    // חובש = תמיד 207 שעות
+    if (/חובש/i.test(text)) return "207 שעות";
+
+    // מע"ר = לקחת את מספר השעות שמופיע בהכשרה.
+    // אם אין מספר, משאירים "שעה" כפי שמוגדר בדרישת התעודה.
+    if (/מע[״"'׳]?ר/.test(text)) {
+      const decimal = text.match(/\d+(?:[.,]\d+)?/);
+      if (decimal) {
+        const n = decimal[0].replace(',', '.');
+        return n === "1" ? "שעה" : `${n} שעות`;
+      }
+      return "שעה";
+    }
+
+    // כל הכשרה אחרת: להשתמש במספר שמופיע בטקסט.
+    const matched = text.match(/\d+(?:[.,]\d+)?/);
+    if (matched) {
+      const n = matched[0].replace(',', '.');
+      return n === "1" ? "שעה" : `${n} שעות`;
+    }
+
+    // תמיכה גם בטקסט "שעה וחצי"
+    if (/שעה\s*וחצי/.test(text)) return "שעה וחצי";
+
+    return "-- שעות";
+  }
+
+  // עמודה H / תאריך הנפקה.
+  // ה-API עשוי להחזיר את העמודה בשם H, h, columnH או בשם סמנטי.
+  function getIssueDate(cert) {
+    const raw =
+      cert.H ??
+      cert.h ??
+      cert.columnH ??
+      cert.issueDate ??
+      cert.dateIssued ??
+      cert.issuedDate ??
+      cert.courseEnd ??
+      "";
+
+    if (!raw) return "";
+
+    const value = String(raw).trim();
+
+    // אם כבר הגיע תאריך בפורמט ישראלי – משאירים אותו.
+    if (/^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/.test(value)) {
+      return value.replace(/-/g, ".");
+    }
+
+    // ניסיון לפרמט תאריך ISO / תאריך שנשלח מ-Google Sheets.
+    const d = new Date(value);
+    if (!Number.isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}.${month}.${year}`;
+    }
+
+    return value;
+  }
+
+  function getCertificateTraining(cert) {
+    // בשורת "עבר/ה בהצלחה קורס:" מוצגת ההכשרה, לא שם הקורס הפנימי.
+    return cert.training || "";
   }
 
   function getSelectedIndexes() {
@@ -396,15 +508,17 @@
     selectedIndexes.forEach(idx => {
       const cert = filteredCertificates[idx];
       const hours = calculateHours(cert.training);
+      const training = getCertificateTraining(cert);
+      const issueDate = getIssueDate(cert);
 
       const certDiv = document.createElement('div');
       certDiv.className = 'certificate-container';
       certDiv.innerHTML = `
         <div class="field-name">${escapeHtml(cert.firstName)} ${escapeHtml(cert.lastName)}</div>
         <div class="field-id">${escapeHtml(cert.id)}</div>
-        <div class="field-course">${escapeHtml(cert.courseName || cert.training || '')}</div>
+        <div class="field-course">${escapeHtml(training)}</div>
         <div class="field-hours">${escapeHtml(hours)}</div>
-        <div class="field-date">${escapeHtml(cert.courseEnd)}</div>
+        <div class="field-date">${escapeHtml(issueDate)}</div>
       `;
       container.appendChild(certDiv);
     });
@@ -414,14 +528,17 @@
 
   function buildCertificateElement(cert) {
     const hours = calculateHours(cert.training);
+    const training = getCertificateTraining(cert);
+    const issueDate = getIssueDate(cert);
+
     const certDiv = document.createElement('div');
     certDiv.className = 'certificate-container';
     certDiv.innerHTML = `
       <div class="field-name">${escapeHtml(cert.firstName)} ${escapeHtml(cert.lastName)}</div>
       <div class="field-id">${escapeHtml(cert.id)}</div>
-      <div class="field-course">${escapeHtml(cert.courseName || cert.training || '')}</div>
+      <div class="field-course">${escapeHtml(training)}</div>
       <div class="field-hours">${escapeHtml(hours)}</div>
-      <div class="field-date">${escapeHtml(cert.courseEnd)}</div>
+      <div class="field-date">${escapeHtml(issueDate)}</div>
     `;
     return certDiv;
   }
