@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ניהול והנפקת תעודות מרוכזת - יוזוק מדיק</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Assistant', sans-serif; }
+  body {
+    background: #0d1b2a;
+    color: #fff;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .admin-panel {
+    max-width: 1100px;
+    margin: 0 auto 30px auto;
+    background: rgba(17, 47, 79, 0.95);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  h1 { text-align: center; color: #ffd700; margin-bottom: 20px; font-weight: 800; }
+
+  /* בקרות חיפוש וסינון */
+  .controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1px solid #00bfff;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .btn {
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .btn-primary { background: #00bfff; color: #fff; }
+  .btn-primary:hover { background: #0099cc; }
+  .btn-success { background: #28a745; color: #fff; }
+  .btn-success:hover { background: #218838; }
+
+  /* טבלת נתונים */
+  .table-container {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  table { width: 100%; border-collapse: collapse; text-align: right; }
+  th, td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 15px; }
+  th { background: #112f4f; color: #00bfff; position: sticky; top: 0; }
+  tr:hover { background: rgba(255,255,255,0.05); }
+
+  /* קונטיינר להנפקת תעודות מרוכזת */
+  #certificatesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    margin-top: 30px;
+  }
+
+  /* תבנית התעודה - תואמת בדיוק למפרט הקיים */
+  .certificate-container {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    background-image: url('image.jpg'); /* נתיב לתמונת התעודה */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    background-color: #fff;
+    page-break-after: always;
+  }
+
+  .field-name {
+    position: absolute;
+    top: 35%;
+    left: 10%;
+    right: 10%;
+    text-align: center;
+    font-size: 34px;
+    font-weight: 800;
+    color: #1a237e;
+  }
+
+  .field-id {
+    position: absolute;
+    top: 46%;
+    left: 20%;
+    right: 38%;
+    text-align: left;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0d1b2a;
+    direction: ltr;
+  }
+
+  .field-training {
+    position: absolute;
+    top: 53.5%;
+    left: 10%;
+    right: 10%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a237e;
+  }
+
+  .field-hours {
+    position: absolute;
+    top: 57.5%;
+    left: 20%;
+    right: 37%;
+    text-align: left;
+    font-size: 22px;
+    font-weight: 600;
+    color: #0d1b2a;
+  }
+
+  .field-date {
+    position: absolute;
+    top: 62.3%;
+    left: 20%;
+    right: 37%;
+    text-align: left;
+    font-size: 22px;
+    font-weight: 600;
+    color: #0d1b2a;
+  }
+
+  /* הגדרות הדפסה מרוכזת */
+  @media print {
+    body { background: #fff !important; padding: 0 !important; }
+    .admin-panel, header, .controls { display: none !important; }
+    #certificatesContainer { margin: 0 !important; gap: 0 !important; }
+    .certificate-container {
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      page-break-after: always !important;
+    }
+    @page { size: A4 portrait; margin: 0 !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-panel">
+  <h1>פאנל מנהל - הנפקה וחיפוש תעודות מרוכזת</h1>
+
+  <div class="controls">
+    <input type="text" id="searchInput" class="search-input" placeholder="חפש לפי ת.ז, שם קורס, הכשרה או שם מלא..." oninput="filterCertificates()">
+    <button class="btn btn-primary" onclick="renderSelectedCertificates()">הנפק תעודות נבחרות</button>
+    <button class="btn btn-success" onclick="sendSelectedEmails()">שלח למייל לנבחרים</button>
+    <button class="btn btn-primary" style="background:#6c757d;" onclick="window.print()">הדפס תעודות מוצגות</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+          <th>ת.ז</th>
+          <th>שם מלא</th>
+          <th>קורס/הכשרה</th>
+          <th>תאריך סיום</th>
+          <th>מייל</th>
+        </tr>
+      </thead>
+      <tbody id="certificatesTableBody">
+        <tr><td colspan="6" style="text-align:center;">טוען נתונים...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="certificatesContainer"></div>
+
+<script>
+  // הוסף כאן את ה-URL של ה-Apps Script החדש שיצרת
+  const scriptURL = 'https://script.google.com/macros/s/YOUR_NEW_APPS_SCRIPT_ID/exec';
+  
+  let allCertificates = [];
+  let filteredCertificates = [];
+
+  // טעינת נתונים ראשונית מהגיליון
+  async function loadData() {
+    try {
+      const res = await fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ action: 'getAllCertificates' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        allCertificates = data.certificates;
+        filteredCertificates = [...allCertificates];
+        renderTable();
+      } else {
+        alert("שגיאה שטעינת הנתונים: " + data.message);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("שגיאה בתקשורת עם השרת");
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('certificatesTableBody');
+    if (filteredCertificates.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">לא נמצאו רשומות</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = filteredCertificates.map((cert, index) => `
+      <tr>
+        <td><input type="checkbox" class="cert-checkbox" data-index="${index}"></td>
+        <td>${cert.id}</td>
+        <td>${cert.firstName} ${cert.lastName}</td>
+        <td>${cert.courseName || cert.training}</td>
+        <td>${cert.courseEnd}</td>
+        <td>${cert.email || 'ללא מייל'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function filterCertificates() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    filteredCertificates = allCertificates.filter(c => {
+      const fullText = `${c.id} ${c.firstName} ${c.lastName} ${c.training} ${c.courseName}`.toLowerCase();
+      return fullText.includes(query);
+    });
+    renderTable();
+  }
+
+  function toggleSelectAll(master) {
+    document.querySelectorAll('.cert-checkbox').forEach(cb => cb.checked = master.checked);
+  }
+
+  function calculateHours(trainingText) {
+    const text = (trainingText || "").trim();
+    if (text.includes('מע"ר 44')) return "44 שעות";
+    if (text.includes('מע"ר 60')) return "60 שעות";
+    if (text.includes('חובש')) return "207 שעות";
+    const matched = text.match(/\d+/);
+    return matched ? matched[0] + " שעות" : "-- שעות";
+  }
+
+  // הנפקת התעודות שנבחרו על המסך
+  function renderSelectedCertificates() {
+    const selectedIndexes = Array.from(document.querySelectorAll('.cert-checkbox:checked'))
+      .map(cb => parseInt(cb.getAttribute('data-index')));
+
+    if (selectedIndexes.length === 0) {
+      alert("אנא בחר לפחות תעודה אחת מהרשימה");
+      return;
+    }
+
+    const container = document.getElementById('certificatesContainer');
+    container.innerHTML = '';
+
+    selectedIndexes.forEach(idx => {
+      const cert = filteredCertificates[idx];
+      const hours = calculateHours(cert.training);
+
+      const certDiv = document.createElement('div');
+      certDiv.className = 'certificate-container';
+      certDiv.innerHTML = `
+        <div class="field-name">${cert.firstName} ${cert.lastName}</div>
+        <div class="field-id">${cert.id}</div>
+        <div class="field-training">${cert.training}</div>
+        <div class="field-hours">${hours}</div>
+        <div class="field-date">${cert.courseEnd}</div>
+      `;
+      container.appendChild(certDiv);
+    });
+
+    window.scrollTo({ top: container.offsetTop, behavior: 'smooth' });
+  }
+
+  // שליחה מרוכזת למייל של הרשומות הנבחרות
+  async function sendSelectedEmails() {
+    const selectedIndexes = Array.from(document.querySelectorAll('.cert-checkbox:checked'))
+      .map(cb => parseInt(cb.getAttribute('data-index')));
+
+    if (selectedIndexes.length === 0) {
+      alert("אנא בחר לפחות תעודה אחת לשליחה");
+      return;
+    }
+
+    renderSelectedCertificates();
+    const certElements = document.querySelectorAll('.certificate-container');
+
+    if (!confirm(`האם לשלוח ${selectedIndexes.length} תעודות לנמענים במייל?`)) return;
+
+    for (let i = 0; i < selectedIndexes.length; i++) {
+      const cert = filteredCertificates[selectedIndexes[i]];
+      const elem = certElements[i];
+
+      if (!cert.email) {
+        console.warn(`למנוי ${cert.firstName} ${cert.lastName} אין כתובת מייל, מדלג...`);
+        continue;
+      }
+
+      try {
+        const opt = {
+          margin: 0,
+          filename: `Teuda_${cert.id}.pdf`,
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 1.5, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const pdfBase64 = await html2pdf().set(opt).from(elem).outputPdf('datauristring');
+        const base64Data = pdfBase64.split(',')[1];
+
+        const formData = new URLSearchParams();
+        formData.append('action', 'sendBatchEmail');
+        formData.append('email', cert.email.trim());
+        formData.append('fullName', `${cert.firstName} ${cert.lastName}`);
+        formData.append('pdfData', base64Data);
+        formData.append('fileName', `Teuda_${cert.id}.pdf`);
+
+        await fetch(scriptURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString()
+        });
+
+      } catch (err) {
+        console.error(`שגיאה בשליחת מייל ל-${cert.email}:`, err);
+      }
+    }
+
+    alert("תהליך שליחת המיילים הושלם!");
+  }
+
+  window.onload = loadData;
+</script>
+
+</body>
+</html>
