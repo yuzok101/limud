@@ -2,6 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ניהול והנפקת תעודות מרוכזת - יוזוק מדיק</title>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -26,29 +27,42 @@
 
   h1 { text-align: center; color: #ffd700; margin-bottom: 20px; font-weight: 800; }
 
+  /* מונה סטטיסטיקה */
+  .stats-bar {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 15px;
+  }
+  .stats-item span { font-weight: 800; color: #00bfff; }
+
   /* בקרות חיפוש וסינון */
   .controls {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 20px;
     align-items: center;
   }
 
-  .search-input {
-    flex: 1;
-    min-width: 250px;
+  .search-input, .select-input {
     padding: 12px 18px;
     border-radius: 10px;
     border: 1px solid #00bfff;
     background: rgba(255,255,255,0.08);
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
   }
+  .search-input { flex: 2; min-width: 220px; }
+  .select-input { flex: 1; min-width: 150px; background: #112f4f; }
 
   .btn {
-    padding: 12px 22px;
+    padding: 12px 20px;
     font-size: 15px;
     font-weight: 700;
     border: none;
@@ -60,10 +74,36 @@
   .btn-primary:hover { background: #0099cc; }
   .btn-success { background: #28a745; color: #fff; }
   .btn-success:hover { background: #218838; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e68a00; }
+  .btn-secondary { background: #6c757d; color: #fff; }
+  .btn-secondary:hover { background: #5a6268; }
+
+  /* פס התקדמות */
+  .progress-container {
+    display: none;
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .progress-bar-bg {
+    background: #112f4f;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #00bfff;
+    transition: width 0.3s ease;
+  }
 
   /* טבלת נתונים */
   .table-container {
-    max-height: 350px;
+    max-height: 380px;
     overflow-y: auto;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
@@ -72,10 +112,10 @@
 
   table { width: 100%; border-collapse: collapse; text-align: right; }
   th, td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 15px; }
-  th { background: #112f4f; color: #00bfff; position: sticky; top: 0; }
+  th { background: #112f4f; color: #00bfff; position: sticky; top: 0; z-index: 2; }
   tr:hover { background: rgba(255,255,255,0.05); }
 
-  /* קונטיינר להנפקת תעודות מרוכזת */
+  /* תבנית התעודה */
   #certificatesContainer {
     display: flex;
     flex-direction: column;
@@ -84,12 +124,11 @@
     margin-top: 30px;
   }
 
-  /* תבנית התעודה - תואמת בדיוק למפרט הקיים */
   .certificate-container {
     position: relative;
     width: 210mm;
     height: 297mm;
-    background-image: url('image.jpg'); /* נתיב לתמונת התעודה */
+    background-image: url('images.png'); /* עודכן לנתיב התמונה המבוקש */
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -154,10 +193,9 @@
     color: #0d1b2a;
   }
 
-  /* הגדרות הדפסה מרוכזת */
   @media print {
     body { background: #fff !important; padding: 0 !important; }
-    .admin-panel, header, .controls { display: none !important; }
+    .admin-panel, header, .controls, .stats-bar, .progress-container { display: none !important; }
     #certificatesContainer { margin: 0 !important; gap: 0 !important; }
     .certificate-container {
       box-shadow: none !important;
@@ -173,15 +211,40 @@
 <body>
 
 <div class="admin-panel">
-  <h1>פאנל מנהל - הנפקה וחיפוש תעודות מרוכזת</h1>
+  <h1>פאנל מנהל - הנפקה וניהול תעודות</h1>
 
-  <div class="controls">
-    <input type="text" id="searchInput" class="search-input" placeholder="חפש לפי ת.ז, שם קורס, הכשרה או שם מלא..." oninput="filterCertificates()">
-    <button class="btn btn-primary" onclick="renderSelectedCertificates()">הנפק תעודות נבחרות</button>
-    <button class="btn btn-success" onclick="sendSelectedEmails()">שלח למייל לנבחרים</button>
-    <button class="btn btn-primary" style="background:#6c757d;" onclick="window.print()">הדפס תעודות מוצגות</button>
+  <!-- לוח סטטיסטיקה -->
+  <div class="stats-bar">
+    <div class="stats-item">סה"כ רשומות: <span id="statTotal">0</span></div>
+    <div class="stats-item">רשומות מוצגות: <span id="statFiltered">0</span></div>
+    <div class="stats-item">נבחרו: <span id="statSelected">0</span></div>
   </div>
 
+  <!-- בקרות סינון ופעולות -->
+  <div class="controls">
+    <input type="text" id="searchInput" class="search-input" placeholder="חפש לפי ת.ז, שם, קורס או הכשרה..." oninput="filterCertificates()">
+    
+    <select id="emailFilter" class="select-input" onchange="filterCertificates()">
+      <option value="all">כל הרשומות</option>
+      <option value="hasEmail">עם מייל בלבד</option>
+      <option value="noEmail">ללא מייל</option>
+    </select>
+
+    <button class="btn btn-primary" onclick="renderSelectedCertificates()">הנפק למסך</button>
+    <button class="btn btn-warning" onclick="downloadSelectedPDFs()">הורד PDF לנבחרים</button>
+    <button class="btn btn-success" onclick="sendSelectedEmails()">שלח במייל</button>
+    <button class="btn btn-secondary" onclick="window.print()">הדפס מוצגות</button>
+  </div>
+
+  <!-- פס התקדמות לביצוע פעולות מרוכזות -->
+  <div id="progressContainer" class="progress-container">
+    <div id="progressStatusText" style="font-size: 14px; color: #00bfff;">מעבד...</div>
+    <div class="progress-bar-bg">
+      <div id="progressBarFill" class="progress-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- טבלת רשומות -->
   <div class="table-container">
     <table>
       <thead>
@@ -204,13 +267,12 @@
 <div id="certificatesContainer"></div>
 
 <script>
-  // הוסף כאן את ה-URL של ה-Apps Script החדש שיצרת
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxh0XSf7YMLvBvmXWB_EpTTIAX2eYVWtCfhIvskzxo-UL0e4_vUKNtw4h3TFv4K1eMK/exec';
   
   let allCertificates = [];
   let filteredCertificates = [];
 
-  // טעינת נתונים ראשונית מהגיליון
+  // טעינת נתונים
   async function loadData() {
     try {
       const res = await fetch(scriptURL, {
@@ -224,7 +286,7 @@
         filteredCertificates = [...allCertificates];
         renderTable();
       } else {
-        alert("שגיאה שטעינת הנתונים: " + data.message);
+        alert("שגיאה בטעינת הנתונים: " + data.message);
       }
     } catch (e) {
       console.error(e);
@@ -235,33 +297,54 @@
   function renderTable() {
     const tbody = document.getElementById('certificatesTableBody');
     if (filteredCertificates.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">לא נמצאו רשומות</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">לא נמצאו רשומות מתאימות</td></tr>';
+      updateStats();
       return;
     }
     
     tbody.innerHTML = filteredCertificates.map((cert, index) => `
       <tr>
-        <td><input type="checkbox" class="cert-checkbox" data-index="${index}"></td>
+        <td><input type="checkbox" class="cert-checkbox" data-index="${index}" onchange="updateStats()"></td>
         <td>${cert.id}</td>
         <td>${cert.firstName} ${cert.lastName}</td>
         <td>${cert.courseName || cert.training}</td>
         <td>${cert.courseEnd}</td>
-        <td>${cert.email || 'ללא מייל'}</td>
+        <td>${cert.email ? `<span style="color:#28a745;">${cert.email}</span>` : '<span style="color:#dc3545;">ללא מייל</span>'}</td>
       </tr>
     `).join('');
+
+    updateStats();
   }
 
   function filterCertificates() {
     const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const emailFilter = document.getElementById('emailFilter').value;
+
     filteredCertificates = allCertificates.filter(c => {
       const fullText = `${c.id} ${c.firstName} ${c.lastName} ${c.training} ${c.courseName}`.toLowerCase();
-      return fullText.includes(query);
+      const matchesSearch = fullText.includes(query);
+      
+      let matchesEmail = true;
+      if (emailFilter === 'hasEmail') matchesEmail = !!c.email;
+      if (emailFilter === 'noEmail') matchesEmail = !c.email;
+
+      return matchesSearch && matchesEmail;
     });
+
+    document.getElementById('selectAll').checked = false;
     renderTable();
   }
 
   function toggleSelectAll(master) {
     document.querySelectorAll('.cert-checkbox').forEach(cb => cb.checked = master.checked);
+    updateStats();
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = allCertificates.length;
+    document.getElementById('statFiltered').textContent = filteredCertificates.length;
+    const selectedCount = document.querySelectorAll('.cert-checkbox:checked').length;
+    document.getElementById('statSelected').textContent = selectedCount;
   }
 
   function calculateHours(trainingText) {
@@ -273,10 +356,14 @@
     return matched ? matched[0] + " שעות" : "-- שעות";
   }
 
-  // הנפקת התעודות שנבחרו על המסך
-  function renderSelectedCertificates() {
-    const selectedIndexes = Array.from(document.querySelectorAll('.cert-checkbox:checked'))
+  function getSelectedIndexes() {
+    return Array.from(document.querySelectorAll('.cert-checkbox:checked'))
       .map(cb => parseInt(cb.getAttribute('data-index')));
+  }
+
+  // הנפקת התעודות הנבחרו
+  function renderSelectedCertificates() {
+    const selectedIndexes = getSelectedIndexes();
 
     if (selectedIndexes.length === 0) {
       alert("אנא בחר לפחות תעודה אחת מהרשימה");
@@ -305,10 +392,42 @@
     window.scrollTo({ top: container.offsetTop, behavior: 'smooth' });
   }
 
-  // שליחה מרוכזת למייל של הרשומות הנבחרות
+  // הורדת תעודות מרוכזת לקבצי PDF במחשב
+  async function downloadSelectedPDFs() {
+    const selectedIndexes = getSelectedIndexes();
+    if (selectedIndexes.length === 0) {
+      alert("אנא בחר לפחות תעודה אחת להורדה");
+      return;
+    }
+
+    renderSelectedCertificates();
+    const certElements = document.querySelectorAll('.certificate-container');
+    showProgress(true, `מוריד 0 מתוך ${selectedIndexes.length} תעודות...`, 0);
+
+    for (let i = 0; i < selectedIndexes.length; i++) {
+      const cert = filteredCertificates[selectedIndexes[i]];
+      const elem = certElements[i];
+
+      const opt = {
+        margin: 0,
+        filename: `תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(opt).from(elem).save();
+      
+      const percent = Math.round(((i + 1) / selectedIndexes.length) * 100);
+      showProgress(true, `הורדו ${i + 1} מתוך ${selectedIndexes.length} תעודות...`, percent);
+    }
+
+    setTimeout(() => showProgress(false), 1500);
+  }
+
+  // שליחה מרוכזת למייל
   async function sendSelectedEmails() {
-    const selectedIndexes = Array.from(document.querySelectorAll('.cert-checkbox:checked'))
-      .map(cb => parseInt(cb.getAttribute('data-index')));
+    const selectedIndexes = getSelectedIndexes();
 
     if (selectedIndexes.length === 0) {
       alert("אנא בחר לפחות תעודה אחת לשליחה");
@@ -320,14 +439,20 @@
 
     if (!confirm(`האם לשלוח ${selectedIndexes.length} תעודות לנמענים במייל?`)) return;
 
+    showProgress(true, `מתחיל בשליחה...`, 0);
+
     for (let i = 0; i < selectedIndexes.length; i++) {
       const cert = filteredCertificates[selectedIndexes[i]];
       const elem = certElements[i];
 
+      const percent = Math.round(((i + 1) / selectedIndexes.length) * 100);
+
       if (!cert.email) {
-        console.warn(`למנוי ${cert.firstName} ${cert.lastName} אין כתובת מייל, מדלג...`);
+        showProgress(true, `מדלג על ${cert.firstName} ${cert.lastName} (אין כתובת מייל)...`, percent);
         continue;
       }
+
+      showProgress(true, `שולח מייל ל-${cert.firstName} ${cert.lastName} (${i + 1}/${selectedIndexes.length})...`, percent);
 
       try {
         const opt = {
@@ -359,7 +484,18 @@
       }
     }
 
-    alert("תהליך שליחת המיילים הושלם!");
+    showProgress(true, `השליחה הושלמה בהצלחה!`, 100);
+    setTimeout(() => showProgress(false), 2000);
+  }
+
+  function showProgress(show, statusText = '', percent = 0) {
+    const container = document.getElementById('progressContainer');
+    const textElem = document.getElementById('progressStatusText');
+    const fillElem = document.getElementById('progressBarFill');
+
+    container.style.display = show ? 'block' : 'none';
+    textElem.textContent = statusText;
+    fillElem.style.width = percent + '%';
   }
 
   window.onload = loadData;
