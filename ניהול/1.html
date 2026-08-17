@@ -6,261 +6,229 @@
 <title>ניהול והנפקת תעודות מרוכזת - יוזוק מדיק</title>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Assistant', sans-serif; }
+  html, body { min-height: 100%; }
   body {
-    background: #0d1b2a;
+    background: #071522;
     color: #fff;
-    padding: 20px;
     min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
   }
+  button, input, select { font: inherit; }
 
+  .app-shell { width: 100%; min-height: 100vh; }
   .admin-panel {
-    max-width: 1100px;
-    margin: 0 auto 30px auto;
-    background: rgba(17, 47, 79, 0.95);
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 18px clamp(14px, 2vw, 30px) 24px;
+    background: linear-gradient(180deg, #102d4a 0%, #0b2238 100%);
+    border-radius: 0;
+    box-shadow: 0 8px 35px rgba(0,0,0,.38);
   }
 
-  h1 { text-align: center; color: #ffd700; margin-bottom: 20px; font-weight: 800; }
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between; gap:15px;
+    margin-bottom:16px;
+  }
+  h1 { color:#ffd700; font-weight:800; font-size:clamp(22px,2.2vw,34px); }
+  .sub-title { color:#b8d8ef; font-size:14px; margin-top:3px; }
+  .top-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
-  /* מונה סטטיסטיקה */
   .stats-bar {
-    display: flex;
-    justify-content: space-around;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    font-size: 15px;
+    display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px;
+    background:rgba(255,255,255,.045); padding:10px; border-radius:12px;
+    margin-bottom:12px; border:1px solid rgba(255,255,255,.09);
   }
-  .stats-item span { font-weight: 800; color: #00bfff; }
+  .stats-item {
+    padding:10px 12px; border-radius:9px; background:rgba(255,255,255,.04);
+    color:#dbeeff; text-align:center; font-size:14px;
+  }
+  .stats-item span { display:block; font-size:22px; font-weight:800; color:#00c8ff; }
 
-  /* בקרות חיפוש וסינון */
   .controls {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    align-items: center;
+    display:grid; grid-template-columns:minmax(260px,2fr) minmax(150px,.8fr) auto auto auto auto auto;
+    gap:9px; align-items:center; margin-bottom:12px;
   }
-
   .search-input, .select-input {
-    padding: 12px 18px;
-    border-radius: 10px;
-    border: 1px solid #00bfff;
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    font-size: 15px;
-    outline: none;
+    width:100%; padding:11px 14px; border-radius:9px;
+    border:1px solid #167bb0; background:#0b2944; color:#fff; outline:none;
   }
-  .search-input { flex: 2; min-width: 220px; }
-  .select-input { flex: 1; min-width: 150px; background: #112f4f; }
+  .search-input:focus, .select-input:focus { border-color:#00c8ff; box-shadow:0 0 0 2px rgba(0,200,255,.13); }
+  .select-input option { background:#0b2944; color:#fff; }
 
   .btn {
-    padding: 12px 20px;
-    font-size: 15px;
-    font-weight: 700;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    padding:11px 15px; font-size:14px; font-weight:800; border:0; border-radius:9px;
+    cursor:pointer; transition:.18s ease; white-space:nowrap;
   }
-  .btn-primary { background: #00bfff; color: #fff; }
-  .btn-primary:hover { background: #0099cc; }
-  .btn-success { background: #28a745; color: #fff; }
-  .btn-success:hover { background: #218838; }
-  .btn-warning { background: #ff9800; color: #fff; }
-  .btn-warning:hover { background: #e68a00; }
-  .btn-secondary { background: #6c757d; color: #fff; }
-  .btn-secondary:hover { background: #5a6268; }
+  .btn:hover { transform:translateY(-1px); filter:brightness(1.08); }
+  .btn:active { transform:translateY(0); }
+  .btn-primary { background:#00aeea; color:#fff; }
+  .btn-success { background:#20a44a; color:#fff; }
+  .btn-warning { background:#ff9800; color:#fff; }
+  .btn-secondary { background:#64748b; color:#fff; }
+  .btn-danger { background:#dc3545; color:#fff; }
+  .btn-dark { background:#1e3a56; color:#fff; border:1px solid #315675; }
 
-  /* פס התקדמות */
   .progress-container {
-    display: none;
-    margin-bottom: 20px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px;
+    display:none; margin-bottom:12px; background:rgba(255,255,255,.07);
+    border-radius:9px; padding:9px 12px; border:1px solid rgba(255,255,255,.08);
   }
-  .progress-bar-bg {
-    background: #112f4f;
-    height: 12px;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 6px;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: #00bfff;
-    transition: width 0.3s ease;
-  }
+  .progress-bar-bg { background:#071a2a; height:10px; border-radius:6px; overflow:hidden; margin-top:6px; }
+  .progress-bar-fill { height:100%; width:0; background:#00c8ff; transition:width .2s ease; }
 
-  /* טבלת נתונים */
   .table-container {
-    max-height: 380px;
-    overflow-y: auto;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    margin-bottom: 20px;
+    height:calc(100vh - 300px); min-height:330px; overflow:auto;
+    border:1px solid rgba(255,255,255,.10); border-radius:10px;
+    background:#0b2238;
   }
+  table { width:100%; border-collapse:separate; border-spacing:0; text-align:right; }
+  th, td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.07); font-size:14px; }
+  th { background:#102f4d; color:#00c8ff; position:sticky; top:0; z-index:2; }
+  tbody tr:hover { background:rgba(0,191,255,.055); }
+  td:nth-child(1), th:nth-child(1) { width:44px; text-align:center; }
+  .course-cell { font-weight:700; color:#f5fbff; }
+  .training-cell { color:#bfe7ff; }
+  .email-ok { color:#32d46a; }
+  .email-no { color:#ff6b6b; }
 
-  table { width: 100%; border-collapse: collapse; text-align: right; }
-  th, td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 15px; }
-  th { background: #112f4f; color: #00bfff; position: sticky; top: 0; z-index: 2; }
-  tr:hover { background: rgba(255,255,255,0.05); }
-
-  /* תבנית התעודה */
   #certificatesContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    margin-top: 30px;
+    display:flex; flex-direction:column; align-items:center; gap:24px;
+    margin:0; padding:28px 12px; background:#071522;
   }
 
   .certificate-container {
-    position: relative;
-    width: 210mm;
-    height: 297mm;
-    background-image: url('images.png'); /* עודכן לנתיב התמונה המבוקש */
-    background-size: 100% 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    box-sizing: border-box;
-    background-color: #fff;
-    page-break-after: always;
+    position:relative; width:210mm; height:297mm; flex:0 0 auto;
+    background-image:url('certificate-template.jpg');
+    background-size:100% 100%; background-position:center; background-repeat:no-repeat;
+    background-color:#fff; box-sizing:border-box; page-break-after:always;
+    overflow:hidden;
   }
 
+  /* טקסט שמונח מעל התמונה */
   .field-name {
-    position: absolute;
-    top: 35%;
-    left: 10%;
-    right: 10%;
-    text-align: center;
-    font-size: 34px;
-    font-weight: 800;
-    color: #1a237e;
+    position:absolute; top:48.0%; left:18%; right:18%;
+    text-align:center; font-size:31px; font-weight:800; color:#172c72;
+    line-height:1.05; direction:rtl;
   }
-
   .field-id {
-    position: absolute;
-    top: 46%;
-    left: 20%;
-    right: 38%;
-    text-align: left;
-    font-size: 24px;
-    font-weight: 600;
-    color: #0d1b2a;
-    direction: ltr;
+    position:absolute; top:63.5%; left:26%; right:19%;
+    text-align:center; font-size:22px; font-weight:700; color:#1d2d54;
+    direction:ltr; line-height:1;
   }
-
-  .field-training {
-    position: absolute;
-    top: 53.5%;
-    left: 10%;
-    right: 10%;
-    text-align: center;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a237e;
+  .field-course {
+    position:absolute; top:74.0%; left:16%; right:16%;
+    text-align:center; font-size:26px; font-weight:800; color:#172c72;
+    line-height:1.05; direction:rtl;
   }
-
   .field-hours {
-    position: absolute;
-    top: 57.5%;
-    left: 20%;
-    right: 37%;
-    text-align: left;
-    font-size: 22px;
-    font-weight: 600;
-    color: #0d1b2a;
+    position:absolute; top:84.0%; left:31%; right:15%;
+    text-align:center; font-size:21px; font-weight:700; color:#1d2d54;
+    direction:rtl; line-height:1;
+  }
+  .field-date {
+    position:absolute; top:88.8%; left:31%; right:15%;
+    text-align:center; font-size:21px; font-weight:700; color:#1d2d54;
+    direction:ltr; line-height:1;
   }
 
-  .field-date {
-    position: absolute;
-    top: 62.3%;
-    left: 20%;
-    right: 37%;
-    text-align: left;
-    font-size: 22px;
-    font-weight: 600;
-    color: #0d1b2a;
+  .certificate-label {
+    position:absolute; top:91.8%; left:6%; right:6%; text-align:center;
+    color:#fff; font-size:10px; opacity:.8;
+  }
+
+  @media (max-width: 1200px) {
+    .controls { grid-template-columns:1fr 180px repeat(3,auto); }
+    .controls .btn:nth-of-type(4), .controls .btn:nth-of-type(5) { grid-row:2; }
+  }
+  @media (max-width: 800px) {
+    .stats-bar { grid-template-columns:repeat(2,1fr); }
+    .controls { grid-template-columns:1fr 1fr; }
+    .controls .search-input { grid-column:1/-1; }
+    .table-container { height:55vh; }
+    .topbar { flex-direction:column; align-items:stretch; }
+    .top-actions { justify-content:flex-start; }
   }
 
   @media print {
-    body { background: #fff !important; padding: 0 !important; }
-    .admin-panel, header, .controls, .stats-bar, .progress-container { display: none !important; }
-    #certificatesContainer { margin: 0 !important; gap: 0 !important; }
+    body { background:#fff !important; padding:0 !important; }
+    .admin-panel { display:none !important; }
+    #certificatesContainer { margin:0 !important; padding:0 !important; gap:0 !important; }
     .certificate-container {
-      box-shadow: none !important;
-      border-radius: 0 !important;
-      width: 210mm !important;
-      height: 297mm !important;
-      page-break-after: always !important;
+      box-shadow:none !important; border-radius:0 !important;
+      width:210mm !important; height:297mm !important; page-break-after:always !important;
     }
-    @page { size: A4 portrait; margin: 0 !important; }
+    @page { size:A4 portrait; margin:0 !important; }
   }
 </style>
 </head>
 <body>
 
-<div class="admin-panel">
-  <h1>פאנל מנהל - הנפקה וניהול תעודות</h1>
-
-  <!-- לוח סטטיסטיקה -->
-  <div class="stats-bar">
-    <div class="stats-item">סה"כ רשומות: <span id="statTotal">0</span></div>
-    <div class="stats-item">רשומות מוצגות: <span id="statFiltered">0</span></div>
-    <div class="stats-item">נבחרו: <span id="statSelected">0</span></div>
-  </div>
-
-  <!-- בקרות סינון ופעולות -->
-  <div class="controls">
-    <input type="text" id="searchInput" class="search-input" placeholder="חפש לפי ת.ז, שם, קורס או הכשרה..." oninput="filterCertificates()">
-    
-    <select id="emailFilter" class="select-input" onchange="filterCertificates()">
-      <option value="all">כל הרשומות</option>
-      <option value="hasEmail">עם מייל בלבד</option>
-      <option value="noEmail">ללא מייל</option>
-    </select>
-
-    <button class="btn btn-primary" onclick="renderSelectedCertificates()">הנפק למסך</button>
-    <button class="btn btn-warning" onclick="downloadSelectedPDFs()">הורד PDF לנבחרים</button>
-    <button class="btn btn-success" onclick="sendSelectedEmails()">שלח במייל</button>
-    <button class="btn btn-secondary" onclick="window.print()">הדפס מוצגות</button>
-  </div>
-
-  <!-- פס התקדמות לביצוע פעולות מרוכזות -->
-  <div id="progressContainer" class="progress-container">
-    <div id="progressStatusText" style="font-size: 14px; color: #00bfff;">מעבד...</div>
-    <div class="progress-bar-bg">
-      <div id="progressBarFill" class="progress-bar-fill"></div>
+<div class="app-shell">
+  <div class="admin-panel">
+    <div class="topbar">
+      <div>
+        <h1>פאנל מנהל — הנפקה וניהול תעודות</h1>
+        <div class="sub-title">ניהול, חיפוש, הנפקה, הורדה ושליחה מרוכזת</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-dark" onclick="loadData()">🔄 רענן נתונים</button>
+        <button class="btn btn-dark" onclick="clearSelection()">✕ נקה בחירה</button>
+      </div>
     </div>
-  </div>
 
-  <!-- טבלת רשומות -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-          <th>ת.ז</th>
-          <th>שם מלא</th>
-          <th>קורס/הכשרה</th>
-          <th>תאריך סיום</th>
-          <th>מייל</th>
-        </tr>
-      </thead>
-      <tbody id="certificatesTableBody">
-        <tr><td colspan="6" style="text-align:center;">טוען נתונים...</td></tr>
-      </tbody>
-    </table>
+    <div class="stats-bar">
+      <div class="stats-item">סה"כ רשומות <span id="statTotal">0</span></div>
+      <div class="stats-item">רשומות מוצגות <span id="statFiltered">0</span></div>
+      <div class="stats-item">נבחרו <span id="statSelected">0</span></div>
+      <div class="stats-item">עם מייל <span id="statWithEmail">0</span></div>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-input"
+             placeholder="חפש לפי ת.ז, שם, קורס, הכשרה או מייל..."
+             oninput="filterCertificates()">
+
+      <select id="emailFilter" class="select-input" onchange="filterCertificates()">
+        <option value="all">כל הרשומות</option>
+        <option value="hasEmail">עם מייל בלבד</option>
+        <option value="noEmail">ללא מייל</option>
+      </select>
+
+      <button class="btn btn-primary" onclick="renderSelectedCertificates()">👁️ תצוגה</button>
+      <button class="btn btn-warning" onclick="downloadSelectedPDFs()">⬇️ הורד PDF</button>
+      <button class="btn btn-warning" onclick="downloadSelectedZip()">📦 הורד ZIP</button>
+      <button class="btn btn-success" onclick="sendSelectedEmails()">✉️ שלח במייל</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨️ הדפס</button>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div id="progressStatusText" style="font-size:14px;color:#00c8ff;">מעבד...</div>
+      <div class="progress-bar-bg"><div id="progressBarFill" class="progress-bar-fill"></div></div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" title="בחר הכל"></th>
+            <th>ת.ז</th>
+            <th>שם מלא</th>
+            <th>קורס</th>
+            <th>הכשרה</th>
+            <th>תאריך סיום</th>
+            <th>מייל</th>
+          </tr>
+        </thead>
+        <tbody id="certificatesTableBody">
+          <tr><td colspan="7" style="text-align:center;">טוען נתונים...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -322,25 +290,36 @@
     document.body.appendChild(script);
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[ch]));
+  }
+
   function renderTable() {
     const tbody = document.getElementById('certificatesTableBody');
+
     if (filteredCertificates.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">לא נמצאו רשומות מתאימות</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;">לא נמצאו רשומות מתאימות</td></tr>';
       updateStats();
       return;
     }
-    
+
     tbody.innerHTML = filteredCertificates.map((cert, index) => `
       <tr>
         <td><input type="checkbox" class="cert-checkbox" data-index="${index}" onchange="updateStats()"></td>
-        <td>${cert.id}</td>
-        <td>${cert.firstName} ${cert.lastName}</td>
-        <td>${cert.courseName || cert.training}</td>
-        <td>${cert.courseEnd}</td>
-        <td>${cert.email ? `<span style="color:#28a745;">${cert.email}</span>` : '<span style="color:#dc3545;">ללא מייל</span>'}</td>
+        <td dir="ltr">${escapeHtml(cert.id)}</td>
+        <td><strong>${escapeHtml(cert.firstName)} ${escapeHtml(cert.lastName)}</strong></td>
+        <td class="course-cell">${escapeHtml(cert.courseName || '—')}</td>
+        <td class="training-cell">${escapeHtml(cert.training || '—')}</td>
+        <td>${escapeHtml(cert.courseEnd || '—')}</td>
+        <td>${cert.email
+          ? `<span class="email-ok">${escapeHtml(cert.email)}</span>`
+          : '<span class="email-no">ללא מייל</span>'}</td>
       </tr>
     `).join('');
 
+    document.getElementById('selectAll').checked = false;
     updateStats();
   }
 
@@ -349,31 +328,44 @@
     const emailFilter = document.getElementById('emailFilter').value;
 
     filteredCertificates = allCertificates.filter(c => {
-      const fullText = `${c.id} ${c.firstName} ${c.lastName} ${c.training} ${c.courseName}`.toLowerCase();
+      const fullText = [
+        c.id, c.firstName, c.lastName, c.training, c.courseName, c.email
+      ].join(' ').toLowerCase();
+
       const matchesSearch = fullText.includes(query);
-      
-      let matchesEmail = true;
-      if (emailFilter === 'hasEmail') matchesEmail = !!c.email;
-      if (emailFilter === 'noEmail') matchesEmail = !c.email;
+      const matchesEmail =
+        emailFilter === 'all' ||
+        (emailFilter === 'hasEmail' && !!c.email) ||
+        (emailFilter === 'noEmail' && !c.email);
 
       return matchesSearch && matchesEmail;
     });
 
-    document.getElementById('selectAll').checked = false;
     renderTable();
   }
 
   function toggleSelectAll(master) {
-    document.querySelectorAll('.cert-checkbox').forEach(cb => cb.checked = master.checked);
+    document.querySelectorAll('.cert-checkbox').forEach(cb => {
+      cb.checked = master.checked;
+    });
+    updateStats();
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.cert-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('selectAll').checked = false;
     updateStats();
   }
 
   function updateStats() {
     document.getElementById('statTotal').textContent = allCertificates.length;
     document.getElementById('statFiltered').textContent = filteredCertificates.length;
-    const selectedCount = document.querySelectorAll('.cert-checkbox:checked').length;
-    document.getElementById('statSelected').textContent = selectedCount;
+    document.getElementById('statSelected').textContent =
+      document.querySelectorAll('.cert-checkbox:checked').length;
+    document.getElementById('statWithEmail').textContent =
+      allCertificates.filter(c => !!c.email).length;
   }
+
 
   function calculateHours(trainingText) {
     const text = (trainingText || "").trim();
@@ -389,7 +381,7 @@
       .map(cb => parseInt(cb.getAttribute('data-index')));
   }
 
-  // הנפקת התעודות הנבחרו
+  // יצירת תצוגת תעודות מהתמונה שהועלתה
   function renderSelectedCertificates() {
     const selectedIndexes = getSelectedIndexes();
 
@@ -408,11 +400,11 @@
       const certDiv = document.createElement('div');
       certDiv.className = 'certificate-container';
       certDiv.innerHTML = `
-        <div class="field-name">${cert.firstName} ${cert.lastName}</div>
-        <div class="field-id">${cert.id}</div>
-        <div class="field-training">${cert.training}</div>
-        <div class="field-hours">${hours}</div>
-        <div class="field-date">${cert.courseEnd}</div>
+        <div class="field-name">${escapeHtml(cert.firstName)} ${escapeHtml(cert.lastName)}</div>
+        <div class="field-id">${escapeHtml(cert.id)}</div>
+        <div class="field-course">${escapeHtml(cert.courseName || cert.training || '')}</div>
+        <div class="field-hours">${escapeHtml(hours)}</div>
+        <div class="field-date">${escapeHtml(cert.courseEnd)}</div>
       `;
       container.appendChild(certDiv);
     });
@@ -420,80 +412,155 @@
     window.scrollTo({ top: container.offsetTop, behavior: 'smooth' });
   }
 
-  // הורדת תעודות מרוכזת לקבצי PDF במחשב
+  function buildCertificateElement(cert) {
+    const hours = calculateHours(cert.training);
+    const certDiv = document.createElement('div');
+    certDiv.className = 'certificate-container';
+    certDiv.innerHTML = `
+      <div class="field-name">${escapeHtml(cert.firstName)} ${escapeHtml(cert.lastName)}</div>
+      <div class="field-id">${escapeHtml(cert.id)}</div>
+      <div class="field-course">${escapeHtml(cert.courseName || cert.training || '')}</div>
+      <div class="field-hours">${escapeHtml(hours)}</div>
+      <div class="field-date">${escapeHtml(cert.courseEnd)}</div>
+    `;
+    return certDiv;
+  }
+
+  function certificatePdfOptions(cert) {
+    return {
+      margin: 0,
+      filename: `תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+  }
+
+  // הורדת כל תעודה כ-PDF נפרד, אחת אחרי השנייה
   async function downloadSelectedPDFs() {
     const selectedIndexes = getSelectedIndexes();
-    if (selectedIndexes.length === 0) {
+    if (!selectedIndexes.length) {
       alert("אנא בחר לפחות תעודה אחת להורדה");
       return;
     }
 
-    renderSelectedCertificates();
-    const certElements = document.querySelectorAll('.certificate-container');
-    showProgress(true, `מוריד 0 מתוך ${selectedIndexes.length} תעודות...`, 0);
+    showProgress(true, `מתחיל הורדה של ${selectedIndexes.length} תעודות...`, 0);
 
     for (let i = 0; i < selectedIndexes.length; i++) {
       const cert = filteredCertificates[selectedIndexes[i]];
-      const elem = certElements[i];
+      const elem = buildCertificateElement(cert);
+      document.getElementById('certificatesContainer').appendChild(elem);
 
-      const opt = {
-        margin: 0,
-        filename: `תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+      await html2pdf().set(certificatePdfOptions(cert)).from(elem).save();
 
-      await html2pdf().set(opt).from(elem).save();
-      
       const percent = Math.round(((i + 1) / selectedIndexes.length) * 100);
-      showProgress(true, `הורדו ${i + 1} מתוך ${selectedIndexes.length} תעודות...`, percent);
+      showProgress(true, `הורדו ${i + 1} מתוך ${selectedIndexes.length} תעודות`, percent);
+
+      elem.remove();
+      await new Promise(r => setTimeout(r, 350));
     }
 
-    setTimeout(() => showProgress(false), 1500);
+    showProgress(false);
+    alert(`ההורדה הסתיימה: ${selectedIndexes.length} תעודות.`);
+  }
+
+  // אפשרות יציבה יותר: קובץ ZIP אחד עם כל התעודות
+  async function downloadSelectedZip() {
+    const selectedIndexes = getSelectedIndexes();
+    if (!selectedIndexes.length) {
+      alert("אנא בחר לפחות תעודה אחת להורדה");
+      return;
+    }
+
+    if (typeof JSZip === 'undefined') {
+      alert("ספריית ZIP לא נטענה. נסה לרענן את הדף.");
+      return;
+    }
+
+    const zip = new JSZip();
+    showProgress(true, `מכין ZIP: 0 מתוך ${selectedIndexes.length}`, 0);
+
+    for (let i = 0; i < selectedIndexes.length; i++) {
+      const cert = filteredCertificates[selectedIndexes[i]];
+      const elem = buildCertificateElement(cert);
+      document.getElementById('certificatesContainer').appendChild(elem);
+
+      const blob = await html2pdf()
+        .set(certificatePdfOptions(cert))
+        .from(elem)
+        .outputPdf('blob');
+
+      zip.file(`תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`, blob);
+      elem.remove();
+
+      const percent = Math.round(((i + 1) / selectedIndexes.length) * 100);
+      showProgress(true, `מוכן ל-ZIP: ${i + 1} מתוך ${selectedIndexes.length}`, percent);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' }, meta => {
+      showProgress(true, `דוחס ZIP... ${Math.round(meta.percent)}%`, Math.round(meta.percent));
+    });
+
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `תעודות_יוזוק_מדיק_${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    showProgress(false);
+    alert(`ה-ZIP מוכן עם ${selectedIndexes.length} תעודות.`);
   }
 
   // שליחה מרוכזת למייל
   async function sendSelectedEmails() {
     const selectedIndexes = getSelectedIndexes();
 
-    if (selectedIndexes.length === 0) {
+    if (!selectedIndexes.length) {
       alert("אנא בחר לפחות תעודה אחת לשליחה");
       return;
     }
 
-    renderSelectedCertificates();
-    const certElements = document.querySelectorAll('.certificate-container');
+    const withEmail = selectedIndexes.filter(idx => !!filteredCertificates[idx].email);
+    if (!withEmail.length) {
+      alert("לאף אחת מהתעודות שנבחרו אין כתובת מייל.");
+      return;
+    }
 
-    if (!confirm(`האם לשלוח ${selectedIndexes.length} תעודות לנמענים במייל?`)) return;
+    if (!confirm(`האם לשלוח ${withEmail.length} תעודות במייל?`)) return;
 
     showProgress(true, `מתחיל בשליחה...`, 0);
 
     for (let i = 0; i < selectedIndexes.length; i++) {
       const cert = filteredCertificates[selectedIndexes[i]];
-      const elem = certElements[i];
-
       const percent = Math.round(((i + 1) / selectedIndexes.length) * 100);
 
       if (!cert.email) {
-        showProgress(true, `מדלג על ${cert.firstName} ${cert.lastName} (אין כתובת מייל)...`, percent);
+        showProgress(true, `מדלג על ${cert.firstName} ${cert.lastName} — אין מייל`, percent);
         continue;
       }
 
-      showProgress(true, `שולח מייל ל-${cert.firstName} ${cert.lastName} (${i + 1}/${selectedIndexes.length})...`, percent);
+      showProgress(true, `מכין ושולח ל-${cert.firstName} ${cert.lastName} (${i + 1}/${selectedIndexes.length})...`, percent);
 
       try {
+        const elem = buildCertificateElement(cert);
+        document.getElementById('certificatesContainer').appendChild(elem);
+
         const opt = {
           margin: 0,
           filename: `Teuda_${cert.id}.pdf`,
           image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 1.5, useCORS: true },
+          html2canvas: { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         const pdfBase64 = await html2pdf().set(opt).from(elem).outputPdf('datauristring');
-        const base64Data = pdfBase64.split(',')[1];
+        elem.remove();
 
+        const base64Data = pdfBase64.split(',')[1];
         const formData = new URLSearchParams();
         formData.append('action', 'sendBatchEmail');
         formData.append('email', cert.email.trim());
@@ -501,25 +568,18 @@
         formData.append('pdfData', base64Data);
         formData.append('fileName', `Teuda_${cert.id}.pdf`);
 
-        // שליחת POST דרך טופס + iframe נסתר.
-        // כך הדפדפן לא חוסם את הבקשה בגלל CORS.
         await postToAppsScript(formData);
-
       } catch (err) {
         console.error(`שגיאה בשליחת מייל ל-${cert.email}:`, err);
-        showProgress(
-          true,
-          `שגיאה בשליחת מייל ל-${cert.firstName} ${cert.lastName}`,
-          percent
-        );
+        showProgress(true, `שגיאה בשליחת מייל ל-${cert.firstName} ${cert.lastName}`, percent);
       }
     }
 
-    showProgress(true, `השליחה הושלמה בהצלחה!`, 100);
-    setTimeout(() => showProgress(false), 2000);
+    showProgress(false);
+    alert("פעולת שליחת המיילים הסתיימה.");
   }
 
-  // שליחת POST ל-Google Apps Script בלי fetch/CORS.
+
   function postToAppsScript(formData) {
     return new Promise((resolve) => {
       const iframeName = 'gasPostFrame_' + Date.now();
@@ -576,7 +636,7 @@
     fillElem.style.width = percent + '%';
   }
 
-  window.onload = loadData;
+  window.addEventListener('load', loadData);
 </script>
 
 </body>
