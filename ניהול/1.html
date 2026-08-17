@@ -267,31 +267,59 @@
 <div id="certificatesContainer"></div>
 
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbyXjdjyxorBVNyYCNhKlwe9cE_XkEGCNmLCzjc0RxHrCu-OUx-r5cHksFNXawfF7w6r/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbwLkr494xjIbksbfRjaQg7CumbXTaLoln23hWySS5JSO_YrDj5lATNNdPXrcB9aKN17/exec';
   
   let allCertificates = [];
   let filteredCertificates = [];
 
-  // טעינת נתונים
-  async function loadData() {
-    try {
-      const res = await fetch(scriptURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ action: 'getAllCertificates' })
-      });
-      const data = await res.json();
-      if (data.success) {
-        allCertificates = data.certificates;
+  // טעינת נתונים - JSONP כדי לעקוף CORS של Google Apps Script
+  function loadData() {
+    const callbackName = 'certificatesCallback_' + Date.now();
+
+    window[callbackName] = function(data) {
+      try {
+        console.log('Google Apps Script response:', data);
+
+        if (!data || !data.success) {
+          alert('שגיאה בטעינת הנתונים: ' + (
+            data && data.message ? data.message : 'שגיאה לא ידועה'
+          ));
+          return;
+        }
+
+        allCertificates = Array.isArray(data.certificates)
+          ? data.certificates
+          : [];
+
         filteredCertificates = [...allCertificates];
         renderTable();
-      } else {
-        alert("שגיאה בטעינת הנתונים: " + data.message);
+
+      } catch (e) {
+        console.error('שגיאה בעיבוד הנתונים:', e);
+        alert('שגיאה בעיבוד הנתונים');
+      } finally {
+        delete window[callbackName];
+        const oldScript = document.getElementById(callbackName);
+        if (oldScript) oldScript.remove();
       }
-    } catch (e) {
-      console.error(e);
-      alert("שגיאה בתקשורת עם השרת");
-    }
+    };
+
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src =
+      scriptURL +
+      '?action=getAllCertificates' +
+      '&callback=' + encodeURIComponent(callbackName) +
+      '&t=' + Date.now();
+
+    script.onerror = function() {
+      console.error('Google Apps Script JSONP request failed');
+      alert('שגיאה בחיבור ל-Google Apps Script');
+      delete window[callbackName];
+      script.remove();
+    };
+
+    document.body.appendChild(script);
   }
 
   function renderTable() {
@@ -473,19 +501,69 @@
         formData.append('pdfData', base64Data);
         formData.append('fileName', `Teuda_${cert.id}.pdf`);
 
-        await fetch(scriptURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: formData.toString()
-        });
+        // שליחת POST דרך טופס + iframe נסתר.
+        // כך הדפדפן לא חוסם את הבקשה בגלל CORS.
+        await postToAppsScript(formData);
 
       } catch (err) {
         console.error(`שגיאה בשליחת מייל ל-${cert.email}:`, err);
+        showProgress(
+          true,
+          `שגיאה בשליחת מייל ל-${cert.firstName} ${cert.lastName}`,
+          percent
+        );
       }
     }
 
     showProgress(true, `השליחה הושלמה בהצלחה!`, 100);
     setTimeout(() => showProgress(false), 2000);
+  }
+
+  // שליחת POST ל-Google Apps Script בלי fetch/CORS.
+  function postToAppsScript(formData) {
+    return new Promise((resolve) => {
+      const iframeName = 'gasPostFrame_' + Date.now();
+
+      const iframe = document.createElement('iframe');
+      iframe.name = iframeName;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = scriptURL;
+      form.target = iframeName;
+      form.style.display = 'none';
+
+      for (const [key, value] of formData.entries()) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      }
+
+      document.body.appendChild(form);
+
+      iframe.onload = function() {
+        // אי אפשר לקרוא את תוכן ה-iframe בגלל same-origin policy,
+        // אבל onload מאשר שהטופס נשלח לשרת.
+        setTimeout(() => {
+          form.remove();
+          iframe.remove();
+          resolve();
+        }, 300);
+      };
+
+      form.submit();
+
+      // fallback למקרה ש-onload לא מופעל.
+      setTimeout(() => {
+        if (document.body.contains(form)) form.remove();
+        if (document.body.contains(iframe)) iframe.remove();
+        resolve();
+      }, 15000);
+    });
   }
 
   function showProgress(show, statusText = '', percent = 0) {
