@@ -108,7 +108,7 @@ display: grid;
 grid-template-columns:
 minmax(260px,2fr)
 minmax(150px,.8fr)
-auto auto auto auto auto auto;
+auto auto auto auto auto;
 gap: 9px;
 align-items: center;
 margin-bottom: 12px;
@@ -277,131 +277,6 @@ gap: 24px;
 margin: 0;
 padding: 28px 12px;
 background: #071522;
-}
-
-/* מודל טעינה ראשוני */
-.loading-overlay {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: rgba(7, 21, 34, 0.95);
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-z-index: 9999;
-}
-
-.loading-content {
-text-align: center;
-}
-
-.loading-spinner {
-width: 60px;
-height: 60px;
-border: 4px solid rgba(0, 200, 255, 0.2);
-border-top: 4px solid #00c8ff;
-border-radius: 50%;
-animation: spin 1s linear infinite;
-margin-bottom: 20px;
-}
-
-@keyframes spin {
-to { transform: rotate(360deg); }
-}
-
-.loading-text {
-color: #00c8ff;
-font-size: 18px;
-font-weight: 700;
-margin-bottom: 10px;
-}
-
-.loading-subtext {
-color: #b8d8ef;
-font-size: 14px;
-}
-
-/* מודל שליחה למייל אחד */
-.modal {
-display: none;
-position: fixed;
-z-index: 1000;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-overflow: auto;
-background-color: rgba(0,0,0,0.6);
-}
-
-.modal-content {
-background-color: #0b2238;
-margin: 5% auto;
-padding: 30px;
-border: 1px solid rgba(0, 200, 255, 0.3);
-border-radius: 12px;
-width: 90%;
-max-width: 500px;
-box-shadow: 0 8px 35px rgba(0,0,0,.5);
-}
-
-.modal-header {
-color: #ffd700;
-font-size: 20px;
-font-weight: 800;
-margin-bottom: 20px;
-}
-
-.modal-body {
-margin-bottom: 20px;
-}
-
-.form-group {
-margin-bottom: 15px;
-}
-
-.form-group label {
-display: block;
-color: #b8d8ef;
-margin-bottom: 8px;
-font-weight: 600;
-}
-
-.form-group input {
-width: 100%;
-padding: 11px 14px;
-border-radius: 9px;
-border: 1px solid #167bb0;
-background: #0b2944;
-color: #fff;
-outline: none;
-box-sizing: border-box;
-}
-
-.form-group input:focus {
-border-color: #00c8ff;
-box-shadow: 0 0 0 2px rgba(0,200,255,.13);
-}
-
-.modal-buttons {
-display: flex;
-gap: 10px;
-justify-content: flex-end;
-}
-
-.close-modal {
-color: #ff6b6b;
-cursor: pointer;
-font-size: 28px;
-font-weight: bold;
-float: left;
-}
-
-.close-modal:hover {
-color: #ff9999;
 }
 
 /* =========================================================
@@ -672,14 +547,6 @@ margin: 0 !important;
 
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">
-<div class="loading-content">
-<div class="loading-spinner"></div>
-<div class="loading-text">טוען נתונים...</div>
-<div class="loading-subtext">אנא המתן בזמן טעינת ה-תעודות</div>
-</div>
-</div>
-
 <div class="app-shell">
 
 <div class="admin-panel">
@@ -778,13 +645,6 @@ onclick="sendSelectedEmails()"
 </button>
 
 <button
-class="btn btn-success"
-onclick="openSendToEmailModal()"
->
-📧 שלח לכתובת
-</button>
-
-<button
 class="btn btn-secondary"
 onclick="window.print()"
 >
@@ -863,38 +723,6 @@ style="text-align:center;"
 
 </div>
 
-<div id="sendToEmailModal" class="modal">
-<div class="modal-content">
-<span class="close-modal" onclick="closeSendToEmailModal()">&times;</span>
-<div class="modal-header">שלח תעודות לכתובת מייל</div>
-<div class="modal-body">
-<div class="form-group">
-<label for="recipientEmail">כתובת מייל של הנמען:</label>
-<input 
-type="email" 
-id="recipientEmail" 
-placeholder="example@email.com"
->
-</div>
-<div class="form-group">
-<label for="emailSubject">נושא המייל:</label>
-<input 
-type="text" 
-id="emailSubject" 
-placeholder="תעודות סיום הכשרה"
-value="תעודות סיום הכשרה"
->
-</div>
-<div class="form-group">
-<label>מספר תעודות שיישלחו: <strong id="selectedCountDisplay">0</strong></label>
-</div>
-</div>
-<div class="modal-buttons">
-<button class="btn btn-secondary" onclick="closeSendToEmailModal()">ביטול</button>
-<button class="btn btn-success" onclick="sendToSingleEmail()">שלח תעודות</button>
-</div>
-</div>
-</div>
 
 <div id="certificatesContainer"></div>
 
@@ -906,27 +734,15 @@ const scriptURL =
 
 let allCertificates = [];
 let filteredCertificates = [];
-let dataCache = null;
-let cacheTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 דקות cache
+
 
 /*
 =========================================================
-טעינת נתונים עם שיפור ביצועים
+טעינת נתונים
 =========================================================
 */
 
 function loadData() {
-
-// בדוק אם יש cache תקף
-if (dataCache && (Date.now() - cacheTime < CACHE_DURATION)) {
-console.log('שימוש ב-cache');
-processData(dataCache);
-return;
-}
-
-const loadingOverlay = document.getElementById('loadingOverlay');
-loadingOverlay.style.display = 'flex';
 
 const callbackName =
 'certificatesCallback_' + Date.now();
@@ -951,15 +767,18 @@ data && data.message
 )
 );
 
-loadingOverlay.style.display = 'none';
 return;
 }
 
-// שמור cache
-dataCache = data;
-cacheTime = Date.now();
+allCertificates =
+Array.isArray(data.certificates)
+? data.certificates
+: [];
 
-processData(data);
+filteredCertificates =
+[...allCertificates];
+
+renderTable();
 
 } catch (e) {
 
@@ -971,8 +790,6 @@ e
 alert(
 'שגיאה בעיבוד הנתונים'
 );
-
-loadingOverlay.style.display = 'none';
 
 } finally {
 
@@ -989,6 +806,7 @@ oldScript.remove();
 
 };
 
+
 const script =
 document.createElement('script');
 
@@ -1002,6 +820,7 @@ encodeURIComponent(callbackName) +
 '&t=' +
 Date.now();
 
+
 script.onerror = function() {
 
 console.error(
@@ -1013,29 +832,16 @@ alert(
 );
 
 delete window[callbackName];
-loadingOverlay.style.display = 'none';
+
 script.remove();
 
 };
+
 
 document.body.appendChild(script);
 
 }
 
-function processData(data) {
-allCertificates =
-Array.isArray(data.certificates)
-? data.certificates
-: [];
-
-filteredCertificates =
-[...allCertificates];
-
-renderTable();
-
-const loadingOverlay = document.getElementById('loadingOverlay');
-loadingOverlay.style.display = 'none';
-}
 
 /*
 =========================================================
@@ -1192,24 +998,31 @@ c.firstName,
 c.lastName,
 c.training,
 c.courseName,
-c.courseEnd,
 c.email
+
 ].join(' ').toLowerCase();
 
 
-if (query && !fullText.includes(query)) {
-return false;
-}
+const matchesSearch =
+fullText.includes(query);
 
-if (emailFilter === 'hasEmail') {
-return !!c.email;
-}
 
-if (emailFilter === 'noEmail') {
-return !c.email;
-}
+const matchesEmail =
+emailFilter === 'all' ||
+(
+emailFilter === 'hasEmail' &&
+!!c.email
+) ||
+(
+emailFilter === 'noEmail' &&
+!c.email
+);
 
-return true;
+
+return (
+matchesSearch &&
+matchesEmail
+);
 
 });
 
@@ -1221,53 +1034,21 @@ renderTable();
 
 /*
 =========================================================
-עדכון סטטיסטיקה
-=========================================================
-*/
-
-function updateStats() {
-
-document.getElementById('statTotal').textContent =
-allCertificates.length;
-
-document.getElementById('statFiltered').textContent =
-filteredCertificates.length;
-
-const checked =
-document.querySelectorAll(
-'.cert-checkbox:checked'
-).length;
-
-document.getElementById('statSelected').textContent =
-checked;
-
-const withEmail =
-allCertificates.filter(
-c => c.email
-).length;
-
-document.getElementById('statWithEmail').textContent =
-withEmail;
-
-document.getElementById('selectedCountDisplay').textContent =
-checked;
-
-}
-
-
-/*
-=========================================================
 בחירה
 =========================================================
 */
 
-function toggleSelectAll(checkbox) {
+function toggleSelectAll(master) {
 
-document.querySelectorAll('.cert-checkbox').forEach(
-cb => {
-cb.checked = checkbox.checked;
-}
-);
+document
+.querySelectorAll('.cert-checkbox')
+.forEach(cb => {
+
+cb.checked =
+master.checked;
+
+});
+
 
 updateStats();
 
@@ -1276,460 +1057,1166 @@ updateStats();
 
 function clearSelection() {
 
-document.querySelectorAll('.cert-checkbox').forEach(
-cb => {
-cb.checked = false;
-}
-);
+document
+.querySelectorAll('.cert-checkbox')
+.forEach(cb => {
 
-document.getElementById('selectAll').checked = false;
+cb.checked = false;
+
+});
+
+
+document.getElementById(
+'selectAll'
+).checked = false;
+
+
 updateStats();
 
 }
 
 
-function getSelectedCertificates() {
+function updateStats() {
 
-const selected = [];
+document.getElementById(
+'statTotal'
+).textContent =
+allCertificates.length;
 
-document.querySelectorAll('.cert-checkbox').forEach(cb => {
 
-if (cb.checked) {
+document.getElementById(
+'statFiltered'
+).textContent =
+filteredCertificates.length;
 
-const index = parseInt(
-cb.getAttribute('data-index')
-);
 
-if (index >= 0 && index < filteredCertificates.length) {
-selected.push(filteredCertificates[index]);
-}
+document.getElementById(
+'statSelected'
+).textContent =
+document.querySelectorAll(
+'.cert-checkbox:checked'
+).length;
 
-}
 
-});
-
-return selected;
+document.getElementById(
+'statWithEmail'
+).textContent =
+allCertificates.filter(
+c => !!c.email
+).length;
 
 }
 
 
 /*
 =========================================================
-תצוגה ועריכה
+חישוב שעות
+=========================================================
+*/
+
+function calculateHours(trainingText) {
+
+const text =
+String(trainingText || "").trim();
+
+// חובש = תמיד 207 שעות
+if (/חובש/i.test(text)) {
+return "207 שעות";
+}
+
+
+// מע"ר
+if (/מע[״"'׳]?ר/.test(text)) {
+
+const decimal =
+text.match(
+/\d+(?:[.,]\d+)?/
+);
+
+
+if (decimal) {
+
+const n =
+decimal[0].replace(
+',',
+'.'
+);
+
+
+return n === "1"
+? "שעה"
+: `${n} שעות`;
+
+}
+
+
+return "שעה";
+}
+
+// כל הכשרה אחרת
+const matched =
+text.match(
+/\d+(?:[.,]\d+)?/
+);
+
+
+if (matched) {
+
+const n =
+matched[0].replace(
+',',
+'.'
+);
+
+
+return n === "1"
+? "שעה"
+: `${n} שעות`;
+
+}
+
+// תמיכה גם בטקסט "שעה וחצי"
+if (/שעה\s*וחצי/.test(text)) {
+return "שעה וחצי";
+}
+
+
+return "-- שעות";
+
+}
+
+
+/*
+=========================================================
+תאריך הנפקה
+=========================================================
+*/
+
+function getIssueDate(cert) {
+
+const raw =
+cert.H ??
+cert.h ??
+cert.columnH ??
+cert.issueDate ??
+cert.dateIssued ??
+cert.issuedDate ??
+cert.courseEnd ??
+"";
+
+
+if (!raw) {
+return "";
+}
+
+
+const value =
+String(raw).trim();
+
+// תאריך ישראלי
+if (
+/^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/
+.test(value)
+) {
+
+return value.replace(
+/-/g,
+"."
+);
+
+}
+
+
+// תאריך ISO / Google Sheets
+const d =
+new Date(value);
+
+
+if (!Number.isNaN(d.getTime())) {
+
+const day =
+String(
+d.getDate()
+).padStart(2, "0");
+
+
+const month =
+String(
+d.getMonth() + 1
+).padStart(2, "0");
+
+
+const year =
+d.getFullYear();
+
+
+return `${day}.${month}.${year}`;
+
+}
+
+
+return value;
+
+}
+
+
+/*
+=========================================================
+הכשרה
+=========================================================
+*/
+
+function getCertificateTraining(cert) {
+
+return cert.training || "";
+
+}
+
+
+/*
+=========================================================
+תעודות נבחרות
+=========================================================
+*/
+
+function getSelectedIndexes() {
+
+return Array.from(
+document.querySelectorAll(
+'.cert-checkbox:checked'
+)
+).map(
+cb =>
+parseInt(
+cb.getAttribute(
+'data-index'
+)
+)
+);
+
+}
+
+
+/*
+=========================================================
+יצירת תעודה
 =========================================================
 */
 
 function renderSelectedCertificates() {
 
-const selected = getSelectedCertificates();
+const selectedIndexes =
+getSelectedIndexes();
 
-if (selected.length === 0) {
-alert('בחר תעודות להצגה');
+
+if (selectedIndexes.length === 0) {
+
+alert(
+"אנא בחר לפחות תעודה אחת מהרשימה"
+);
+
 return;
 }
+
 
 const container =
 document.getElementById(
 'certificatesContainer'
 );
 
-container.innerHTML =
-selected.map(cert => `
 
-<div class="certificate-container">
+container.innerHTML = '';
+
+
+selectedIndexes.forEach(idx => {
+
+const cert =
+filteredCertificates[idx];
+
+
+const hours =
+calculateHours(
+cert.training
+);
+
+
+const training =
+getCertificateTraining(
+cert
+);
+
+
+const issueDate =
+getIssueDate(
+cert
+);
+
+
+const certDiv =
+document.createElement(
+'div'
+);
+
+
+certDiv.className =
+'certificate-container';
+
+
+certDiv.innerHTML = `
 
 <div class="field-name">
-<span>${escapeHtml(cert.firstName)}</span>
-<span>${escapeHtml(cert.lastName)}</span>
+
+<span>
+${escapeHtml(cert.firstName)}
+</span>
+
+<span>
+${escapeHtml(cert.lastName)}
+</span>
+
 </div>
+
 
 <div class="field-id">
 ${escapeHtml(cert.id)}
 </div>
 
-<div class="field-course">
-${escapeHtml(cert.courseName || '—')}
-</div>
-
-<div class="field-hours">
-${escapeHtml(cert.training || '—')}
-</div>
-
-<div class="field-date">
-${escapeHtml(cert.courseEnd || '—')}
-</div>
-
-<div class="certificate-label">
-מספר תעודה: ${escapeHtml(cert.id)}
-</div>
-
-</div>
-
-`
-).join('');
-
-window.scrollTo(0, 0);
-
-}
-
-
-/*
-=========================================================
-הורדה
-=========================================================
-*/
-
-function downloadSelectedPDFs() {
-
-const selected = getSelectedCertificates();
-
-if (selected.length === 0) {
-alert('בחר תעודות להורדה');
-return;
-}
-
-showProgress();
-
-let processed = 0;
-
-selected.forEach((cert, idx) => {
-
-setTimeout(() => {
-
-const element = createCertificateElement(cert);
-
-const opt = {
-margin: 0,
-filename: `${cert.firstName}_${cert.lastName}_certificate.pdf`,
-image: { type: 'png', quality: 0.98 },
-html2canvas: { scale: 2 },
-jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-};
-
-html2pdf().set(opt).from(element).save().then(() => {
-processed++;
-updateProgressBar(processed, selected.length);
-if (processed === selected.length) {
-hideProgress();
-}
-});
-
-}, idx * 500);
-
-});
-
-}
-
-
-function downloadSelectedZip() {
-
-const selected = getSelectedCertificates();
-
-if (selected.length === 0) {
-alert('בחר תעודות להורדה');
-return;
-}
-
-showProgress();
-const zip = new JSZip();
-let processed = 0;
-
-selected.forEach((cert, idx) => {
-
-setTimeout(() => {
-
-const element = createCertificateElement(cert);
-
-const opt = {
-margin: 0,
-image: { type: 'png', quality: 0.98 },
-html2canvas: { scale: 2 },
-jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-};
-
-html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
-
-const filename =
-`${cert.firstName}_${cert.lastName}_certificate.pdf`;
-
-zip.file(filename, blob);
-
-processed++;
-updateProgressBar(processed, selected.length);
-
-if (processed === selected.length) {
-
-zip.generateAsync({ type: 'blob' }).then(blob => {
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'certificates.zip';
-a.click();
-URL.revokeObjectURL(url);
-hideProgress();
-});
-
-}
-
-});
-
-}, idx * 500);
-
-});
-
-}
-
-
-function createCertificateElement(cert) {
-
-const div = document.createElement('div');
-
-div.className = 'certificate-container';
-
-div.innerHTML = `
-
-<div class="field-name">
-<span>${escapeHtml(cert.firstName)}</span>
-<span>${escapeHtml(cert.lastName)}</span>
-</div>
-
-<div class="field-id">
-${escapeHtml(cert.id)}
-</div>
 
 <div class="field-course">
-${escapeHtml(cert.courseName || '—')}
+${escapeHtml(training)}
 </div>
+
 
 <div class="field-hours">
-${escapeHtml(cert.training || '—')}
+${escapeHtml(hours)}
 </div>
 
+
 <div class="field-date">
-${escapeHtml(cert.courseEnd || '—')}
+${escapeHtml(issueDate)}
 </div>
 
 `;
 
-return div;
 
-}
+container.appendChild(
+certDiv
+);
 
-
-/*
-=========================================================
-שליחה במייל
-=========================================================
-*/
-
-function sendSelectedEmails() {
-
-const selected = getSelectedCertificates();
-
-if (selected.length === 0) {
-alert('בחר תעודות לשליחה');
-return;
-}
-
-const emails = selected
-.filter(c => c.email)
-.map(c => c.email);
-
-if (emails.length === 0) {
-alert('לא נבחרו תעודות עם כתובות מייל');
-return;
-}
-
-showProgress();
-
-const callbackName =
-'sendEmailCallback_' + Date.now();
-
-window[callbackName] = function(response) {
-
-delete window[callbackName];
-
-const oldScript =
-document.getElementById(callbackName);
-
-if (oldScript) {
-oldScript.remove();
-}
-
-hideProgress();
-
-if (response && response.success) {
-alert(`נשלחו ${response.count || 0} מייל/ים בהצלחה`);
-} else {
-alert('שגיאה בשליחת המייל');
-}
-
-};
-
-const script = document.createElement('script');
-script.id = callbackName;
-
-script.src =
-scriptURL +
-'?action=sendEmails' +
-'&emails=' +
-encodeURIComponent(JSON.stringify(emails)) +
-'&callback=' +
-encodeURIComponent(callbackName) +
-'&t=' +
-Date.now();
-
-script.onerror = function() {
-alert('שגיאה בשליחת המייל');
-delete window[callbackName];
-hideProgress();
-script.remove();
-};
-
-document.body.appendChild(script);
-
-}
-
-/*
-=========================================================
-שליחה לכתובת מייל אחת
-=========================================================
-*/
-
-function openSendToEmailModal() {
-
-const selected = getSelectedCertificates();
-
-if (selected.length === 0) {
-alert('בחר תעודות לשליחה');
-return;
-}
-
-document.getElementById('sendToEmailModal').style.display = 'block';
-document.getElementById('recipientEmail').value = '';
-document.getElementById('selectedCountDisplay').textContent = selected.length;
-
-}
-
-function closeSendToEmailModal() {
-document.getElementById('sendToEmailModal').style.display = 'none';
-}
-
-function sendToSingleEmail() {
-
-const selected = getSelectedCertificates();
-
-if (selected.length === 0) {
-alert('בחר תעודות לשליחה');
-return;
-}
-
-const recipientEmail = document.getElementById('recipientEmail').value.trim();
-const emailSubject = document.getElementById('emailSubject').value.trim();
-
-if (!recipientEmail) {
-alert('אנא הזן כתובת מייל');
-return;
-}
-
-if (!validateEmail(recipientEmail)) {
-alert('כתובת המייל אינה תקינה');
-return;
-}
-
-showProgress();
-
-const callbackName =
-'sendToEmailCallback_' + Date.now();
-
-window[callbackName] = function(response) {
-
-delete window[callbackName];
-
-const oldScript =
-document.getElementById(callbackName);
-
-if (oldScript) {
-oldScript.remove();
-}
-
-hideProgress();
-closeSendToEmailModal();
-
-if (response && response.success) {
-alert(`נשלחו ${selected.length} תעודות ל-${recipientEmail} בהצלחה`);
-clearSelection();
-} else {
-alert('שגיאה בשליחת המייל: ' + (response?.message || 'שגיאה לא ידועה'));
-}
-
-};
-
-const script = document.createElement('script');
-script.id = callbackName;
-
-script.src =
-scriptURL +
-'?action=sendToSingleEmail' +
-'&recipientEmail=' +
-encodeURIComponent(recipientEmail) +
-'&subject=' +
-encodeURIComponent(emailSubject) +
-'&certificateIds=' +
-encodeURIComponent(JSON.stringify(selected.map(c => c.id))) +
-'&callback=' +
-encodeURIComponent(callbackName) +
-'&t=' +
-Date.now();
-
-script.onerror = function() {
-alert('שגיאה בשליחת המייל');
-delete window[callbackName];
-hideProgress();
-script.remove();
-};
-
-document.body.appendChild(script);
-
-}
-
-function validateEmail(email) {
-const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-return re.test(email);
-}
-
-/*
-=========================================================
-עמודת התקדמות
-=========================================================
-*/
-
-function showProgress() {
-document.getElementById('progressContainer').style.display = 'block';
-document.getElementById('progressBarFill').style.width = '0%';
-}
-
-function hideProgress() {
-document.getElementById('progressContainer').style.display = 'none';
-}
-
-function updateProgressBar(current, total) {
-const percent = Math.round((current / total) * 100);
-document.getElementById('progressBarFill').style.width = percent + '%';
-document.getElementById('progressStatusText').textContent =
-`מעבד... ${current} מתוך ${total}`;
-}
-
-/*
-=========================================================
-טעינה בהתחלה
-=========================================================
-*/
-
-window.addEventListener('DOMContentLoaded', function() {
-loadData();
 });
 
+
+window.scrollTo({
+top: container.offsetTop,
+behavior: 'smooth'
+});
+
+}
+
+
+/*
+=========================================================
+בניית תעודה ל-PDF
+=========================================================
+*/
+
+function buildCertificateElement(cert) {
+
+const hours =
+calculateHours(
+cert.training
+);
+
+
+const training =
+getCertificateTraining(
+cert
+);
+
+
+const issueDate =
+getIssueDate(
+cert
+);
+
+
+const certDiv =
+document.createElement(
+'div'
+);
+
+
+certDiv.className =
+'certificate-container';
+
+
+certDiv.innerHTML = `
+
+<div class="field-name">
+
+<span>
+${escapeHtml(cert.firstName)}
+</span>
+
+<span>
+${escapeHtml(cert.lastName)}
+</span>
+
+</div>
+
+
+<div class="field-id">
+${escapeHtml(cert.id)}
+</div>
+
+
+<div class="field-course">
+${escapeHtml(training)}
+</div>
+
+
+<div class="field-hours">
+${escapeHtml(hours)}
+</div>
+
+
+<div class="field-date">
+${escapeHtml(issueDate)}
+</div>
+
+`;
+
+
+return certDiv;
+
+}
+
+
+/*
+=========================================================
+הגדרות PDF
+=========================================================
+*/
+
+function certificatePdfOptions(cert) {
+
+return {
+
+margin: 0,
+
+filename:
+`תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
+
+image: {
+type: 'jpeg',
+quality: 0.98
+},
+
+html2canvas: {
+scale: 2,
+useCORS: true,
+backgroundColor: '#ffffff'
+},
+
+jsPDF: {
+unit: 'mm',
+format: 'a4',
+orientation: 'portrait'
+},
+
+pagebreak: {
+mode: [
+'css',
+'legacy'
+]
+}
+
+};
+
+}
+
+
+/*
+=========================================================
+הורדת PDF
+=========================================================
+*/
+
+async function downloadSelectedPDFs() {
+
+const selectedIndexes =
+getSelectedIndexes();
+
+
+if (!selectedIndexes.length) {
+
+alert(
+"אנא בחר לפחות תעודה אחת להורדה"
+);
+
+return;
+}
+
+
+showProgress(
+true,
+`מתחיל הורדה של ${selectedIndexes.length} תעודות...`,
+0
+);
+
+
+for (
+let i = 0;
+i < selectedIndexes.length;
+i++
+) {
+
+const cert =
+filteredCertificates[
+selectedIndexes[i]
+];
+
+
+const elem =
+buildCertificateElement(
+cert
+);
+
+
+document
+.getElementById(
+'certificatesContainer'
+)
+.appendChild(elem);
+
+
+await html2pdf()
+.set(
+certificatePdfOptions(
+cert
+)
+)
+.from(elem)
+.save();
+
+
+const percent =
+Math.round(
+(
+(i + 1) /
+selectedIndexes.length
+) * 100
+);
+
+
+showProgress(
+true,
+`הורדו ${i + 1} מתוך ${selectedIndexes.length} תעודות`,
+percent
+);
+
+
+elem.remove();
+
+
+await new Promise(
+r => setTimeout(r, 350)
+);
+
+}
+
+
+showProgress(false);
+
+
+alert(
+`ההורדה הסתיימה: ${selectedIndexes.length} תעודות.`
+);
+
+}
+
+
+/*
+=========================================================
+הורדת ZIP
+=========================================================
+*/
+
+async function downloadSelectedZip() {
+
+const selectedIndexes =
+getSelectedIndexes();
+
+
+if (!selectedIndexes.length) {
+
+alert(
+"אנא בחר לפחות תעודה אחת להורדה"
+);
+
+return;
+}
+
+
+if (typeof JSZip === 'undefined') {
+
+alert(
+"ספריית ZIP לא נטענה. נסה לרענן את הדף."
+);
+
+return;
+}
+
+
+const zip =
+new JSZip();
+
+
+showProgress(
+true,
+`מכין ZIP: 0 מתוך ${selectedIndexes.length}`,
+0
+);
+
+
+for (
+let i = 0;
+i < selectedIndexes.length;
+i++
+) {
+
+const cert =
+filteredCertificates[
+selectedIndexes[i]
+];
+
+
+const elem =
+buildCertificateElement(
+cert
+);
+
+
+document
+.getElementById(
+'certificatesContainer'
+)
+.appendChild(elem);
+
+
+const blob =
+await html2pdf()
+.set(
+certificatePdfOptions(
+cert
+)
+)
+.from(elem)
+.outputPdf('blob');
+
+
+zip.file(
+`תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
+blob
+);
+
+
+elem.remove();
+
+
+const percent =
+Math.round(
+(
+(i + 1) /
+selectedIndexes.length
+) * 100
+);
+
+
+showProgress(
+true,
+`מוכן ל-ZIP: ${i + 1} מתוך ${selectedIndexes.length}`,
+percent
+);
+
+}
+
+
+const zipBlob =
+await zip.generateAsync(
+{ type: 'blob' },
+meta => {
+
+showProgress(
+true,
+`דוחס ZIP... ${Math.round(meta.percent)}%`,
+Math.round(meta.percent)
+);
+
+}
+);
+
+
+const url =
+URL.createObjectURL(
+zipBlob
+);
+
+
+const a =
+document.createElement(
+'a'
+);
+
+
+a.href = url;
+
+
+a.download =
+`תעודות_יוזוק_מדיק_${new Date().toISOString().slice(0,10)}.zip`;
+
+
+document.body.appendChild(a);
+
+
+a.click();
+
+
+a.remove();
+
+
+URL.revokeObjectURL(url);
+
+
+showProgress(false);
+
+
+alert(
+`ה-ZIP מוכן עם ${selectedIndexes.length} תעודות.`
+);
+
+}
+
+
+/*
+=========================================================
+שליחה מרוכזת למייל
+=========================================================
+*/
+
+async function sendSelectedEmails() {
+
+const selectedIndexes =
+getSelectedIndexes();
+
+
+if (!selectedIndexes.length) {
+
+alert(
+"אנא בחר לפחות תעודה אחת לשליחה"
+);
+
+return;
+}
+
+
+const withEmail =
+selectedIndexes.filter(
+idx =>
+!!filteredCertificates[idx].email
+);
+
+
+if (!withEmail.length) {
+
+alert(
+"לאף אחת מהתעודות שנבחרו אין כתובת מייל."
+);
+
+return;
+}
+
+
+if (
+!confirm(
+`האם לשלוח ${withEmail.length} תעודות במייל?`
+)
+) {
+return;
+}
+
+
+showProgress(
+true,
+`מתחיל בשליחה...`,
+0
+);
+
+
+for (
+let i = 0;
+i < selectedIndexes.length;
+i++
+) {
+
+const cert =
+filteredCertificates[
+selectedIndexes[i]
+];
+
+
+const percent =
+Math.round(
+(
+(i + 1) /
+selectedIndexes.length
+) * 100
+);
+
+
+if (!cert.email) {
+
+showProgress(
+true,
+`מדלג על ${cert.firstName} ${cert.lastName} — אין מייל`,
+percent
+);
+
+continue;
+}
+
+
+showProgress(
+true,
+`מכין ושולח ל-${cert.firstName} ${cert.lastName} (${i + 1}/${selectedIndexes.length})...`,
+percent
+);
+
+
+try {
+
+const elem =
+buildCertificateElement(
+cert
+);
+
+
+document
+.getElementById(
+'certificatesContainer'
+)
+.appendChild(elem);
+
+
+const opt = {
+
+margin: 0,
+
+filename:
+`Teuda_${cert.id}.pdf`,
+
+image: {
+type: 'jpeg',
+quality: 0.95
+},
+
+html2canvas: {
+scale: 1.5,
+useCORS: true,
+backgroundColor: '#ffffff'
+},
+
+jsPDF: {
+unit: 'mm',
+format: 'a4',
+orientation: 'portrait'
+}
+
+};
+
+
+const pdfBase64 =
+await html2pdf()
+.set(opt)
+.from(elem)
+.outputPdf('datauristring');
+
+
+elem.remove();
+
+
+const base64Data =
+pdfBase64.split(',')[1];
+
+
+const formData =
+new URLSearchParams();
+
+
+formData.append(
+'action',
+'sendBatchEmail'
+);
+
+
+formData.append(
+'email',
+cert.email.trim()
+);
+
+
+formData.append(
+'fullName',
+`${cert.firstName} ${cert.lastName}`
+);
+
+
+formData.append(
+'pdfData',
+base64Data
+);
+
+
+formData.append(
+'fileName',
+`Teuda_${cert.id}.pdf`
+);
+
+
+await postToAppsScript(
+formData
+);
+
+
+} catch (err) {
+
+console.error(
+`שגיאה בשליחת מייל ל-${cert.email}:`,
+err
+);
+
+
+showProgress(
+true,
+`שגיאה בשליחת מייל ל-${cert.firstName} ${cert.lastName}`,
+percent
+);
+
+}
+
+}
+
+
+showProgress(false);
+
+
+alert(
+"פעולת שליחת המיילים הסתיימה."
+);
+
+}
+
+
+/*
+=========================================================
+POST ל-Google Apps Script
+=========================================================
+*/
+
+function postToAppsScript(formData) {
+
+return new Promise(
+(resolve) => {
+
+const iframeName =
+'gasPostFrame_' +
+Date.now();
+
+
+const iframe =
+document.createElement(
+'iframe'
+);
+
+
+iframe.name =
+iframeName;
+
+
+iframe.style.display =
+'none';
+
+
+document.body.appendChild(
+iframe
+);
+
+
+const form =
+document.createElement(
+'form'
+);
+
+
+form.method =
+'POST';
+
+
+form.action =
+scriptURL;
+
+
+form.target =
+iframeName;
+
+
+form.style.display =
+'none';
+
+
+for (
+const [key, value]
+of formData.entries()
+) {
+
+const input =
+document.createElement(
+'input'
+);
+
+
+input.type =
+'hidden';
+
+
+input.name =
+key;
+
+
+input.value =
+value;
+
+
+form.appendChild(
+input
+);
+
+}
+
+
+document.body.appendChild(
+form
+);
+
+
+iframe.onload =
+function() {
+
+setTimeout(
+() => {
+
+form.remove();
+iframe.remove();
+
+resolve();
+
+},
+300
+);
+
+};
+
+
+form.submit();
+
+
+setTimeout(
+() => {
+
+if (
+document.body.contains(form)
+) {
+form.remove();
+}
+
+
+if (
+document.body.contains(iframe)
+) {
+iframe.remove();
+}
+
+
+resolve();
+
+},
+15000
+);
+
+}
+);
+
+}
+
+
+/*
+=========================================================
+פס התקדמות
+=========================================================
+*/
+
+function showProgress(
+show,
+statusText = '',
+percent = 0
+) {
+
+const container =
+document.getElementById(
+'progressContainer'
+);
+
+
+const textElem =
+document.getElementById(
+'progressStatusText'
+);
+
+
+const fillElem =
+document.getElementById(
+'progressBarFill'
+);
+
+
+container.style.display =
+show
+? 'block'
+: 'none';
+
+
+textElem.textContent =
+statusText;
+
+
+fillElem.style.width =
+percent + '%';
+
+}
+
+
+/*
+=========================================================
+טעינה ראשונית
+=========================================================
+*/
+
+window.addEventListener(
+'load',
+loadData
+);
+
 </script>
+
 </body>
 </html>
