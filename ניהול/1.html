@@ -738,16 +738,61 @@ let filteredCertificates = [];
 
 /*
 =========================================================
-טעינת נתונים
+טעינת נתונים — גרסה עמידה למובייל
 =========================================================
+מנסה קודם fetch() רגיל (עובד הכי טוב במובייל, כי
+Apps Script שולח כותרת CORS פתוחה כברירת מחדל).
+אם fetch נכשל (רשת חסומה / דפדפן ישן) — עובר אוטומטית
+ל-JSONP כגיבוי. יש גם Timeout כדי שהדף לא יישאר תקוע
+בלי שום הודעה אם הבקשה לא חוזרת.
 */
 
 function loadData() {
 
-const callbackName =
-'certificatesCallback_' + Date.now();
+showTableMessage('טוען נתונים...');
 
-window[callbackName] = function(data) {
+const url =
+scriptURL +
+'?action=getAllCertificates' +
+'&t=' + Date.now();
+
+fetchWithTimeout(url, 10000)
+.then(res => {
+if (!res.ok) {
+throw new Error('HTTP ' + res.status);
+}
+return res.json();
+})
+.then(data => {
+handleData(data);
+})
+.catch(err => {
+console.warn(
+'fetch() נכשל, עובר ל-JSONP כגיבוי:',
+err
+);
+loadDataJSONP();
+});
+
+}
+
+
+function fetchWithTimeout(url, timeoutMs) {
+
+const controller = new AbortController();
+
+const timer = setTimeout(
+() => controller.abort(),
+timeoutMs
+);
+
+return fetch(url, { signal: controller.signal })
+.finally(() => clearTimeout(timer));
+
+}
+
+
+function handleData(data) {
 
 try {
 
@@ -766,6 +811,8 @@ data && data.message
 : 'שגיאה לא ידועה'
 )
 );
+
+showTableMessage('שגיאה בטעינת הנתונים');
 
 return;
 }
@@ -787,11 +834,33 @@ console.error(
 e
 );
 
-alert(
-'שגיאה בעיבוד הנתונים'
-);
+alert('שגיאה בעיבוד הנתונים');
 
-} finally {
+showTableMessage('שגיאה בעיבוד הנתונים');
+
+}
+
+}
+
+
+/*
+=========================================================
+גיבוי JSONP (למקרה ש-fetch נחסם)
+=========================================================
+*/
+
+function loadDataJSONP() {
+
+const callbackName =
+'certificatesCallback_' + Date.now();
+
+let finished = false;
+
+window[callbackName] = function(data) {
+
+finished = true;
+
+handleData(data);
 
 delete window[callbackName];
 
@@ -800,8 +869,6 @@ document.getElementById(callbackName);
 
 if (oldScript) {
 oldScript.remove();
-}
-
 }
 
 };
@@ -827,18 +894,38 @@ console.error(
 'Google Apps Script JSONP request failed'
 );
 
-alert(
-'שגיאה בחיבור ל-Google Apps Script'
-);
-
 delete window[callbackName];
 
 script.remove();
+
+alert(
+'שגיאה בחיבור לשרת. ודא שיש חיבור לאינטרנט ונסה שוב.'
+);
+
+showTableMessage('שגיאה בחיבור לשרת');
 
 };
 
 
 document.body.appendChild(script);
+
+
+// אם אחרי 12 שניות אין תשובה בכלל — נודיע במקום להשאיר תקוע
+setTimeout(() => {
+
+if (!finished) {
+
+alert(
+'הבקשה לוקחת יותר מדי זמן. ייתכן שהרשת חלשה, ' +
+'או שהדפדפן/תוסף חוסם את הבקשה (למשל AdBlock או DNS פרטי). ' +
+'נסה לכבות זמנית תוספי חסימה בדפדפן ולרענן.'
+);
+
+showTableMessage('אין תגובה מהשרת — נסה לרענן');
+
+}
+
+}, 12000);
 
 }
 
@@ -861,6 +948,29 @@ ch => ({
 "'": '&#039;'
 }[ch])
 );
+
+}
+
+
+/*
+=========================================================
+הודעת מצב בטבלה
+=========================================================
+*/
+
+function showTableMessage(text) {
+
+const tbody =
+document.getElementById(
+'certificatesTableBody'
+);
+
+tbody.innerHTML =
+'<tr>' +
+'<td colspan="7" style="text-align:center;padding:30px;">' +
+escapeHtml(text) +
+'</td>' +
+'</tr>';
 
 }
 
