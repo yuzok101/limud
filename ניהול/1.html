@@ -547,7 +547,15 @@ margin: 0 !important;
 
 <body>
 
-<div class="app-shell">
+  <div id="loadingScreen">
+    <div class="loading-box">
+        <div class="loader"></div>
+        <h1>טוען נתונים...</h1>
+        <p>אנא המתן</p>
+    </div>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none;">
 
 <div class="admin-panel">
 
@@ -611,6 +619,20 @@ id="emailFilter"
 class="select-input"
 onchange="filterCertificates()"
 >
+  <select
+id="sortField"
+class="select-input"
+onchange="sortCertificates()"
+>
+
+<option value="">ללא מיון</option>
+<option value="id">מיין לפי ת.ז</option>
+<option value="firstName">מיין לפי שם</option>
+<option value="lastName">מיין לפי שם משפחה</option>
+<option value="courseName">מיין לפי קורס</option>
+<option value="training">מיין לפי הכשרה</option>
+
+</select>
 <option value="all">כל הרשומות</option>
 <option value="hasEmail">עם מייל בלבד</option>
 <option value="noEmail">ללא מייל</option>
@@ -641,7 +663,14 @@ onclick="downloadSelectedZip()"
 class="btn btn-success"
 onclick="sendSelectedEmails()"
 >
-✉️ שלח במייל
+✉️ שלח למיילים
+</button>
+
+<button
+class="btn btn-success"
+onclick="sendCertificatesToCustomEmail()"
+>
+📧 שלח למייל שאבחר
 </button>
 
 <button
