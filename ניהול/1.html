@@ -542,6 +542,74 @@ size: A4 portrait;
 margin: 0 !important;
 }
 }
+
+
+/* =========================================================
+   מסך טעינה
+========================================================= */
+
+#loadingScreen{
+    position:fixed;
+    inset:0;
+    background:#071522;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999999;
+}
+
+.loading-box{
+    text-align:center;
+}
+
+.loading-box h1{
+    color:#ffffff;
+    font-size:42px;
+    margin-top:30px;
+    font-weight:800;
+}
+
+.loading-box p{
+    color:#9edcff;
+    font-size:22px;
+    margin-top:12px;
+}
+
+.loader{
+    width:90px;
+    height:90px;
+    border:8px solid rgba(255,255,255,.15);
+    border-top:8px solid #00c8ff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* =========================================================
+   שדה מיון
+========================================================= */
+
+#sortField{
+    min-width:180px;
+}
+
+@media(max-width:900px){
+
+    #sortField{
+        width:100%;
+    }
+
+}
+
 </style>
 </head>
 
@@ -795,7 +863,9 @@ data && data.message
 : 'שגיאה לא ידועה'
 )
 );
-
+document.getElementById("loadingScreen").style.display = "none";
+document.getElementById("appShell").style.display = "block";
+  
 return;
 }
 
@@ -806,9 +876,11 @@ Array.isArray(data.certificates)
 
 filteredCertificates =
 [...allCertificates];
+  sortCertificates();
 
 renderTable();
-
+document.getElementById("loadingScreen").style.display = "none";
+document.getElementById("appShell").style.display = "block";
 } catch (e) {
 
 console.error(
@@ -1056,8 +1128,8 @@ matchesEmail
 });
 
 
+sortCertificates();
 renderTable();
-
 }
 
 
@@ -2043,6 +2115,114 @@ alert(
 "פעולת שליחת המיילים הסתיימה."
 );
 
+  async function sendCertificatesToCustomEmail(){
+
+    const selectedIndexes = getSelectedIndexes();
+
+    if(selectedIndexes.length===0){
+        alert("בחר לפחות תעודה אחת.");
+        return;
+    }
+
+    const email = prompt("לאיזה מייל לשלוח את כל התעודות?");
+
+    if(!email){
+        return;
+    }
+
+    const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!emailRegex.test(email)){
+        alert("כתובת המייל אינה תקינה.");
+        return;
+    }
+
+    showProgress(
+        true,
+        "מכין תעודות...",
+        0
+    );
+
+    for(let i=0;i<selectedIndexes.length;i++){
+
+        const cert =
+        filteredCertificates[selectedIndexes[i]];
+
+        const elem =
+        buildCertificateElement(cert);
+
+        document
+        .getElementById("certificatesContainer")
+        .appendChild(elem);
+
+        const pdf =
+        await html2pdf()
+        .set({
+            margin:0,
+            filename:`Teuda_${cert.id}.pdf`,
+            image:{
+                type:"jpeg",
+                quality:0.95
+            },
+            html2canvas:{
+                scale:1.5,
+                useCORS:true,
+                backgroundColor:"#ffffff"
+            },
+            jsPDF:{
+                unit:"mm",
+                format:"a4",
+                orientation:"portrait"
+            }
+        })
+        .from(elem)
+        .outputPdf("datauristring");
+
+        elem.remove();
+
+        const formData =
+        new URLSearchParams();
+
+        formData.append(
+            "action",
+            "sendBatchEmail"
+        );
+
+        formData.append(
+            "email",
+            email
+        );
+
+        formData.append(
+            "fullName",
+            cert.firstName+" "+cert.lastName
+        );
+
+        formData.append(
+            "pdfData",
+            pdf.split(",")[1]
+        );
+
+        formData.append(
+            "fileName",
+            `Teuda_${cert.id}.pdf`
+        );
+
+        await postToAppsScript(formData);
+
+        showProgress(
+            true,
+            `נשלחו ${i+1} מתוך ${selectedIndexes.length}`,
+            Math.round(((i+1)/selectedIndexes.length)*100)
+        );
+
+    }
+
+    showProgress(false);
+
+    alert("כל התעודות נשלחו אל "+email);
+
+}
 }
 
 
@@ -2240,6 +2420,66 @@ percent + '%';
 =========================================================
 */
 
+  /* =========================================================
+   מיון רשומות
+========================================================= */
+
+function sortCertificates(){
+
+    const field =
+    document.getElementById("sortField").value;
+
+    if(!field){
+        return;
+    }
+
+    filteredCertificates.sort((a,b)=>{
+
+        let valueA = "";
+        let valueB = "";
+
+        switch(field){
+
+            case "id":
+                valueA = String(a.id || "");
+                valueB = String(b.id || "");
+                break;
+
+            case "firstName":
+                valueA = String(a.firstName || "");
+                valueB = String(b.firstName || "");
+                break;
+
+            case "lastName":
+                valueA = String(a.lastName || "");
+                valueB = String(b.lastName || "");
+                break;
+
+            case "courseName":
+                valueA = String(a.courseName || "");
+                valueB = String(b.courseName || "");
+                break;
+
+            case "training":
+                valueA = String(a.training || "");
+                valueB = String(b.training || "");
+                break;
+
+        }
+
+        return valueA.localeCompare(
+            valueB,
+            "he",
+            {
+                numeric:true,
+                sensitivity:"base"
+            }
+        );
+
+    });
+
+}
+  
 window.addEventListener(
 'load',
 loadData
