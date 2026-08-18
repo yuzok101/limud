@@ -279,10 +279,6 @@ padding: 28px 12px;
 background: #071522;
 }
 
-/* =========================================================
-תעודה
-========================================================= */
-
 .certificate-container {
 position: relative;
 width: 210mm;
@@ -291,9 +287,6 @@ flex: 0 0 auto;
 
 background-image: url('certificate-template.jpg');
 
-/*
-הרקע מעט מוגדל ומוזז למעלה כדי למנוע פס לבן
-*/
 background-size: 100.5% 100.5%;
 background-position: center -1.2mm;
 background-repeat: no-repeat;
@@ -303,14 +296,6 @@ box-sizing: border-box;
 page-break-after: always;
 overflow: hidden;
 }
-
-/*
-=========================================================
-שם פרטי + שם משפחה
-=========================================================
-הועלה מעט למעלה כדי להיות ממש מעל הקו.
-בנוסף יש רווח גדול וברור יותר בין השם הפרטי למשפחה.
-*/
 
 .field-name {
 position: absolute;
@@ -344,14 +329,6 @@ white-space: nowrap;
 display: inline-block;
 }
 
-/*
-=========================================================
-מספר תעודת זהות
-=========================================================
-המספר עולה מעט למעלה ונצמד לקצה השמאלי
-של השורה.
-*/
-
 .field-id {
 position: absolute;
 
@@ -373,14 +350,6 @@ line-height: 1;
 
 white-space: nowrap;
 }
-
-/*
-=========================================================
-הכשרה
-=========================================================
-עולה למעלה כדי להיות ממש מתחת ל:
-"עבר/ה בהצלחה קורס:"
-*/
 
 .field-course {
 position: absolute;
@@ -404,13 +373,6 @@ direction: rtl;
 white-space: nowrap;
 }
 
-/*
-=========================================================
-היקף שעות
-=========================================================
-עולה ומוצמד לקצה השמאלי של השורה.
-*/
-
 .field-hours {
 position: absolute;
 
@@ -432,13 +394,6 @@ line-height: 1;
 
 white-space: nowrap;
 }
-
-/*
-=========================================================
-תאריך הנפקה
-=========================================================
-עולה ומוצמד לקצה השמאלי של השורה.
-*/
 
 .field-date {
 position: absolute;
@@ -473,6 +428,30 @@ text-align: center;
 color: #fff;
 font-size: 10px;
 opacity: .8;
+}
+
+.import-section {
+margin-bottom: 12px;
+padding: 12px;
+background: rgba(255,255,255,.07);
+border-radius: 9px;
+border: 1px solid rgba(255,255,255,.08);
+}
+
+.import-section label {
+display: block;
+font-size: 13px;
+margin-bottom: 8px;
+color: #b8d8ef;
+}
+
+.import-section input[type="file"] {
+padding: 8px;
+background: #0b2944;
+border: 1px solid #167bb0;
+border-radius: 6px;
+color: #fff;
+width: 100%;
 }
 
 @media (max-width: 1200px) {
@@ -556,7 +535,7 @@ margin: 0 !important;
 <div>
 <h1>פאנל מנהל — הנפקה וניהול תעודות</h1>
 <div class="sub-title">
-ניהול, חיפוש, הנפקה, הורדה ושליחה מרוכזת
+ניהול, חיפוש, הנפקה, הורדה ושליחה מרוכזת (בלי API)
 </div>
 </div>
 
@@ -570,6 +549,19 @@ margin: 0 !important;
 </button>
 </div>
 
+</div>
+
+<div class="import-section">
+<label for="jsonFileInput">📤 טען קובץ JSON:</label>
+<input
+type="file"
+id="jsonFileInput"
+accept=".json"
+onchange="handleJsonUpload(event)"
+>
+<div style="font-size: 12px; color: #8ab4d5; margin-top: 6px;">
+הנתונים יישמרו בהתקן (localStorage)
+</div>
 </div>
 
 <div class="stats-bar">
@@ -638,10 +630,10 @@ onclick="downloadSelectedZip()"
 </button>
 
 <button
-class="btn btn-success"
-onclick="sendSelectedEmails()"
+class="btn btn-secondary"
+onclick="downloadJSON()"
 >
-✉️ שלח במייל
+💾 שמור JSON
 </button>
 
 <button
@@ -729,128 +721,103 @@ style="text-align:center;"
 
 <script>
 
-const scriptURL =
-'https://script.google.com/macros/s/AKfycbwLkr494xjIbksbfRjaQg7CumbXTaLoln23hWySS5JSO_YrDj5lATNNdPXrcB9aKN17/exec';
-
 let allCertificates = [];
 let filteredCertificates = [];
 
+// =========================================================
+// שמירה וטעינה מ-localStorage
+// =========================================================
 
-/*
-=========================================================
-טעינת נתונים
-=========================================================
-*/
-
-function loadData() {
-
-const callbackName =
-'certificatesCallback_' + Date.now();
-
-window[callbackName] = function(data) {
-
+function saveCertificatesToStorage() {
 try {
+localStorage.setItem('certificates', JSON.stringify(allCertificates));
+console.log('✓ נתונים נשמרו בהתקן');
+} catch (e) {
+console.error('שגיאה בשמירה:', e);
+}
+}
 
-console.log(
-'Google Apps Script response:',
-data
-);
+function loadCertificatesFromStorage() {
+try {
+const stored = localStorage.getItem('certificates');
+if (stored) {
+allCertificates = JSON.parse(stored);
+console.log('✓ נתונים נטענו מהתקן:', allCertificates.length);
+} else {
+allCertificates = [];
+console.log('אין נתונים בהתקן');
+}
+} catch (e) {
+console.error('שגיאה בטעינה:', e);
+allCertificates = [];
+}
+}
 
-if (!data || !data.success) {
+// =========================================================
+// ייבוא JSON מקובץ
+// =========================================================
 
-alert(
-'שגיאה בטעינת הנתונים: ' +
-(
-data && data.message
-? data.message
-: 'שגיאה לא ידועה'
-)
-);
+function handleJsonUpload(event) {
+const file = event.target.files[0];
+if (!file) return;
 
+const reader = new FileReader();
+reader.onload = function(e) {
+try {
+const data = JSON.parse(e.target.result);
+const certificates = Array.isArray(data) ? data : (data.certificates || []);
+
+if (certificates.length === 0) {
+alert('הקובץ לא מכיל נתונים');
 return;
 }
 
-allCertificates =
-Array.isArray(data.certificates)
-? data.certificates
-: [];
-
-filteredCertificates =
-[...allCertificates];
-
+allCertificates = certificates;
+saveCertificatesToStorage();
+filteredCertificates = [...allCertificates];
 renderTable();
+alert(`✓ נטענו ${certificates.length} תעודות בהצלחה!`);
 
-} catch (e) {
-
-console.error(
-'שגיאה בעיבוד הנתונים:',
-e
-);
-
-alert(
-'שגיאה בעיבוד הנתונים'
-);
-
-} finally {
-
-delete window[callbackName];
-
-const oldScript =
-document.getElementById(callbackName);
-
-if (oldScript) {
-oldScript.remove();
+} catch (err) {
+alert('שגיאה בקריאת הקובץ: ' + err.message);
 }
-
-}
-
 };
-
-
-const script =
-document.createElement('script');
-
-script.id = callbackName;
-
-script.src =
-scriptURL +
-'?action=getAllCertificates' +
-'&callback=' +
-encodeURIComponent(callbackName) +
-'&t=' +
-Date.now();
-
-
-script.onerror = function() {
-
-console.error(
-'Google Apps Script JSONP request failed'
-);
-
-alert(
-'שגיאה בחיבור ל-Google Apps Script'
-);
-
-delete window[callbackName];
-
-script.remove();
-
-};
-
-
-document.body.appendChild(script);
-
+reader.readAsText(file);
 }
 
+// =========================================================
+// ייצוא JSON לקובץ
+// =========================================================
 
-/*
-=========================================================
-אבטחת HTML
-=========================================================
-*/
+function downloadJSON() {
+const dataStr = JSON.stringify(allCertificates, null, 2);
+const dataBlob = new Blob([dataStr], { type: 'application/json' });
+const url = URL.createObjectURL(dataBlob);
+const link = document.createElement('a');
+link.href = url;
+link.download = 'certificates_' + new Date().toISOString().slice(0, 10) + '.json';
+link.click();
+URL.revokeObjectURL(url);
+}
+
+// =========================================================
+// טעינת נתונים בעת טעינת העמוד
+// =========================================================
+
+function loadData() {
+loadCertificatesFromStorage();
+filteredCertificates = [...allCertificates];
+renderTable();
+if (allCertificates.length === 0) {
+alert('לא נמצאו נתונים בהתקן. אנא טען קובץ JSON.');
+}
+}
+
+// =========================================================
+// אבטחת HTML
+// =========================================================
 
 function escapeHtml(value) {
-
 return String(value ?? '').replace(
 /[&<>"']/g,
 ch => ({
@@ -861,26 +828,16 @@ ch => ({
 "'": '&#039;'
 }[ch])
 );
-
 }
 
-
-/*
-=========================================================
-טבלה
-=========================================================
-*/
+// =========================================================
+// טבלה
+// =========================================================
 
 function renderTable() {
-
-const tbody =
-document.getElementById(
-'certificatesTableBody'
-);
-
+const tbody = document.getElementById('certificatesTableBody');
 
 if (filteredCertificates.length === 0) {
-
 tbody.innerHTML =
 '<tr>' +
 '<td colspan="7" style="text-align:center;padding:30px;">' +
@@ -889,13 +846,10 @@ tbody.innerHTML =
 '</tr>';
 
 updateStats();
-
 return;
 }
 
-
-tbody.innerHTML =
-filteredCertificates.map(
+tbody.innerHTML = filteredCertificates.map(
 (cert, index) => `
 
 <tr>
@@ -921,36 +875,22 @@ ${escapeHtml(cert.lastName)}
 </td>
 
 <td class="course-cell">
-${escapeHtml(
-cert.courseName || '—'
-)}
+${escapeHtml(cert.courseName || '—')}
 </td>
 
 <td class="training-cell">
-${escapeHtml(
-cert.training || '—'
-)}
+${escapeHtml(cert.training || '—')}
 </td>
 
 <td>
-${escapeHtml(
-cert.courseEnd || '—'
-)}
+${escapeHtml(cert.courseEnd || '—')}
 </td>
 
 <td>
 ${
 cert.email
-? `
-<span class="email-ok">
-${escapeHtml(cert.email)}
-</span>
-`
-: `
-<span class="email-no">
-ללא מייל
-</span>
-`
+? `<span class="email-ok">${escapeHtml(cert.email)}</span>`
+: `<span class="email-no">ללא מייל</span>`
 }
 </td>
 
@@ -959,1262 +899,226 @@ ${escapeHtml(cert.email)}
 `
 ).join('');
 
-
-document.getElementById(
-'selectAll'
-).checked = false;
-
+document.getElementById('selectAll').checked = false;
 updateStats();
-
 }
 
-
-/*
-=========================================================
-חיפוש וסינון
-=========================================================
-*/
+// =========================================================
+// חיפוש וסינון
+// =========================================================
 
 function filterCertificates() {
+const query = document.getElementById('searchInput').value.trim().toLowerCase();
+const emailFilter = document.getElementById('emailFilter').value;
 
-const query =
-document.getElementById(
-'searchInput'
-).value.trim().toLowerCase();
-
-const emailFilter =
-document.getElementById(
-'emailFilter'
-).value;
-
-
-filteredCertificates =
-allCertificates.filter(c => {
-
+filteredCertificates = allCertificates.filter(c => {
 const fullText = [
-
 c.id,
 c.firstName,
 c.lastName,
 c.training,
 c.courseName,
+c.courseEnd,
 c.email
-
 ].join(' ').toLowerCase();
 
-
-const matchesSearch =
-fullText.includes(query);
-
-
+const matchesSearch = fullText.includes(query);
 const matchesEmail =
 emailFilter === 'all' ||
-(
-emailFilter === 'hasEmail' &&
-!!c.email
-) ||
-(
-emailFilter === 'noEmail' &&
-!c.email
-);
+(emailFilter === 'hasEmail' && c.email) ||
+(emailFilter === 'noEmail' && !c.email);
 
-
-return (
-matchesSearch &&
-matchesEmail
-);
-
+return matchesSearch && matchesEmail;
 });
-
 
 renderTable();
-
 }
 
-
-/*
-=========================================================
-בחירה
-=========================================================
-*/
-
-function toggleSelectAll(master) {
-
-document
-.querySelectorAll('.cert-checkbox')
-.forEach(cb => {
-
-cb.checked =
-master.checked;
-
-});
-
-
-updateStats();
-
-}
-
-
-function clearSelection() {
-
-document
-.querySelectorAll('.cert-checkbox')
-.forEach(cb => {
-
-cb.checked = false;
-
-});
-
-
-document.getElementById(
-'selectAll'
-).checked = false;
-
-
-updateStats();
-
-}
-
+// =========================================================
+// סטטיסטיקות
+// =========================================================
 
 function updateStats() {
+const total = allCertificates.length;
+const filtered = filteredCertificates.length;
+const selected = document.querySelectorAll('.cert-checkbox:checked').length;
+const withEmail = allCertificates.filter(c => c.email).length;
 
-document.getElementById(
-'statTotal'
-).textContent =
-allCertificates.length;
-
-
-document.getElementById(
-'statFiltered'
-).textContent =
-filteredCertificates.length;
-
-
-document.getElementById(
-'statSelected'
-).textContent =
-document.querySelectorAll(
-'.cert-checkbox:checked'
-).length;
-
-
-document.getElementById(
-'statWithEmail'
-).textContent =
-allCertificates.filter(
-c => !!c.email
-).length;
-
+document.getElementById('statTotal').textContent = total;
+document.getElementById('statFiltered').textContent = filtered;
+document.getElementById('statSelected').textContent = selected;
+document.getElementById('statWithEmail').textContent = withEmail;
 }
 
+// =========================================================
+// בחירה
+// =========================================================
 
-/*
-=========================================================
-חישוב שעות
-=========================================================
-*/
-
-function calculateHours(trainingText) {
-
-const text =
-String(trainingText || "").trim();
-
-// חובש = תמיד 207 שעות
-if (/חובש/i.test(text)) {
-return "207 שעות";
+function toggleSelectAll(checkbox) {
+document.querySelectorAll('.cert-checkbox').forEach(cb => {
+cb.checked = checkbox.checked;
+});
+updateStats();
 }
 
-
-// מע"ר
-if (/מע[״"'׳]?ר/.test(text)) {
-
-const decimal =
-text.match(
-/\d+(?:[.,]\d+)?/
-);
-
-
-if (decimal) {
-
-const n =
-decimal[0].replace(
-',',
-'.'
-);
-
-
-return n === "1"
-? "שעה"
-: `${n} שעות`;
-
+function clearSelection() {
+document.querySelectorAll('.cert-checkbox').forEach(cb => {
+cb.checked = false;
+});
+updateStats();
 }
 
-
-return "שעה";
+function getSelectedCertificates() {
+const selected = [];
+document.querySelectorAll('.cert-checkbox:checked').forEach(cb => {
+const index = parseInt(cb.dataset.index);
+selected.push(filteredCertificates[index]);
+});
+return selected;
 }
 
-// כל הכשרה אחרת
-const matched =
-text.match(
-/\d+(?:[.,]\d+)?/
-);
+// =========================================================
+// הורדת PDF בודדים
+// =========================================================
 
-
-if (matched) {
-
-const n =
-matched[0].replace(
-',',
-'.'
-);
-
-
-return n === "1"
-? "שעה"
-: `${n} שעות`;
-
+function downloadSelectedPDFs() {
+const selected = getSelectedCertificates();
+if (selected.length === 0) {
+alert('אנא בחר לפחות תעודה אחת');
+return;
 }
 
-// תמיכה גם בטקסט "שעה וחצי"
-if (/שעה\s*וחצי/.test(text)) {
-return "שעה וחצי";
+showProgress(selected.length);
+
+selected.forEach((cert, idx) => {
+setTimeout(() => {
+const cert_html = generateCertificateHTML(cert);
+const opt = {
+margin: 0,
+filename: `${cert.lastName}_${cert.firstName}_certificate.pdf`,
+image: { type: 'jpeg', quality: 0.98 },
+html2canvas: { scale: 2 },
+jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
+html2pdf().set(opt).from(cert_html).save();
+updateProgress(idx + 1, selected.length);
+}, idx * 1000);
+});
 }
 
+// =========================================================
+// הורדת ZIP
+// =========================================================
 
-return "-- שעות";
-
+function downloadSelectedZip() {
+const selected = getSelectedCertificates();
+if (selected.length === 0) {
+alert('אנא בחר לפחות תעודה אחת');
+return;
 }
 
+showProgress(selected.length);
+const zip = new JSZip();
+let processed = 0;
 
-/*
-=========================================================
-תאריך הנפקה
-=========================================================
-*/
+selected.forEach((cert, idx) => {
+setTimeout(() => {
+const cert_html = generateCertificateHTML(cert);
+const opt = {
+margin: 0,
+image: { type: 'jpeg', quality: 0.98 },
+html2canvas: { scale: 2 },
+jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
 
-function getIssueDate(cert) {
+html2pdf().set(opt).from(cert_html).output('blob').then(pdfBlob => {
+const filename = `${cert.lastName}_${cert.firstName}_certificate.pdf`;
+zip.file(filename, pdfBlob);
+processed++;
+updateProgress(processed, selected.length);
 
-const raw =
-cert.H ??
-cert.h ??
-cert.columnH ??
-cert.issueDate ??
-cert.dateIssued ??
-cert.issuedDate ??
-cert.courseEnd ??
-"";
-
-
-if (!raw) {
-return "";
+if (processed === selected.length) {
+zip.generateAsync({ type: 'blob' }).then(content => {
+const url = URL.createObjectURL(content);
+const link = document.createElement('a');
+link.href = url;
+link.download = 'certificates_' + new Date().toISOString().slice(0, 10) + '.zip';
+link.click();
+URL.revokeObjectURL(url);
+hideProgress();
+});
+}
+});
+}, idx * 500);
+});
 }
 
-
-const value =
-String(raw).trim();
-
-// תאריך ישראלי
-if (
-/^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/
-.test(value)
-) {
-
-return value.replace(
-/-/g,
-"."
-);
-
-}
-
-
-// תאריך ISO / Google Sheets
-const d =
-new Date(value);
-
-
-if (!Number.isNaN(d.getTime())) {
-
-const day =
-String(
-d.getDate()
-).padStart(2, "0");
-
-
-const month =
-String(
-d.getMonth() + 1
-).padStart(2, "0");
-
-
-const year =
-d.getFullYear();
-
-
-return `${day}.${month}.${year}`;
-
-}
-
-
-return value;
-
-}
-
-
-/*
-=========================================================
-הכשרה
-=========================================================
-*/
-
-function getCertificateTraining(cert) {
-
-return cert.training || "";
-
-}
-
-
-/*
-=========================================================
-תעודות נבחרות
-=========================================================
-*/
-
-function getSelectedIndexes() {
-
-return Array.from(
-document.querySelectorAll(
-'.cert-checkbox:checked'
-)
-).map(
-cb =>
-parseInt(
-cb.getAttribute(
-'data-index'
-)
-)
-);
-
-}
-
-
-/*
-=========================================================
-יצירת תעודה
-=========================================================
-*/
+// =========================================================
+// תצוגת תעודות
+// =========================================================
 
 function renderSelectedCertificates() {
-
-const selectedIndexes =
-getSelectedIndexes();
-
-
-if (selectedIndexes.length === 0) {
-
-alert(
-"אנא בחר לפחות תעודה אחת מהרשימה"
-);
-
+const selected = getSelectedCertificates();
+if (selected.length === 0) {
+alert('אנא בחר לפחות תעודה אחת');
 return;
 }
 
+const container = document.getElementById('certificatesContainer');
+container.innerHTML = selected.map(cert => generateCertificateHTML(cert)).join('');
 
-const container =
-document.getElementById(
-'certificatesContainer'
-);
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
+// =========================================================
+// יצירת HTML של תעודה
+// =========================================================
 
-container.innerHTML = '';
-
-
-selectedIndexes.forEach(idx => {
-
-const cert =
-filteredCertificates[idx];
-
-
-const hours =
-calculateHours(
-cert.training
-);
-
-
-const training =
-getCertificateTraining(
-cert
-);
-
-
-const issueDate =
-getIssueDate(
-cert
-);
-
-
-const certDiv =
-document.createElement(
-'div'
-);
-
-
-certDiv.className =
-'certificate-container';
-
-
-certDiv.innerHTML = `
-
+function generateCertificateHTML(cert) {
+return `
+<div class="certificate-container">
 <div class="field-name">
-
-<span>
-${escapeHtml(cert.firstName)}
-</span>
-
-<span>
-${escapeHtml(cert.lastName)}
-</span>
-
+<span>${escapeHtml(cert.firstName)}</span>
+<span>${escapeHtml(cert.lastName)}</span>
 </div>
-
-
-<div class="field-id">
-${escapeHtml(cert.id)}
+<div class="field-id">${escapeHtml(cert.id)}</div>
+<div class="field-course">${escapeHtml(cert.courseName || '—')}</div>
+<div class="field-hours">${escapeHtml(cert.training || '—')}</div>
+<div class="field-date">${escapeHtml(cert.courseEnd || '—')}</div>
+<div class="certificate-label">תעודת הנפקה</div>
 </div>
-
-
-<div class="field-course">
-${escapeHtml(training)}
-</div>
-
-
-<div class="field-hours">
-${escapeHtml(hours)}
-</div>
-
-
-<div class="field-date">
-${escapeHtml(issueDate)}
-</div>
-
 `;
+}
 
+// =========================================================
+// ניהול Progress Bar
+// =========================================================
 
-container.appendChild(
-certDiv
-);
+function showProgress(total) {
+const container = document.getElementById('progressContainer');
+container.style.display = 'block';
+document.getElementById('progressBarFill').style.width = '0%';
+}
 
+function updateProgress(current, total) {
+const percent = Math.round((current / total) * 100);
+document.getElementById('progressStatusText').textContent = `מעבד: ${current}/${total}`;
+document.getElementById('progressBarFill').style.width = percent + '%';
+}
+
+function hideProgress() {
+setTimeout(() => {
+document.getElementById('progressContainer').style.display = 'none';
+}, 500);
+}
+
+// =========================================================
+// טעינה בעת פתיחת העמוד
+// =========================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+loadData();
 });
-
-
-window.scrollTo({
-top: container.offsetTop,
-behavior: 'smooth'
-});
-
-}
-
-
-/*
-=========================================================
-בניית תעודה ל-PDF
-=========================================================
-*/
-
-function buildCertificateElement(cert) {
-
-const hours =
-calculateHours(
-cert.training
-);
-
-
-const training =
-getCertificateTraining(
-cert
-);
-
-
-const issueDate =
-getIssueDate(
-cert
-);
-
-
-const certDiv =
-document.createElement(
-'div'
-);
-
-
-certDiv.className =
-'certificate-container';
-
-
-certDiv.innerHTML = `
-
-<div class="field-name">
-
-<span>
-${escapeHtml(cert.firstName)}
-</span>
-
-<span>
-${escapeHtml(cert.lastName)}
-</span>
-
-</div>
-
-
-<div class="field-id">
-${escapeHtml(cert.id)}
-</div>
-
-
-<div class="field-course">
-${escapeHtml(training)}
-</div>
-
-
-<div class="field-hours">
-${escapeHtml(hours)}
-</div>
-
-
-<div class="field-date">
-${escapeHtml(issueDate)}
-</div>
-
-`;
-
-
-return certDiv;
-
-}
-
-
-/*
-=========================================================
-הגדרות PDF
-=========================================================
-*/
-
-function certificatePdfOptions(cert) {
-
-return {
-
-margin: 0,
-
-filename:
-`תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
-
-image: {
-type: 'jpeg',
-quality: 0.98
-},
-
-html2canvas: {
-scale: 2,
-useCORS: true,
-backgroundColor: '#ffffff'
-},
-
-jsPDF: {
-unit: 'mm',
-format: 'a4',
-orientation: 'portrait'
-},
-
-pagebreak: {
-mode: [
-'css',
-'legacy'
-]
-}
-
-};
-
-}
-
-
-/*
-=========================================================
-הורדת PDF
-=========================================================
-*/
-
-async function downloadSelectedPDFs() {
-
-const selectedIndexes =
-getSelectedIndexes();
-
-
-if (!selectedIndexes.length) {
-
-alert(
-"אנא בחר לפחות תעודה אחת להורדה"
-);
-
-return;
-}
-
-
-showProgress(
-true,
-`מתחיל הורדה של ${selectedIndexes.length} תעודות...`,
-0
-);
-
-
-for (
-let i = 0;
-i < selectedIndexes.length;
-i++
-) {
-
-const cert =
-filteredCertificates[
-selectedIndexes[i]
-];
-
-
-const elem =
-buildCertificateElement(
-cert
-);
-
-
-document
-.getElementById(
-'certificatesContainer'
-)
-.appendChild(elem);
-
-
-await html2pdf()
-.set(
-certificatePdfOptions(
-cert
-)
-)
-.from(elem)
-.save();
-
-
-const percent =
-Math.round(
-(
-(i + 1) /
-selectedIndexes.length
-) * 100
-);
-
-
-showProgress(
-true,
-`הורדו ${i + 1} מתוך ${selectedIndexes.length} תעודות`,
-percent
-);
-
-
-elem.remove();
-
-
-await new Promise(
-r => setTimeout(r, 350)
-);
-
-}
-
-
-showProgress(false);
-
-
-alert(
-`ההורדה הסתיימה: ${selectedIndexes.length} תעודות.`
-);
-
-}
-
-
-/*
-=========================================================
-הורדת ZIP
-=========================================================
-*/
-
-async function downloadSelectedZip() {
-
-const selectedIndexes =
-getSelectedIndexes();
-
-
-if (!selectedIndexes.length) {
-
-alert(
-"אנא בחר לפחות תעודה אחת להורדה"
-);
-
-return;
-}
-
-
-if (typeof JSZip === 'undefined') {
-
-alert(
-"ספריית ZIP לא נטענה. נסה לרענן את הדף."
-);
-
-return;
-}
-
-
-const zip =
-new JSZip();
-
-
-showProgress(
-true,
-`מכין ZIP: 0 מתוך ${selectedIndexes.length}`,
-0
-);
-
-
-for (
-let i = 0;
-i < selectedIndexes.length;
-i++
-) {
-
-const cert =
-filteredCertificates[
-selectedIndexes[i]
-];
-
-
-const elem =
-buildCertificateElement(
-cert
-);
-
-
-document
-.getElementById(
-'certificatesContainer'
-)
-.appendChild(elem);
-
-
-const blob =
-await html2pdf()
-.set(
-certificatePdfOptions(
-cert
-)
-)
-.from(elem)
-.outputPdf('blob');
-
-
-zip.file(
-`תעודה_${cert.firstName}_${cert.lastName}_${cert.id}.pdf`,
-blob
-);
-
-
-elem.remove();
-
-
-const percent =
-Math.round(
-(
-(i + 1) /
-selectedIndexes.length
-) * 100
-);
-
-
-showProgress(
-true,
-`מוכן ל-ZIP: ${i + 1} מתוך ${selectedIndexes.length}`,
-percent
-);
-
-}
-
-
-const zipBlob =
-await zip.generateAsync(
-{ type: 'blob' },
-meta => {
-
-showProgress(
-true,
-`דוחס ZIP... ${Math.round(meta.percent)}%`,
-Math.round(meta.percent)
-);
-
-}
-);
-
-
-const url =
-URL.createObjectURL(
-zipBlob
-);
-
-
-const a =
-document.createElement(
-'a'
-);
-
-
-a.href = url;
-
-
-a.download =
-`תעודות_יוזוק_מדיק_${new Date().toISOString().slice(0,10)}.zip`;
-
-
-document.body.appendChild(a);
-
-
-a.click();
-
-
-a.remove();
-
-
-URL.revokeObjectURL(url);
-
-
-showProgress(false);
-
-
-alert(
-`ה-ZIP מוכן עם ${selectedIndexes.length} תעודות.`
-);
-
-}
-
-
-/*
-=========================================================
-שליחה מרוכזת למייל
-=========================================================
-*/
-
-async function sendSelectedEmails() {
-
-const selectedIndexes =
-getSelectedIndexes();
-
-
-if (!selectedIndexes.length) {
-
-alert(
-"אנא בחר לפחות תעודה אחת לשליחה"
-);
-
-return;
-}
-
-
-const withEmail =
-selectedIndexes.filter(
-idx =>
-!!filteredCertificates[idx].email
-);
-
-
-if (!withEmail.length) {
-
-alert(
-"לאף אחת מהתעודות שנבחרו אין כתובת מייל."
-);
-
-return;
-}
-
-
-if (
-!confirm(
-`האם לשלוח ${withEmail.length} תעודות במייל?`
-)
-) {
-return;
-}
-
-
-showProgress(
-true,
-`מתחיל בשליחה...`,
-0
-);
-
-
-for (
-let i = 0;
-i < selectedIndexes.length;
-i++
-) {
-
-const cert =
-filteredCertificates[
-selectedIndexes[i]
-];
-
-
-const percent =
-Math.round(
-(
-(i + 1) /
-selectedIndexes.length
-) * 100
-);
-
-
-if (!cert.email) {
-
-showProgress(
-true,
-`מדלג על ${cert.firstName} ${cert.lastName} — אין מייל`,
-percent
-);
-
-continue;
-}
-
-
-showProgress(
-true,
-`מכין ושולח ל-${cert.firstName} ${cert.lastName} (${i + 1}/${selectedIndexes.length})...`,
-percent
-);
-
-
-try {
-
-const elem =
-buildCertificateElement(
-cert
-);
-
-
-document
-.getElementById(
-'certificatesContainer'
-)
-.appendChild(elem);
-
-
-const opt = {
-
-margin: 0,
-
-filename:
-`Teuda_${cert.id}.pdf`,
-
-image: {
-type: 'jpeg',
-quality: 0.95
-},
-
-html2canvas: {
-scale: 1.5,
-useCORS: true,
-backgroundColor: '#ffffff'
-},
-
-jsPDF: {
-unit: 'mm',
-format: 'a4',
-orientation: 'portrait'
-}
-
-};
-
-
-const pdfBase64 =
-await html2pdf()
-.set(opt)
-.from(elem)
-.outputPdf('datauristring');
-
-
-elem.remove();
-
-
-const base64Data =
-pdfBase64.split(',')[1];
-
-
-const formData =
-new URLSearchParams();
-
-
-formData.append(
-'action',
-'sendBatchEmail'
-);
-
-
-formData.append(
-'email',
-cert.email.trim()
-);
-
-
-formData.append(
-'fullName',
-`${cert.firstName} ${cert.lastName}`
-);
-
-
-formData.append(
-'pdfData',
-base64Data
-);
-
-
-formData.append(
-'fileName',
-`Teuda_${cert.id}.pdf`
-);
-
-
-await postToAppsScript(
-formData
-);
-
-
-} catch (err) {
-
-console.error(
-`שגיאה בשליחת מייל ל-${cert.email}:`,
-err
-);
-
-
-showProgress(
-true,
-`שגיאה בשליחת מייל ל-${cert.firstName} ${cert.lastName}`,
-percent
-);
-
-}
-
-}
-
-
-showProgress(false);
-
-
-alert(
-"פעולת שליחת המיילים הסתיימה."
-);
-
-}
-
-
-/*
-=========================================================
-POST ל-Google Apps Script
-=========================================================
-*/
-
-function postToAppsScript(formData) {
-
-return new Promise(
-(resolve) => {
-
-const iframeName =
-'gasPostFrame_' +
-Date.now();
-
-
-const iframe =
-document.createElement(
-'iframe'
-);
-
-
-iframe.name =
-iframeName;
-
-
-iframe.style.display =
-'none';
-
-
-document.body.appendChild(
-iframe
-);
-
-
-const form =
-document.createElement(
-'form'
-);
-
-
-form.method =
-'POST';
-
-
-form.action =
-scriptURL;
-
-
-form.target =
-iframeName;
-
-
-form.style.display =
-'none';
-
-
-for (
-const [key, value]
-of formData.entries()
-) {
-
-const input =
-document.createElement(
-'input'
-);
-
-
-input.type =
-'hidden';
-
-
-input.name =
-key;
-
-
-input.value =
-value;
-
-
-form.appendChild(
-input
-);
-
-}
-
-
-document.body.appendChild(
-form
-);
-
-
-iframe.onload =
-function() {
-
-setTimeout(
-() => {
-
-form.remove();
-iframe.remove();
-
-resolve();
-
-},
-300
-);
-
-};
-
-
-form.submit();
-
-
-setTimeout(
-() => {
-
-if (
-document.body.contains(form)
-) {
-form.remove();
-}
-
-
-if (
-document.body.contains(iframe)
-) {
-iframe.remove();
-}
-
-
-resolve();
-
-},
-15000
-);
-
-}
-);
-
-}
-
-
-/*
-=========================================================
-פס התקדמות
-=========================================================
-*/
-
-function showProgress(
-show,
-statusText = '',
-percent = 0
-) {
-
-const container =
-document.getElementById(
-'progressContainer'
-);
-
-
-const textElem =
-document.getElementById(
-'progressStatusText'
-);
-
-
-const fillElem =
-document.getElementById(
-'progressBarFill'
-);
-
-
-container.style.display =
-show
-? 'block'
-: 'none';
-
-
-textElem.textContent =
-statusText;
-
-
-fillElem.style.width =
-percent + '%';
-
-}
-
-
-/*
-=========================================================
-טעינה ראשונית
-=========================================================
-*/
-
-window.addEventListener(
-'load',
-loadData
-);
 
 </script>
 
