@@ -11,186 +11,195 @@
     <style>
         body { font-family: 'Assistant', sans-serif; }
         .loader {
-            border: 3px solid #f1f5f9;
-            border-top: 3px solid #0f172a;
+            border: 3px solid #334155;
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes bounce-lateral {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-8px); }
+        }
+        .animate-like {
+            animation: bounce-lateral 1s ease-in-out infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
     <!-- Header / Navbar -->
-    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50">
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <!-- צד שמאל: כותרת -->
         <div>
-            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 מוקד אבחון ואבטחת אזור אישי
             </h1>
-            <p class="text-xs text-slate-400">איתור תקלות כניסה, אימות דו-שלבי ועדכון פרטים מאובטח</p>
+            <p class="text-xs text-slate-400 mt-0.5">איתור תקלות כניסה, אימות דו-שלבי ועדכון פרטים מאובטח</p>
         </div>
-        <!-- צד ימין: לוגו מתיקיית השורש -->
+        <!-- צד ימין: לוגו מוגדל ומקונשר -->
         <div class="flex items-center gap-3">
             <div class="text-left hidden sm:block">
                 <span class="block text-xs font-semibold text-slate-300">סביבת ייצור</span>
                 <span class="block text-[10px] text-emerald-400 font-medium">● מסד נתונים מחובר</span>
             </div>
-            <div class="h-12 w-12 rounded-xl bg-slate-700/80 border border-slate-600 flex items-center justify-center overflow-hidden shadow-inner">
-                <!-- טעינת לוגו מתיקיית השורש עם נפילה חלופית אם הקובץ טרם הועלה -->
-                <img src="logo.png" alt="לוגו המערכת" class="h-9 w-9 object-contain" onerror="this.replaceWith(document.createTextNode('LOGO'))">
-            </div>
+            <a href="https://yuzok101.github.io/limud/login1.html" class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shadow-md hover:border-blue-500 transition cursor-pointer group">
+                <img src="logo.png" alt="לוגו המערכת" class="h-11 w-11 object-contain group-hover:scale-105 transition duration-300" onerror="this.replaceWith(document.createTextNode('LOGO'))">
+            </a>
         </div>
     </header>
 
     <!-- Main Content Container -->
-    <main class="max-w-2xl w-full mx-auto p-4 md:p-6 my-auto flex-grow flex flex-col justify-center">
+    <main class="max-w-xl w-full mx-auto p-4 md:p-6 my-auto flex-grow flex flex-col justify-center">
         
-        <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden">
+        <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
             
             <!-- Banner -->
-            <div class="bg-gradient-to-l from-slate-900 via-slate-800 to-blue-950 p-6 border-b border-slate-700/60 relative">
+            <div class="bg-gradient-to-l from-slate-900 via-slate-900 to-blue-950/60 p-6 md:p-8 border-b border-slate-800 relative">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-2xl text-blue-400">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-3xl text-blue-400 shadow-inner">
                         🛡️
                     </div>
                     <div>
-                        <h2 class="text-base md:text-lg font-bold text-white">בדיקת גישה ואבחון תקלה</h2>
-                        <p class="text-slate-400 text-xs md:text-sm">תהליך אימות מדורג לאיתור בעיות בכניסה לאזור האישי.</p>
+                        <h2 class="text-lg md:text-xl font-bold text-white tracking-wide">בדיקת גישה ואבחון תקלה</h2>
+                        <p class="text-slate-400 text-xs md:text-sm mt-1">תהליך אימות מדורג לאיתור בעיות בכניסה לאזור האישי.</p>
                     </div>
                 </div>
             </div>
 
             <!-- STEP 1: Enter ID -->
-            <div id="step-1-tz" class="p-6 md:p-8 space-y-5">
-                <div class="space-y-1">
+            <div id="step-1-tz" class="p-6 md:p-8 space-y-6">
+                <div class="space-y-1.5">
                     <label class="block text-sm font-semibold text-slate-200">הזן מספר תעודת זהות:</label>
                     <p class="text-xs text-slate-400">יש להזין 9 ספרות בדיוק (כולל ספרת ביקורת במידת הצורך).</p>
                 </div>
                 <div class="flex gap-3">
-                    <input type="text" id="input-tz" maxlength="9" placeholder="לדוגמה: 327545737" 
-                        class="flex-grow px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg tracking-widest">
-                    <button onclick="verifyTz()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition shadow-lg shadow-blue-600/30 flex items-center gap-2 shrink-0">
+                    <input type="text" id="input-tz" maxlength="9" placeholder="" 
+                        class="flex-grow px-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-lg tracking-widest shadow-inner">
+                    <button onclick="verifyTz()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-7 py-3.5 rounded-2xl transition shadow-lg shadow-blue-600/20 flex items-center gap-2 shrink-0 text-sm">
                         <span>המשך</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </button>
                 </div>
-                <p id="error-msg-1" class="text-rose-400 text-xs hidden"></p>
+                <p id="error-msg-1" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
             </div>
 
             <!-- STEP 2: Phone Verification (Primary Login Method) -->
-            <div id="step-2-phone" class="p-6 md:p-8 space-y-5 hidden">
-                <div class="space-y-1">
+            <div id="step-2-phone" class="p-6 md:p-8 space-y-6 hidden">
+                <div class="space-y-1.5">
                     <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">שלב אימות 2 מתוך 2</span>
-                    <h3 class="text-base font-bold text-white">אימות באמצעות מספר טלפון נייד</h3>
-                    <p class="text-xs text-slate-400">כדי להיכנס לאזור האישי או לבדוק תקלות, הזן את מספר הטלפון המעודכן במערכת שלך.</p>
+                    <h3 class="text-base md:text-lg font-bold text-white">אימות באמצעות מספר טלפון נייד</h3>
+                    <p class="text-xs text-slate-400">הזן את מספר הטלפון המעודכן במערכת שלך.</p>
                 </div>
                 <div class="flex gap-3">
-                    <input type="tel" id="input-phone" maxlength="10" placeholder="לדוגמה: 0583212053" 
-                        class="flex-grow px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg tracking-wider">
-                    <button onclick="verifyPhone()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-600/30 shrink-0">
+                    <input type="tel" id="input-phone" maxlength="10" placeholder="" 
+                        class="flex-grow px-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-lg tracking-wider shadow-inner">
+                    <button onclick="verifyPhone()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3.5 rounded-2xl transition shadow-lg shadow-emerald-600/20 shrink-0 text-sm">
                         אמת טלפון
                     </button>
                 </div>
-                <!-- כפתור מעבר לאימות חלופי אם הטלפון לא תקין או נשכח -->
-                <div class="pt-2 border-t border-slate-700/60 flex justify-between items-center">
-                    <button onclick="backToTz()" class="text-slate-400 hover:text-white text-xs transition">
+                <!-- כפתור מעבר אחורה וכפתור מעבר לדרכי הזדהות חלופיות למטה -->
+                <div class="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <button onclick="backToTz()" class="text-slate-400 hover:text-white text-xs transition flex items-center gap-1">
                         ← חזור לתעודת זהות
                     </button>
+                    <!-- מעבר לדרכי הזדהות חלופיות בצורה נקייה -->
                     <button onclick="switchToAlternativeVerification()" class="text-amber-400 hover:text-amber-300 text-xs font-medium transition underline underline-offset-4">
-                        הטלפון לא תקין או שגוי? נסה דרך זיהוי חלופית 🔄
+                        מעבר להזדהות בדרך שונה 🔄
                     </button>
                 </div>
-                <p id="error-msg-2" class="text-rose-400 text-xs hidden"></p>
+                <p id="error-msg-2" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
             </div>
 
-            <!-- STEP 2B: Alternative Verification (If phone is wrong/forgotten) -->
-            <div id="step-2-alt" class="p-6 md:p-8 space-y-4 hidden">
-                <div class="space-y-1">
+            <!-- STEP 2B: Alternative Verification (Only one shown at a time cleanly) -->
+            <div id="step-2-alt" class="p-6 md:p-8 space-y-5 hidden">
+                <div class="space-y-1.5">
                     <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">אבחון וזיהוי חלופי</span>
-                    <h3 class="text-base font-bold text-white">הטלפון אינו מעודכן? בחר פרט נוסף לאימות:</h3>
-                    <p class="text-xs text-slate-400">מכיוון שמספר הטלפון שלך במערכת אינו זמין או שגוי, בחר נתון נוסף שידוע לך כדי לאמת את זהותך ולאפשר לך לתקן אותו.</p>
+                    <h3 class="text-base md:text-lg font-bold text-white">בחר דרך אימות חלופית:</h3>
+                    <p class="text-xs text-slate-400">בחר אפשרות אחת מבין השניים הנותרים לאימות זהותך:</p>
                 </div>
 
-                <div class="space-y-3 pt-2">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">כתובת אימייל (מלאה):</label>
-                        <input type="email" id="alt-email" placeholder="user@gmail.com" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <!-- בחירת סוג אימות חלופי בצורה נקייה ונפרדת -->
+                <div class="space-y-4 pt-2">
+                    <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                        <button type="button" id="tab-opt-1" onclick="switchAltTab('email')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow">אימייל</button>
+                        <button type="button" id="tab-opt-2" onclick="switchAltTab('details')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white">תאריך סיום / עיר מגורים</button>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">תאריך סיום קורס (לדוגמה: 22.01.2000):</label>
-                        <input type="text" id="alt-date" placeholder="DD.MM.YYYY" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+                    <!-- שדה אימייל -->
+                    <div id="alt-box-email" class="space-y-2">
+                        <label class="block text-xs font-medium text-slate-300">הזן כתובת אימייל מלאה:</label>
+                        <input type="email" id="alt-email" placeholder="user@gmail.com" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">עיר מגורים / כתובת:</label>
-                        <input type="text" id="alt-address" placeholder="לדוגמה: מודיעין עילית" class="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+                    <!-- שדה תאריך או כתובת (מוצג רק בטאב השני) -->
+                    <div id="alt-box-details" class="space-y-3 hidden">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">תאריך סיום קורס (לדוגמה: 22.01.2000):</label>
+                            <input type="text" id="alt-date" placeholder="DD.MM.YYYY" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
+                        </div>
+                        <div class="text-center text-xs text-slate-500 font-medium">- או -</div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">עיר מגורים / כתובת:</label>
+                            <input type="text" id="alt-address" placeholder="לדוגמה: מודיעין עילית" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center pt-3">
+                <div class="flex justify-between items-center pt-4 border-t border-slate-800/80">
                     <button onclick="backToPhone()" class="text-slate-400 hover:text-white text-xs transition">
                         ← חזור לבדיקת טלפון
                     </button>
-                    <button onclick="verifyAlternative()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-md">
+                    <button onclick="verifyAlternative()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-6 py-3 rounded-xl transition shadow-md">
                         בצע אימות חלופי
                     </button>
                 </div>
-                <p id="error-msg-alt" class="text-rose-400 text-xs hidden"></p>
+                <p id="error-msg-alt" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
             </div>
 
             <!-- Loader State -->
-            <div id="loading-state" class="hidden p-12 text-center flex flex-col items-center justify-center space-y-3">
+            <div id="loading-state" class="hidden p-12 text-center flex flex-col items-center justify-center space-y-4">
                 <div class="loader"></div>
-                <p class="text-slate-400 text-sm font-medium">מאמת נתונים מול מסד הנתונים...</p>
+                <p class="text-slate-400 text-xs font-medium tracking-wide">מאמת נתונים מול מסד הנתונים...</p>
             </div>
 
             <!-- STEP 3: Diagnostics & Dashboard (Success) -->
             <div id="step-3-dashboard" class="hidden p-6 md:p-8 space-y-6">
                 
-                <!-- Status Alert -->
-                <div id="dashboard-alert" class="p-4 rounded-xl border flex items-start gap-3">
-                    <div id="dash-icon" class="text-2xl mt-0.5"></div>
+                <!-- Status Alert עם אייקון לייק זז -->
+                <div id="dashboard-alert" class="p-5 rounded-2xl border flex items-start gap-4">
+                    <div id="dash-icon" class="text-3xl mt-0.5 animate-like shrink-0">👍</div>
                     <div>
-                        <h3 id="dash-title" class="font-bold text-sm md:text-base"></h3>
-                        <p id="dash-desc" class="text-xs md:text-sm mt-0.5 text-slate-300"></p>
+                        <h3 id="dash-title" class="font-bold text-sm md:text-base text-white"></h3>
+                        <p id="dash-desc" class="text-xs md:text-sm mt-1 text-slate-300 leading-relaxed"></p>
                     </div>
                 </div>
 
-                <!-- Phone Update Section (Crucial requirement: Change phone if invalid) -->
-                <div id="phone-fix-section" class="bg-blue-950/40 border border-blue-800/60 rounded-xl p-4 hidden">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-blue-300 mb-2">🛠️ תיקון מהיר: מספר הטלפון שלך שגוי או לא פעיל?</h4>
-                    <p class="text-xs text-slate-300 mb-3">זיהינו שייתכן ויש בעיה במספר הטלפון הרשום. תוכל לעדכן אותו כאן מיד:</p>
-                    <div class="flex gap-2">
-                        <input type="tel" id="new-phone-input" maxlength="10" placeholder="הכנס מספר טלפון חדש ותקין" class="flex-grow px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none">
-                        <button onclick="updatePhoneNumber()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
-                            עדכן מספר בשיטס
+                <!-- Phone Update Section (עדכון טלפון בגוגל שיטס אוטומטית) -->
+                <div id="phone-fix-section" class="bg-blue-950/30 border border-blue-900/60 rounded-2xl p-5 hidden space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400">🛠️ עדכון מספר טלפון במערכת</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">מספר הטלפון לא תאם, הזן מספר חדש שיתעדכן ישירות במסד הנתונים בגוגל שיטס:</p>
+                    <div class="flex gap-2.5">
+                        <input type="tel" id="new-phone-input" maxlength="10" placeholder="הכנס מספר טלפון חדש ותקין" class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none shadow-inner">
+                        <button onclick="updatePhoneNumber()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md shrink-0">
+                            עדכן בשיטס
                         </button>
                     </div>
-                    <p id="update-phone-msg" class="text-xs mt-2 text-emerald-400 hidden"></p>
+                    <p id="update-phone-msg" class="text-xs font-medium mt-1 text-emerald-400 hidden"></p>
                 </div>
 
                 <!-- Diagnostics & AI Recommendation Box -->
-                <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4">
-                    <div class="flex items-center gap-2 mb-2 text-indigo-400 font-bold text-sm">
+                <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5">
+                    <div class="flex items-center gap-2 mb-2.5 text-indigo-400 font-bold text-xs uppercase tracking-wider">
                         <span>🤖</span>
-                        <span>המלצות אבחון חכמות למערכת:</span>
+                        <span>המלצות אבחון חכמות למערכת</span>
                     </div>
-                    <ul id="ai-recs" class="list-disc list-inside text-xs md:text-sm text-slate-300 space-y-1.5">
+                    <ul id="ai-recs" class="list-disc list-inside text-xs md:text-sm text-slate-300 space-y-2">
                         <!-- מולא דינמית -->
                     </ul>
-                </div>
-
-                <!-- Actions Footer -->
-                <div class="flex justify-between items-center pt-2 border-t border-slate-700/60">
-                    <button onclick="resetSystem()" class="text-slate-400 hover:text-white text-xs font-medium transition">
-                        ← התחל בדיקה חדשה
-                    </button>
-                    <button onclick="alert('בדיקת חיבור מול שרת ה-OTP בוצעה בהצלחה. המערכת מוכנה.')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition">
-                        בדוק חיבור שרת ראשי
-                    </button>
                 </div>
 
             </div>
@@ -199,7 +208,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800">
+    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-900">
         מערכת אבחון אזור אישי &copy; 2026 | מוגן ומאובטח
     </footer>
 
@@ -209,7 +218,6 @@
         
         let currentUserData = null;
 
-        // בדיקת תקינות קלט בסיסית
         function isValidTZ(tz) {
             return /^\d{9}$/.test(tz);
         }
@@ -237,11 +245,11 @@
 
                 if (result.status === 'success') {
                     currentUserData = result.data;
-                    // עוברים לשלב אימות טלפון
                     document.getElementById('step-1-tz').classList.add('hidden');
                     document.getElementById('step-2-phone').classList.remove('hidden');
                 } else {
-                    errorMsg.innerText = "תעודת הזהות לא נמצאה במערכת.";
+                    // הודעה מדויקת כפי שביקשת
+                    errorMsg.innerText = "לא נמצאה תעודת זהות כזאת במערכת אנא נסה שנית";
                     errorMsg.classList.remove('hidden');
                 }
             } catch (err) {
@@ -251,7 +259,7 @@
             }
         }
 
-        function verifyPhone() {
+        async function verifyPhone() {
             const phone = document.getElementById('input-phone').value.trim();
             const errorMsg = document.getElementById('error-msg-2');
 
@@ -262,12 +270,21 @@
             }
             errorMsg.classList.add('hidden');
 
+            // עדכון אוטומטי של מספר הטלפון במסד הנתונים בעת ההזדהות המוצלחת
+            showLoader(true);
+            try {
+                await fetch(`${SCRIPT_URL}?action=update_phone&tz=${encodeURIComponent(currentUserData.tz)}&newPhone=${encodeURIComponent(phone)}`);
+                currentUserData.phone = phone;
+            } catch (e) {
+                console.error("שגיאה בעדכון אוטומטי של הטלפון");
+            }
+            showLoader(false);
+
             // השוואה מול הנתון שהתקבל בשרת
             if (currentUserData.phone === phone) {
-                // הצלחה באימות! עוברים לדשבורד
                 showDashboard(true);
             } else {
-                errorMsg.innerText = "מספר הטלפון אינו תואם את הנתון במערכת. לחץ על 'הטלפון לא תקין' לאימות חלופי.";
+                errorMsg.innerText = "מספר הטלפון אינו תואם את הנתון במערכת.";
                 errorMsg.classList.remove('hidden');
             }
         }
@@ -277,23 +294,44 @@
             document.getElementById('step-2-alt').classList.remove('hidden');
         }
 
+        let currentAltTab = 'email';
+        function switchAltTab(tab) {
+            currentAltTab = tab;
+            const btnEmail = document.getElementById('tab-opt-1');
+            const btnDetails = document.getElementById('tab-opt-2');
+            const boxEmail = document.getElementById('alt-box-email');
+            const boxDetails = document.getElementById('alt-box-details');
+
+            if (tab === 'email') {
+                btnEmail.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow";
+                btnDetails.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
+                boxEmail.classList.remove('hidden');
+                boxDetails.classList.add('hidden');
+            } else {
+                btnDetails.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow";
+                btnEmail.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
+                boxDetails.classList.remove('hidden');
+                boxEmail.classList.add('hidden');
+            }
+        }
+
         function verifyAlternative() {
             const emailInput = document.getElementById('alt-email').value.trim().toLowerCase();
             const dateInput = document.getElementById('alt-date').value.trim();
             const addressInput = document.getElementById('alt-address').value.trim().toLowerCase();
             const errorMsg = document.getElementById('error-msg-alt');
 
-            let matched = false;
             let matchCount = 0;
 
-            if (emailInput && currentUserData.email && currentUserData.email.toLowerCase() === emailInput) matchCount++;
-            if (dateInput && currentUserData.courseEndDate && currentUserData.courseEndDate === dateInput) matchCount++;
-            if (addressInput && currentUserData.address && currentUserData.address.toLowerCase().includes(addressInput)) matchCount++;
+            if (currentAltTab === 'email') {
+                if (emailInput && currentUserData.email && currentUserData.email.toLowerCase() === emailInput) matchCount++;
+            } else {
+                if (dateInput && currentUserData.courseEndDate && currentUserData.courseEndDate === dateInput) matchCount++;
+                if (addressInput && currentUserData.address && currentUserData.address.toLowerCase().includes(addressInput)) matchCount++;
+            }
 
-            // דורשים לפחות התאמה אחת חזקה כדי לאמת את המשתמש
             if (matchCount >= 1) {
                 errorMsg.classList.add('hidden');
-                // אימות חלופי הצליח - מעבירים לדשבורד עם התראה שהטלפון דורש תיקון
                 showDashboard(false, true);
             } else {
                 errorMsg.innerText = "הפרטים שהוזנו אינם תואמים לנתונים הרשומים במערכת.";
@@ -307,7 +345,6 @@
             document.getElementById('step-3-dashboard').classList.remove('hidden');
 
             const alertBox = document.getElementById('dashboard-alert');
-            const dashIcon = document.getElementById('dash-icon');
             const dashTitle = document.getElementById('dash-title');
             const dashDesc = document.getElementById('dash-desc');
             const aiRecs = document.getElementById('ai-recs');
@@ -317,18 +354,16 @@
             let recs = [];
 
             if (phoneMatched) {
-                alertBox.className = "p-4 rounded-xl border bg-emerald-950/40 border-emerald-800 text-emerald-200 flex items-start gap-3";
-                dashIcon.innerText = "✅";
-                dashTitle.innerText = `שלום רב, ${currentUserData.firstName} ${currentUserData.lastName}`;
-                dashDesc.innerText = "האימות הושלם בהצלחה. לא נמצאו תקלות גישה או שדות פגומים בחשבונך.";
-                recs.push("מספר הטלפון והתז תואמים ומאפשרים קבלת קוד OTP מלא לאזור האישי.");
+                alertBox.className = "p-5 rounded-2xl border bg-emerald-950/30 border-emerald-900/60 text-emerald-200 flex items-start gap-4";
+                dashTitle.innerText = "מעולה!";
+                dashDesc.innerText = "עכשיו אתה יכול להיכנס לאיזור האישי.";
+                recs.push("מספר הטלפון מעודכן ומאפשר כניסה מלאה וחלקה.");
                 phoneFixSection.classList.add('hidden');
             } else {
-                alertBox.className = "p-4 rounded-xl border bg-amber-950/40 border-amber-800 text-amber-200 flex items-start gap-3";
-                dashIcon.innerText = "⚠️";
-                dashTitle.innerText = `זיהוי חלופי הצליח עבור ${currentUserData.firstName} ${currentUserData.lastName}`;
-                dashDesc.innerText = "הצלחת לאמת את זהותך באמצעות נתון חלופי, אך מספר הטלפון במערכת אינו מעודכן או שגוי.";
-                recs.push("חובה לעדכן את מספר הטלפון מיד באמצעות טופס התיקון למטה כדי למנוע חסימת כניסה בעתיד.");
+                alertBox.className = "p-5 rounded-2xl border bg-amber-950/30 border-amber-900/60 text-amber-200 flex items-start gap-4";
+                dashTitle.innerText = "זיהוי חלופי בוצע בהצלחה";
+                dashDesc.innerText = "הזהות אומתה בהצלחה, אך מספר הטלפון במערכת דורש עדכון.";
+                recs.push("מומלץ לעדכן את מספר הטלפון למטה כדי לאפשר כניסות עתידיות מהירות.");
                 phoneFixSection.classList.remove('hidden');
             }
 
@@ -367,6 +402,8 @@
             const loader = document.getElementById('loading-state');
             if (show) {
                 document.getElementById('step-1-tz').classList.add('hidden');
+                document.getElementById('step-2-phone').classList.add('hidden');
+                document.getElementById('step-2-alt').classList.add('hidden');
                 loader.classList.remove('hidden');
             } else {
                 loader.classList.add('hidden');
@@ -382,14 +419,6 @@
         function backToPhone() {
             document.getElementById('step-2-alt').classList.add('hidden');
             document.getElementById('step-2-phone').classList.remove('hidden');
-        }
-
-        function resetSystem() {
-            currentUserData = null;
-            document.getElementById('step-3-dashboard').classList.add('hidden');
-            document.getElementById('step-1-tz').classList.remove('hidden');
-            document.getElementById('input-tz').value = '';
-            document.getElementById('input-phone').value = '';
         }
     </script>
 </body>
