@@ -269,22 +269,33 @@
                 errorMsg.classList.remove('hidden');
                 return;
             }
+
             errorMsg.classList.add('hidden');
-
             showLoader(true);
-            try {
-                // קריאה נכונה לעדכון הטלפון בשרת (Google Apps Script)
-                await fetch(`${SCRIPT_URL}?action=update_phone&tz=${encodeURIComponent(currentUserData.tz)}&newPhone=${encodeURIComponent(phone)}`);
-                currentUserData.phone = phone;
-            } catch (e) {
-                console.error("שגיאה בעדכון אוטומטי של הטלפון", e);
-            }
-            showLoader(false);
 
-            if (currentUserData.phone === phone) {
-                showDashboard(true);
-            } else {
-                errorMsg.innerText = "מספר הטלפון אינו תואם את הנתון במערכת.";
+            try {
+                // חשוב: כאן מתבצע אימות בלבד. אין עדכון של Google Sheets.
+                const response = await fetch(
+                    `${SCRIPT_URL}?action=verify_phone&tz=${encodeURIComponent(currentUserData.tz)}&phone=${encodeURIComponent(phone)}`
+                );
+
+                const result = await response.json();
+                showLoader(false);
+
+                if (result.status === 'verified') {
+                    showDashboard(true);
+                    return;
+                }
+
+                errorMsg.innerText =
+                    result.message ||
+                    "מספר הטלפון שהזנת אינו תואם למספר המעודכן במערכת. ניתן לנסות שוב או לעבור להזדהות בדרך שונה.";
+                errorMsg.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("שגיאה באימות הטלפון:", err);
+                showLoader(false);
+                errorMsg.innerText = "שגיאת תקשורת מול השרת. נסה שוב.";
                 errorMsg.classList.remove('hidden');
             }
         }
@@ -315,31 +326,85 @@
             }
         }
 
-        function verifyAlternative() {
-            const emailInput = document.getElementById('alt-email').value.trim().toLowerCase();
-            const dateInput = document.getElementById('alt-date').value.trim();
-            const addressInput = document.getElementById('alt-address').value.trim().toLowerCase();
+        async function verifyAlternative() {
             const errorMsg = document.getElementById('error-msg-alt');
 
-            let matchCount = 0;
+            errorMsg.classList.add('hidden');
+            showLoader(true);
 
-            if (currentAltTab === 'email') {
-                if (emailInput && currentUserData.email && currentUserData.email.toLowerCase() === emailInput) matchCount++;
-            } else {
-                if (dateInput && currentUserData.courseEndDate && currentUserData.courseEndDate === dateInput) matchCount++;
-                if (addressInput && currentUserData.address && currentUserData.address.toLowerCase().includes(addressInput)) matchCount++;
-            }
+            try {
+                let url =
+                    `${SCRIPT_URL}?action=verify_alternative` +
+                    `&tz=${encodeURIComponent(currentUserData.tz)}`;
 
-            if (matchCount >= 1) {
-                errorMsg.classList.add('hidden');
-                showDashboard(false, true);
-            } else {
-                errorMsg.innerText = "הפרטים שהוזנו אינם תואמים לנתונים הרשומים במערכת.";
+                if (currentAltTab === 'email') {
+                    const emailInput =
+                        document.getElementById('alt-email').value.trim().toLowerCase();
+
+                    if (!emailInput) {
+                        showLoader(false);
+                        errorMsg.innerText = "נא להזין כתובת אימייל.";
+                        errorMsg.classList.remove('hidden');
+                        return;
+                    }
+
+                    url +=
+                        `&method=email` +
+                        `&email=${encodeURIComponent(emailInput)}`;
+
+                } else {
+                    const dateInput =
+                        document.getElementById('alt-date').value.trim();
+
+                    const addressInput =
+                        document.getElementById('alt-address').value.trim();
+
+                    if (dateInput) {
+                        url +=
+                            `&method=date` +
+                            `&date=${encodeURIComponent(dateInput)}`;
+
+                    } else if (addressInput) {
+                        url +=
+                            `&method=address` +
+                            `&address=${encodeURIComponent(addressInput)}`;
+
+                    } else {
+                        showLoader(false);
+                        errorMsg.innerText = "נא להזין תאריך סיום או עיר / כתובת.";
+                        errorMsg.classList.remove('hidden');
+                        return;
+                    }
+                }
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                showLoader(false);
+
+                if (result.status === 'verified') {
+                    // השרת מחזיר Token זמני רק לאחר אימות מוצלח.
+                    currentUserData.verificationToken =
+                        result.verificationToken || null;
+
+                    showDashboard(false, true);
+                    return;
+                }
+
+                errorMsg.innerText =
+                    result.message ||
+                    "הפרטים שהוזנו אינם תואמים לנתונים הרשומים במערכת.";
+                errorMsg.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("שגיאה באימות חלופי:", err);
+                showLoader(false);
+                errorMsg.innerText = "שגיאת תקשורת מול השרת. נסה שוב.";
                 errorMsg.classList.remove('hidden');
             }
         }
 
-        function showDashboard(phoneMatched) {
+        function showDashboard(phoneMatched, alternativeVerified = false) {
             document.getElementById('step-2-phone').classList.add('hidden');
             document.getElementById('step-2-alt').classList.add('hidden');
             document.getElementById('step-3-dashboard').classList.remove('hidden');
@@ -350,53 +415,107 @@
             const phoneFixSection = document.getElementById('phone-fix-section');
 
             if (phoneMatched) {
-                alertBox.className = "p-5 rounded-2xl border bg-emerald-950/30 border-emerald-900/60 text-emerald-200 flex items-start gap-4";
+                alertBox.className =
+                    "p-5 rounded-2xl border bg-emerald-950/30 border-emerald-900/60 text-emerald-200 flex items-start gap-4";
+
                 dashTitle.innerText = "מעולה!";
-                dashDesc.innerText = "עכשיו אתה יכול להיכנס לאיזור האישי.";
+                dashDesc.innerText =
+                    "מספר הטלפון תואם למערכת. עכשיו אתה יכול להיכנס לאזור האישי.";
+
                 phoneFixSection.classList.add('hidden');
-                // הצגת החלון הקופץ ישירות במקרה שהטלפון תואם
+
                 setTimeout(() => {
                     document.getElementById('success-modal').classList.remove('hidden');
                 }, 800);
-            } else {
-                alertBox.className = "p-5 rounded-2xl border bg-amber-950/30 border-amber-900/60 text-amber-200 flex items-start gap-4";
+
+            } else if (alternativeVerified) {
+                alertBox.className =
+                    "p-5 rounded-2xl border bg-amber-950/30 border-amber-900/60 text-amber-200 flex items-start gap-4";
+
                 dashTitle.innerText = "זיהוי חלופי בוצע בהצלחה";
-                dashDesc.innerText = "הזהות אומתה בהצלחה, אך מספר הטלפון במערכת דורש עדכון.";
+                dashDesc.innerText =
+                    "הזהות אומתה בהצלחה, אך מספר הטלפון במערכת דורש עדכון.";
+
                 phoneFixSection.classList.remove('hidden');
             }
         }
 
         async function updatePhoneNumber() {
-            const newPhone = document.getElementById('new-phone-input').value.trim();
-            const msg = document.getElementById('update-phone-msg');
+            const newPhone =
+                document.getElementById('new-phone-input').value.trim();
+
+            const msg =
+                document.getElementById('update-phone-msg');
 
             if (!isValidPhone(newPhone)) {
-                alert("מספר טלפון חדש חייב להיות תקין (10 ספרות, מתחיל ב-05).");
+                msg.innerText =
+                    "מספר טלפון חדש חייב להיות תקין (10 ספרות ומתחיל ב-05).";
+                msg.className =
+                    "text-xs font-medium mt-1 text-rose-400";
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            // עדכון מותר רק לאחר אימות חלופי מוצלח.
+            if (
+                !currentUserData ||
+                !currentUserData.verificationToken
+            ) {
+                msg.innerText =
+                    "לא נמצא אישור אימות. יש לבצע את תהליך האימות מחדש.";
+                msg.className =
+                    "text-xs font-medium mt-1 text-rose-400";
+                msg.classList.remove('hidden');
                 return;
             }
 
             showLoader(true);
+
             try {
-                // קריאה מדויקת ל-Google Apps Script לעדכון הטלפון בפועל
-                const res = await fetch(`${SCRIPT_URL}?action=update_phone&tz=${encodeURIComponent(currentUserData.tz)}&newPhone=${encodeURIComponent(newPhone)}`);
-                const result = await res.json();
+                const response = await fetch(
+                    `${SCRIPT_URL}?action=update_phone` +
+                    `&tz=${encodeURIComponent(currentUserData.tz)}` +
+                    `&newPhone=${encodeURIComponent(newPhone)}` +
+                    `&verificationToken=${encodeURIComponent(currentUserData.verificationToken)}`
+                );
+
+                const result = await response.json();
+
                 showLoader(false);
 
                 if (result.status === 'success') {
-                    msg.innerText = "✔ מספר הטלפון עודכן בהצלחה במסד הנתונים!";
-                    msg.classList.remove('hidden');
                     currentUserData.phone = newPhone;
-                    
-                    // הצגת החלון הקופץ לאחר שניות ספורות מרגע העדכון המוצלחת
+                    currentUserData.verificationToken = null;
+
+                    msg.innerText =
+                        "✔ מספר הטלפון עודכן בהצלחה במסד הנתונים בגוגל שיטס!";
+                    msg.className =
+                        "text-xs font-medium mt-1 text-emerald-400";
+                    msg.classList.remove('hidden');
+
                     setTimeout(() => {
                         document.getElementById('success-modal').classList.remove('hidden');
-                    }, 1000);
-                } else {
-                    alert("שגיאה בעדכון המספר מול השרת.");
+                    }, 800);
+
+                    return;
                 }
-            } catch (e) {
+
+                msg.innerText =
+                    result.message ||
+                    "שגיאה בעדכון מספר הטלפון.";
+                msg.className =
+                    "text-xs font-medium mt-1 text-rose-400";
+                msg.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("שגיאה בעדכון הטלפון:", err);
                 showLoader(false);
-                alert("שגיאת תקשורת מול השרת.");
+
+                msg.innerText =
+                    "שגיאת תקשורת מול השרת. המספר לא עודכן.";
+                msg.className =
+                    "text-xs font-medium mt-1 text-rose-400";
+                msg.classList.remove('hidden');
             }
         }
 
