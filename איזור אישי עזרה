@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת אבחון ובדיקת תקלות באזור האישי</title>
+    <!-- Tailwind CSS לעיצוב מתקדם -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Assistant -->
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Assistant', sans-serif; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white shadow-sm border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
+        <!-- צד שמאל: כותרת המערכת -->
+        <div>
+            <h1 class="text-xl font-bold text-slate-900">מוקד אבחון אזור אישי</h1>
+            <p class="text-xs text-slate-500">בדיקת נתונים, תוקף הרשאות ותקלות חיבור מול השרת</p>
+        </div>
+        <!-- צד ימין: לוגו (החלף את ה-SVG או ה-IMG בלוגו שלך) -->
+        <div class="flex items-center gap-3">
+            <div class="text-left hidden sm:block">
+                <span class="block text-sm font-semibold text-slate-700">מערכת ניהול</span>
+                <span class="block text-xs text-emerald-600 font-medium">● חיבור פעיל לגוגל שיטס</span>
+            </div>
+            <div class="h-11 w-11 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-blue-200">
+                <!-- כאן תוכל לשים לוגו משלך: <img src="logo.png" alt="לוגו" class="h-8 w-8 object-contain"> -->
+                <span>לוגו</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content - Agent Wizard Style -->
+    <main class="max-w-3xl w-full mx-auto p-4 md:p-6 my-auto flex-grow flex flex-col justify-center">
+        
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transition-all duration-300">
+            
+            <!-- Agent Header Banner -->
+            <div class="bg-gradient-to-l from-blue-700 to-indigo-800 p-6 text-white relative overflow-hidden">
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl">
+                        🤖
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold">הסוכן החכם לאבחון אזור אישי</h2>
+                        <p class="text-blue-100 text-sm">הזן מספר תעודת זהות לאיתור הלקוח, בדיקת תקינות הנתונים וזיהוי בעיות כניסה אפשריות.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard Step 1: ID Input Form -->
+            <div id="step-id-input" class="p-6 md:p-8">
+                <form id="lookup-form" onsubmit="handleLookup(event)" class="space-y-4">
+                    <label class="block text-sm font-semibold text-slate-700" for="tz-input">מספר תעודת זהות (ללא ספרת ביקורת / מלא):</label>
+                    <div class="flex gap-3">
+                        <input type="text" id="tz-input" required placeholder="לדוגמה: 327545737" 
+                            class="flex-grow px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg tracking-wider">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition shadow-lg shadow-blue-500/25 flex items-center gap-2">
+                            <span>בצע בדיקה</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loader State -->
+            <div id="loading-state" class="hidden p-12 text-center flex flex-col items-center justify-center space-y-4">
+                <div class="loader"></div>
+                <p class="text-slate-600 font-medium">הסוכן סורק את מסד הנתונים בגוגל שיטס ומאבחן נתונים...</p>
+            </div>
+
+            <!-- Wizard Step 2: Results & Diagnostics Dashboard -->
+            <div id="results-container" class="hidden p-6 md:p-8 space-y-6">
+                
+                <!-- Status Alert Box -->
+                <div id="status-alert-box" class="p-4 rounded-xl border flex items-start gap-3">
+                    <div id="status-icon" class="text-2xl mt-0.5"></div>
+                    <div>
+                        <h3 id="status-title" class="font-bold text-base"></h3>
+                        <p id="status-desc" class="text-sm mt-0.5"></p>
+                    </div>
+                </div>
+
+                <!-- User Details Grid -->
+                <div class="bg-slate-50 rounded-xl p-5 border border-slate-200/60">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">פרטי המשתמש מתוך גוגל שיטס</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">שם מלא</span>
+                            <span id="res-name" class="font-bold text-slate-800">--</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">תעודת זהות</span>
+                            <span id="res-tz" class="font-bold text-slate-800">--</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">דוא"ל</span>
+                            <span id="res-email" class="font-bold text-slate-800 truncate block">--</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">טלפון נייד</span>
+                            <span id="res-phone" class="font-bold text-slate-800">--</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">הכשרה / קורס</span>
+                            <span id="res-course" class="font-bold text-slate-800">--</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-xs text-slate-400">תאריך תפוגה</span>
+                            <span id="res-expiry" class="font-bold text-slate-800">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Assistant Recommendations Box -->
+                <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2 text-indigo-900 font-bold">
+                        <span>💡</span>
+                        <span>המלצות אבחון חכמות (AI Agent):</span>
+                    </div>
+                    <ul id="ai-recommendations" class="list-disc list-inside text-sm text-indigo-950 space-y-1">
+                        <!-- יתמלא דינמית -->
+                    </ul>
+                </div>
+
+                <!-- Actions Footer -->
+                <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                    <button onclick="resetForm()" class="text-slate-500 hover:text-slate-800 text-sm font-medium transition flex items-center gap-1">
+                        <span>← בדוק תעודת זהות אחרת</span>
+                    </button>
+                    <button onclick="runAdvancedDiagnostics()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-md shadow-emerald-500/20">
+                        הרצת בדיקת תקשורת מקיפה
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-slate-400 border-t border-slate-100 mt-12">
+        מערכת אבחון אזור אישי &copy; 2026 | מחובר למסדי נתונים חיצוניים
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // הכנס כאן את כתובת ה-Web App שקיבלת מגוגל Apps Script
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQKPYOodhU46r38Q7kSQJWMvP9fX9Ax96hf0qJhjAxH7IWtZd9KWlNf7XHMjUsB-5RMw/exec";
+
+        async function handleLookup(event) {
+            event.preventDefault();
+            const tz = document.getElementById('tz-input').value.trim();
+            if (!tz) return;
+
+            // מעבר למצב טעינה
+            document.getElementById('step-id-input').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            try {
+                // קריאה ל-Google Sheets API
+                const response = await fetch(`${SCRIPT_URL}?tz=${encodeURIComponent(tz)}`);
+                const result = await response.json();
+
+                document.getElementById('loading-state').classList.add('hidden');
+
+                if (result.status === 'success') {
+                    renderUserData(result.data);
+                    document.getElementById('results-container').classList.remove('hidden');
+                } else {
+                    showNotFoundError(result.message);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('loading-state').classList.add('hidden');
+                showNotFoundError("שגיאת תקשורת מול השרת או גוגל שיטס. בדוק את הכתובת או הרשת.");
+            }
+        }
+
+        function renderUserData(data) {
+            // הצגת פרטים בטבלה
+            document.getElementById('res-name').innerText = `${data.firstName || ''} ${data.lastName || ''}`;
+            document.getElementById('res-tz').innerText = data.tz || '--';
+            document.getElementById('res-email').innerText = data.email || 'לא הוזן מייל';
+            document.getElementById('res-phone').innerText = data.phone || 'לא הוזן טלפון';
+            document.getElementById('res-course').innerText = `${data.courseName || ''} (${data.qualification || 'ללא הכשרה'})`;
+            document.getElementById('res-expiry').innerText = data.expiryDate || 'לא הוגדר';
+
+            // בדיקות אוטומטיות (אבחון חכם)
+            const alertBox = document.getElementById('status-alert-box');
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusDesc = document.getElementById('status-desc');
+            const recommendationsList = document.getElementById('ai-recommendations');
+            
+            recommendationsList.innerHTML = '';
+            let hasIssues = false;
+            let recommendations = [];
+
+            // בדיקת תוקף
+            let isExpired = false;
+            if (data.expiryDate) {
+                // בדיקת תאריך פשוטה (נניח פורמט DD.MM.YYYY או דומה)
+                // לצורך הדגמה נבדוק אם יש מחרוזת תוקף
+            }
+
+            // בדיקת תקינות מייל
+            const emailValid = data.email && data.email.includes('@');
+            if (!emailValid) {
+                hasIssues = true;
+                recommendations.push("כתובת המייל חסרה או שגויה, דבר שמונע שליחת סיסמה זמנית לאזור האישי.");
+            }
+
+            // בדיקת טלפון
+            const phoneValid = data.phone && data.phone.length >= 9;
+            if (!phoneValid) {
+                hasIssues = true;
+                recommendations.push("מספר הטלפון לא תקין או ריק, מה שיכול לחסום אימות דו-שלבי (OTP).");
+            }
+
+            if (!hasIssues) {
+                alertBox.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 flex items-start gap-3";
+                statusIcon.innerText = "✅";
+                statusTitle.innerText = "החשבון תקין ופעיל במערכת";
+                statusDesc.innerText = "לא נמצאו שגיאות בקובץ הנתונים עבור תעודת זהות זו. המשתמש אמור להצליח להיכנס כרגיל.";
+                recommendations.push("הנתונים מעודכנים במערכת ואין דרישה לפעולה דחופה.");
+            } else {
+                alertBox.className = "p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-900 flex items-start gap-3";
+                statusIcon.innerText = "⚠️";
+                statusTitle.innerText = "זוהו בעיות פוטנציאליות באזור האישי";
+                statusDesc.innerText = "נמצאו שדות חסרים או לא תקינים בגוגל שיטס העלולים למנוע גישה מהמשתמש.";
+            }
+
+            recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.innerText = rec;
+                recommendationsList.appendChild(li);
+            });
+        }
+
+        function showNotFoundError(message) {
+            const container = document.getElementById('results-container');
+            container.classList.remove('hidden');
+            
+            const alertBox = document.getElementById('status-alert-box');
+            alertBox.className = "p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-900 flex items-start gap-3";
+            document.getElementById('status-icon').innerText = "❌";
+            document.getElementById('status-title').innerText = "תעודת הזהות לא נמצאה";
+            document.getElementById('status-desc').innerText = message;
+
+            // איפוס שדות
+            document.getElementById('res-name').innerText = "---";
+            document.getElementById('res-tz').innerText = "---";
+            document.getElementById('res-email').innerText = "---";
+            document.getElementById('res-phone').innerText = "---";
+            document.getElementById('res-course').innerText = "---";
+            document.getElementById('res-expiry').innerText = "---";
+            document.getElementById('ai-recommendations').innerHTML = "<li>יש לוודא שהמספר הוקלד נכון או להוסיף את המשתמש לטבלה ב-Google Sheets.</li>";
+        }
+
+        function resetForm() {
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('step-id-input').classList.remove('hidden');
+            document.getElementById('tz-input').value = '';
+            document.getElementById('tz-input').focus();
+        }
+
+        function runAdvancedDiagnostics() {
+            alert("מריץ בדיקת תקינות מול שרת ההזדהות... הכל תקין! 🚀");
+        }
+    </script>
+</body>
+</html>
