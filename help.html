@@ -366,7 +366,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
       <div id="phone-update-box" class="update-box hidden">
         <div class="update-title">📱 הגדרת מספר טלפון חדש</div>
-        <p class="update-desc">הזן מספר ישראלי תקין. המספר החדש יחליף את המספר הקיים בעמודת <strong>F — טלפון</strong>.</p>
+        <p class="update-desc">הזן מספר ישראלי תקין.  <strong> טלפון</strong>.</p>
         <div class="update-row">
           <input id="new-phone" class="input ltr" type="tel" inputmode="numeric" autocomplete="tel"
                  maxlength="10" placeholder="05XXXXXXXX">
@@ -588,7 +588,7 @@ async function verifyTz() {
   }
 
   setButtonBusy("btn-tz", true, "בודק...", "המשך");
-  setLoading(true, "מאתר את החשבון...", "מחפש את הרשומה המתאימה בגוגל שיטס.");
+  setLoading(true, "מאתר את החשבון...", "מחפשים אותך אצלינו במערכת.");
 
   try {
     const result = await api({ tz });
@@ -746,7 +746,7 @@ async function updatePhoneNumber() {
     setLoading(false);
     showStep("step-3");
 
-    document.getElementById("update-msg").textContent = "✓ המספר נשמר בהצלחה בגוגל שיטס.";
+    document.getElementById("update-msg").textContent = "✓ המספר נשמר בהצלחה .";
     document.getElementById("update-msg").className = "success";
     document.getElementById("update-msg").classList.remove("hidden");
 
