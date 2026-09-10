@@ -43,11 +43,60 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
 #userContent { background: #0d2b4a; padding: 15px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s; line-height: 1.6; }
 #userContent:hover { transform: scale(1.05); }
 @keyframes fadeIn { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
+
+
+  /* כפתור חזרה למעלה מימין */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.back-btn:hover {
+  background: rgba(0, 191, 255, 0.2);
+  border-color: #00bfff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+}
+
+/* קישור עזרה בתחתית */
+.help-link-container {
+  margin-top: 25px;
+  position: relative;
+  z-index: 1;
+}
+.help-link {
+  color: #a0c4ff;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.help-link:hover {
+  color: #00bfff;
+  text-decoration: underline;
+}
 </style>
 </head>
 
 <body>
 
+  <a href="https://yuzok101.github.io/yuzukmedic/" class="back-btn">
+  ➔ חזרה לאתר
+</a>
+  
 <div id="loginCard">
   <img src="logo.png" alt="לוגו">
   <h2>התחבר לאזור האישי</h2>
@@ -64,6 +113,10 @@ button:hover { background: #0099cc; transform: translateY(-3px); box-shadow: 0 6
       <div class="spinner"></div>
     </button>
   </form>
+
+  <div class="help-link-container">
+    <a href="help.html" class="help-link">לא הצלחת להתחבר? לחץ כאן</a>
+  </div>
 </div>
 
 <div id="personalArea">
