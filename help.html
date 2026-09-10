@@ -589,7 +589,7 @@ async function verifyAlternative() {
   }
 
   setButtonBusy("btn-alt", true, "מאמת...", "אימות והמשך");
-  setLoading(true, "מאמת את הזהות...", "הפרטים נבדקים מול הרשומה שלך.");
+  setLoading(true, "מאמת את הזהות...", "הפרטים נבדקים מול המערכת.");
 
   try {
     const result = await api(params);
@@ -609,7 +609,7 @@ async function verifyAlternative() {
     console.error(err);
     setLoading(false);
     showStep("step-2");
-    showError("error-2", "השרת לא החזיר תשובה תקינה. יש לעדכן את פריסת ה־Apps Script לגרסה האחרונה (Web App) ולנסות שוב.");
+    showError("error-2", "נא לנסות שנית.");
   } finally {
     setButtonBusy("btn-alt", false, "מאמת...", "אימות והמשך");
   }
@@ -646,7 +646,7 @@ async function updatePhoneNumber() {
   }
 
   setButtonBusy("btn-update", true, "שומר...", "שמור מספר");
-  setLoading(true, "שומר את המספר החדש...", "מבצע עדכון ישיר בשורת המשתמש בגוגל שיטס.");
+  setLoading(true, "שומר את המספר החדש...", "מבצע עדכון ישיר במערכת.");
 
   try {
     const result = await api({
