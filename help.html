@@ -236,7 +236,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <div>
           <div class="step-number">שלב 1 מתוך 3</div>
           <h2 class="step-title">זיהוי החשבון</h2>
-          <p class="step-desc">הזן את מספר תעודת הזהות כדי לאתר את החשבון שלך.</p>
+          <p class="step-desc">הזן את מספר תעודת הזהות כדי לאתר את הרשומה שלך בגוגל שיטס.</p>
         </div>
       </div>
 
@@ -258,7 +258,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <div>
           <div class="step-number">שלב 2 מתוך 3</div>
           <h2 class="step-title">אימות זהות</h2>
-          <p class="step-desc">בחר דרך אימות אחת. אם אינך זוכר את הטלפון הרשום, אפשר להשתמש באימייל, בתאריך סיום ההכשרה או בכתובת.</p>
+          <p class="step-desc">בחר דרך אימות אחת. אם אינך זוכר את הטלפון הרשום, אפשר להשתמש במייל, בתאריך סיום הקורס או בכתובת המגורים.</p>
         </div>
       </div>
 
@@ -324,7 +324,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
       <div id="phone-update-box" class="update-box hidden">
         <div class="update-title">📱 הגדרת מספר טלפון חדש</div>
-        <p class="update-desc">הזן מספר נייד ישראלי תקין. לאחר השמירה ניתן יהיה להשתמש בו בכניסה הבאה לאזור האישי.</p>
+        <p class="update-desc">הזן מספר נייד ישראלי תקין. המספר החדש יחליף את המספר הקיים בעמודת <strong>E — טלפון</strong> בלבד. עמודה F — כתובת — לא תשתנה.</p>
         <div class="update-row">
           <input id="new-phone" class="input ltr" type="tel" inputmode="numeric" autocomplete="tel"
                  maxlength="10" placeholder="05XXXXXXXX">
@@ -366,7 +366,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYE5Qgo1nzG98CS84US6S7mO3f4x5194JMzyvB2o2yuOb1ZXq5lDmx2KuXkrIYbY6YlQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZ9E0Y5dD1tvFOWHUZlqi9FGp3BGp7EnRPcp3KmY6X3JcX2Otjii9IUwPPtodzdo_Ozw/exec";
+
+// Google Sheets mapping:
+// A ת.ז | B מייל | C שם פרטי | D שם משפחה | E טלפון | F כתובת |
+// G תאריך סיום קורס | H הכשרה | I תאריך תפוגה | J שנת לידה | K שם הקורס
 
 let currentUser = null;
 let selectedMethod = "email";
