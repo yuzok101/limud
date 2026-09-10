@@ -57,7 +57,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
   background:linear-gradient(145deg,#1d4ed8,#0f766e);
   box-shadow:0 10px 28px rgba(37,99,235,.24);
   font-size:22px;
+  overflow:hidden;
 }
+.brand-mark img{width:100%;height:100%;object-fit:contain;display:block;padding:5px}
+
 .brand-title{font-weight:800;font-size:18px;line-height:1.1}
 .brand-sub{color:var(--muted);font-size:12px;margin-top:3px}
 .back-link{
@@ -186,6 +189,21 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .modal h3{margin:0 0 7px;font-size:21px}
 .modal p{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 19px}
 .full-btn{width:100%}
+
+.contact-help{
+  margin-top:14px;padding:15px;border-radius:15px;
+  background:rgba(59,130,246,.08);
+  border:1px solid rgba(59,130,246,.22);
+  color:#cfe1ff;font-size:13px;line-height:1.55;
+}
+.contact-help strong{display:block;color:#fff;margin-bottom:4px}
+.contact-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-top:10px;min-height:42px;padding:0 16px;border-radius:12px;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  color:#fff;text-decoration:none;font-weight:800;
+}
+
 @media(max-width:620px){
   .header-inner{padding:11px 13px}
   .brand-sub{display:none}
@@ -209,7 +227,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 <header class="header">
   <div class="header-inner">
     <div class="brand">
-      <div class="brand-mark">🩺</div>
+      <div class="brand-mark"><img src="logo.png" alt="יוז'וק מדיק"></div>
       <div>
         <div class="brand-title">יוז'וק מדיק</div>
         <div class="brand-sub">לדעת להציל חיים</div>
@@ -249,6 +267,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <button id="btn-tz" class="btn btn-primary" type="button" onclick="verifyTz()">המשך</button>
       </div>
       <div id="error-1" class="error hidden" role="alert"></div>
+       <div id="contact-help-1" class="contact-help hidden">
+         <strong>עדיין לא מצליח?</strong>
+         אנחנו תמיד זמינים לעזור לך. אפשר לפנות אלינו דרך דף יצירת הקשר.
+         <a class="contact-btn" href="https://yuzok101.github.io/yuzukmedic/kesher.html">מעבר ליצירת קשר</a>
+       </div>
     </div>
 
     <!-- STEP 2 -->
@@ -282,7 +305,21 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
       <div id="panel-email" class="form-panel">
         <label class="label" for="alt-email">כתובת אימייל</label>
-        <input id="alt-email" class="input ltr" type="email" autocomplete="email" placeholder="name@example.com">
+        <input id="alt-email" class="input ltr" type="email" autocomplete="email"
+               list="email-domains" placeholder="name@example.com">
+         <datalist id="email-domains">
+           <option value="@gmail.com"></option>
+           <option value="@outlook.com"></option>
+           <option value="@hotmail.com"></option>
+           <option value="@yahoo.com"></option>
+           <option value="@icloud.com"></option>
+           <option value="@walla.co.il"></option>
+           <option value="@012.net.il"></option>
+           <option value="@bezeqint.net"></option>
+           <option value="@netvision.net.il"></option>
+           <option value="@gmail.co.il"></option>
+         </datalist>
+         <div class="hint">אפשר להתחיל להקליד את שם המשתמש ולקבל הצעות להשלמת כתובת האימייל.</div>
       </div>
 
       <div id="panel-date" class="form-panel hidden">
@@ -302,6 +339,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <button id="btn-alt" class="btn btn-primary" type="button" onclick="verifyAlternative()">אימות והמשך</button>
       </div>
       <div id="error-2" class="error hidden" role="alert"></div>
+       <div id="contact-help-2" class="contact-help hidden">
+         <strong>עדיין לא מצליח?</strong>
+         אנחנו תמיד זמינים לעזור לך. אפשר לפנות אלינו דרך דף יצירת הקשר.
+         <a class="contact-btn" href="https://yuzok101.github.io/yuzukmedic/kesher.html">מעבר ליצירת קשר</a>
+       </div>
     </div>
 
     <!-- STEP 3 -->
@@ -353,7 +395,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
   </section>
 </main>
 
-<footer class="footer">יוז'וק מדיק © 2025 · עזרה לכניסה לאזור האישי</footer>
+<footer class="footer">יוז'וק מדיק © 2026 · עזרה לכניסה לאזור האישי</footer>
 
 <div id="success-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-box">
@@ -362,6 +404,18 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <p>מספר הטלפון נשמר במערכת. בפעם הבאה ניתן להשתמש במספר החדש כדי להיכנס לאזור האישי.</p>
     <a class="btn btn-primary full-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none"
        href="https://yuzok101.github.io/limud/login1.html">כניסה לאזור האישי</a>
+  </div>
+</div>
+
+<div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+  <div class="modal-box">
+    <div class="modal-icon">💬</div>
+    <h3 id="help-modal-title">עדיין לא מצליח?</h3>
+    <p id="help-modal-text">לא הצלחנו לאמת את הפרטים שהוזנו. אפשר לנסות שוב, ואם עדיין לא מצליחים — אנחנו תמיד זמינים לעזור.</p>
+    <a class="btn btn-primary full-btn"
+       style="display:flex;align-items:center;justify-content:center;text-decoration:none"
+       href="https://yuzok101.github.io/yuzukmedic/kesher.html">יצירת קשר עם יוז'וק מדיק</a>
+    <button class="btn btn-ghost full-btn" style="margin-top:10px" type="button" onclick="closeHelpModal()">נסה שוב</button>
   </div>
 </div>
 
@@ -420,14 +474,33 @@ function setLoading(on, title = "בודק את הפרטים...", desc = "מתב�
   }
 }
 
-function showError(id, message) {
+function showError(id, message, showContact = false) {
   const el = document.getElementById(id);
   el.textContent = message;
   el.classList.remove("hidden");
+
+  const suffix = id.replace("error-", "");
+  const contact = document.getElementById("contact-help-" + suffix);
+  if (contact) contact.classList.toggle("hidden", !showContact);
 }
 
 function clearError(id) {
   document.getElementById(id).classList.add("hidden");
+
+  const suffix = id.replace("error-", "");
+  const contact = document.getElementById("contact-help-" + suffix);
+  if (contact) contact.classList.add("hidden");
+}
+
+function showHelpModal(text) {
+  const modal = document.getElementById("help-modal");
+  const message = document.getElementById("help-modal-text");
+  if (message && text) message.textContent = text;
+  modal.classList.remove("hidden");
+}
+
+function closeHelpModal() {
+  document.getElementById("help-modal").classList.add("hidden");
 }
 
 function setButtonBusy(id, on, busyText, normalText) {
@@ -522,7 +595,8 @@ async function verifyTz() {
     if (result.status !== "success" || !result.data) {
       setLoading(false);
       showStep("step-1");
-      showError("error-1", result.message || "לא נמצאה תעודת זהות כזאת במערכת.");
+      showError("error-1", result.message || "מספר תעודת הזהות לא נמצא במערכת.", true);
+       showHelpModal("מספר תעודת הזהות שהוזן לא נמצא במערכת. אפשר לבדוק שוב את המספר, ואם עדיין לא מצליחים — אנחנו תמיד זמינים לעזור.");
       return;
     }
 
@@ -597,7 +671,8 @@ async function verifyAlternative() {
     if (result.status !== "verified") {
       setLoading(false);
       showStep("step-2");
-      showError("error-2", result.message || "הפרטים אינם תואמים למערכת.");
+      showError("error-2", result.message || "הפרטים אינם תואמים למערכת.", true);
+       showHelpModal("הפרט שהוזן לא תואם לרשומה במערכת. אפשר לנסות שוב, ואם עדיין לא מצליחים — אנחנו תמיד זמינים לעזור.");
       return;
     }
 
@@ -689,6 +764,7 @@ async function updatePhoneNumber() {
 }
 
 function backToTz() {
+  closeHelpModal();
   currentUser = null;
   document.getElementById("input-tz").value = "";
   clearError("error-1");
@@ -698,6 +774,7 @@ function backToTz() {
 }
 
 function restart() {
+  closeHelpModal();
   currentUser = null;
   document.getElementById("input-tz").value = "";
   document.getElementById("alt-email").value = "";
@@ -719,6 +796,26 @@ document.getElementById("new-phone").addEventListener("input", e => {
 });
 document.getElementById("alt-date").addEventListener("input", e => {
   e.target.value = e.target.value.replace(/[^\d./-]/g, "").slice(0, 10);
+});
+
+
+document.getElementById("alt-email").addEventListener("input", e => {
+  const value = e.target.value;
+  if (value.includes("@")) {
+    const local = value.split("@")[0];
+    const domain = value.split("@")[1] || "";
+    const domains = [
+      "gmail.com","outlook.com","hotmail.com","yahoo.com","icloud.com",
+      "walla.co.il","012.net.il","bezeqint.net","netvision.net.il","gmail.co.il"
+    ];
+    if (local && domain && !domain.includes(".")) {
+      const list = document.getElementById("email-domains");
+      list.innerHTML = domains
+        .filter(d => d.startsWith(domain.toLowerCase()))
+        .map(d => `<option value="${local}@${d}"></option>`)
+        .join("");
+    }
+  }
 });
 
 ["input-tz","alt-email","alt-date","alt-address","new-phone"].forEach(id => {
