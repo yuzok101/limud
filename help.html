@@ -212,7 +212,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
       <div class="brand-mark">🩺</div>
       <div>
         <div class="brand-title">יוז'וק מדיק</div>
-        <div class="brand-sub">מרכז עזרה מאובטח לאזור האישי</div>
+        <div class="brand-sub">לדעת להציל חיים</div>
       </div>
     </div>
     <a class="back-link" href="https://yuzok101.github.io/limud/login1.html">← חזרה לאזור האישי</a>
@@ -236,14 +236,14 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <div>
           <div class="step-number">שלב 1 מתוך 3</div>
           <h2 class="step-title">זיהוי החשבון</h2>
-          <p class="step-desc">הזן את מספר תעודת הזהות כדי לאתר את הרשומה שלך בגוגל שיטס.</p>
+          <p class="step-desc">אנחנו צריכים את מספר תעודת הזהות כדי לזהות אותך.</p>
         </div>
       </div>
 
       <label class="label" for="input-tz">מספר תעודת זהות</label>
       <input id="input-tz" class="input ltr" inputmode="numeric" autocomplete="off"
              maxlength="9" placeholder="9 ספרות" aria-label="מספר תעודת זהות">
-      <div class="hint">המספר משמש רק לאיתור הרשומה המתאימה במערכת.</div>
+      <div class="hint">המספר משמש רק לאיתור המשתמש במערכת.</div>
 
       <div class="actions">
         <button id="btn-tz" class="btn btn-primary" type="button" onclick="verifyTz()">המשך</button>
@@ -258,7 +258,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <div>
           <div class="step-number">שלב 2 מתוך 3</div>
           <h2 class="step-title">אימות זהות</h2>
-          <p class="step-desc">בחר דרך אימות אחת. אם אינך זוכר את הטלפון הרשום, אפשר להשתמש במייל, בתאריך סיום הקורס או בכתובת המגורים.</p>
+          <p class="step-desc">בחר דרך אימות אחת. אם אינך זוכר את הטלפון הרשום, אפשר להשתמש במייל, בתאריך סיום הקורס או בעיר המגורים.</p>
         </div>
       </div>
 
@@ -275,8 +275,8 @@ button:disabled{opacity:.55;cursor:not-allowed}
         </button>
         <button id="method-address" class="method" type="button" onclick="selectMethod('address')">
           <span class="emoji">📍</span>
-          <strong>כתובת מגורים</strong>
-          <span>עיר או כתובת הרשומה במערכת</span>
+          <strong>עיר מגורים</strong>
+          <span>עיר הרשומה במערכת</span>
         </button>
       </div>
 
@@ -292,9 +292,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
       </div>
 
       <div id="panel-address" class="form-panel hidden">
-        <label class="label" for="alt-address">עיר מגורים / כתובת</label>
-        <input id="alt-address" class="input" type="text" autocomplete="street-address" placeholder="הזן את העיר או הכתובת כפי שהיא רשומה במערכת">
-        <div class="hint">אין צורך להוסיף מידע שאינו מופיע ברשומה.</div>
+        <label class="label" for="alt-address">עיר מגורים</label>
+        <input id="alt-address" class="input" type="text" autocomplete="street-address" placeholder="הזן את העיר">
+        <div class="hint">אין צורך להוסיף מידע שאינו מופיע .</div>
       </div>
 
       <div class="actions">
@@ -318,13 +318,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
         <div class="status-icon">🔐</div>
         <div>
           <h2>הזהות אומתה בהצלחה</h2>
-          <p>אפשר עכשיו להגדיר מספר טלפון חדש. העדכון יבוצע ישירות בשורת המשתמש שלך בגוגל שיטס.</p>
+          <p>אפשר עכשיו להגדיר מספר טלפון חדש. העדכון יבוצע ישירות אצלינו במערכת.</p>
         </div>
       </div>
 
       <div id="phone-update-box" class="update-box hidden">
         <div class="update-title">📱 הגדרת מספר טלפון חדש</div>
-        <p class="update-desc">הזן מספר נייד ישראלי תקין. המספר החדש יחליף את המספר הקיים בעמודת <strong>F — טלפון</strong> בלבד. שאר העמודות לא ישתנו.</p>
+        <p class="update-desc">הזן מספר ישראלי תקין. המספר החדש יחליף את המספר הקיים בעמודת <strong>F — טלפון</strong>.</p>
         <div class="update-row">
           <input id="new-phone" class="input ltr" type="tel" inputmode="numeric" autocomplete="tel"
                  maxlength="10" placeholder="05XXXXXXXX">
@@ -334,7 +334,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
       </div>
 
       <div class="security-note">
-        🔒 האימות החלופי יוצר הרשאת עדכון זמנית וקצרת-טווח. לאחר השימוש בה, ההרשאה נמחקת ואי אפשר להשתמש בה שוב.
+        🔒 המספר נשמר במערכת מאובטחת.
       </div>
 
       <div class="actions">
@@ -353,13 +353,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
   </section>
 </main>
 
-<footer class="footer">יוז'וק מדיק © 2026 · מרכז עזרה לכניסה לאזור האישי</footer>
+<footer class="footer">יוז'וק מדיק © 2025 · עזרה לכניסה לאזור האישי</footer>
 
 <div id="success-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-box">
     <div class="modal-icon">✅</div>
     <h3 id="modal-title">המספר עודכן בהצלחה</h3>
-    <p>מספר הטלפון נשמר בגוגל שיטס. בפעם הבאה ניתן להשתמש במספר החדש כדי להיכנס לאזור האישי.</p>
+    <p>מספר הטלפון נשמר במערכת. בפעם הבאה ניתן להשתמש במספר החדש כדי להיכנס לאזור האישי.</p>
     <a class="btn btn-primary full-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none"
        href="https://yuzok101.github.io/limud/login1.html">כניסה לאזור האישי</a>
   </div>
