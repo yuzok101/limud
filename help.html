@@ -366,11 +366,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDZ8hK7tRZLJH8uOqsu80h_tYhz0BUG4sPOcXcfvEkxO2SzgmLKq7Je4DSHWESvo1aAA/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBnQ1czImcqwZFKaWcY_OmI_GKdMnwTmMikZyMGNU6K9rcPTXWov55ryb46MdPpiQYtg/exec";
 
 // Google Sheets mapping:
-// A ת.ז | B מייל | C שם פרטי | D שם משפחה | E טלפון | F כתובת |
-// G תאריך סיום קורס | H הכשרה | I תאריך תפוגה | J שנת לידה | K שם הקורס
+// A ת.ז | B מייל | C שם פרטי | D שם משפחה | E = לא משמש | F = טלפון |
+// G = כתובת | H = תאריך סיום קורס | I = הכשרה | J = תאריך תפוגה | K = שנת לידה | L = שם הקורס
 
 let currentUser = null;
 let selectedMethod = "email";
@@ -440,24 +440,35 @@ function setButtonBusy(id, on, busyText, normalText) {
 function api(params) {
   return new Promise((resolve, reject) => {
     const callbackName =
-      "__yuzok_cb_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+      "__yuzok_cb_" +
+      Date.now() +
+      "_" +
+      Math.floor(Math.random() * 1000000);
 
-    const query = new URLSearchParams({
-      ...params,
-      callback: callbackName
+    const query = new URLSearchParams();
+    Object.keys(params || {}).forEach(key => {
+      const value = params[key];
+      if (value !== undefined && value !== null) {
+        query.set(key, String(value));
+      }
     });
 
+    query.set("callback", callbackName);
+    query.set("_", String(Date.now()));
+
     const script = document.createElement("script");
+    const requestUrl = SCRIPT_URL + "?" + query.toString();
+
     let finished = false;
 
-    const cleanup = () => {
+    function cleanup() {
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
       try {
         delete window[callbackName];
       } catch (e) {}
-    };
+    }
 
     const timer = setTimeout(() => {
       if (finished) return;
@@ -466,7 +477,7 @@ function api(params) {
       reject(new Error("JSONP_TIMEOUT"));
     }, 20000);
 
-    window[callbackName] = (data) => {
+    window[callbackName] = function(data) {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
@@ -474,16 +485,21 @@ function api(params) {
       resolve(data);
     };
 
-    script.onerror = () => {
+    script.onerror = function() {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
       cleanup();
-      reject(new Error("JSONP_NETWORK_ERROR"));
+
+      const err = new Error("JSONP_NETWORK_ERROR");
+      err.requestUrl = requestUrl;
+      reject(err);
     };
 
-    script.src = SCRIPT_URL + "?" + query.toString();
+    script.src = requestUrl;
     script.async = true;
+    script.referrerPolicy = "no-referrer-when-downgrade";
+
     document.head.appendChild(script);
   });
 }
@@ -593,7 +609,7 @@ async function verifyAlternative() {
     console.error(err);
     setLoading(false);
     showStep("step-2");
-    showError("error-2", "לא התקבלה תשובה מהשרת. ודא שה־Apps Script מפורסם כ־Web App ונסה שוב.");
+    showError("error-2", "השרת לא החזיר תשובה תקינה. יש לעדכן את פריסת ה־Apps Script לגרסה האחרונה (Web App) ולנסות שוב.");
   } finally {
     setButtonBusy("btn-alt", false, "מאמת...", "אימות והמשך");
   }
