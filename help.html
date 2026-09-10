@@ -1,546 +1,687 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יוז'וק מדיק לדעת להציל חיים</title>
-    <!-- Tailwind CSS לעיצוב מקצועי -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Assistant -->
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Assistant', sans-serif; }
-        .loader {
-            border: 3px solid #334155;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes bounce-lateral {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(-8px); }
-        }
-        .animate-like {
-            animation: bounce-lateral 1s ease-in-out infinite;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<title>עזרה בכניסה לאזור האישי | יוז'וק מדיק</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#07111f;
+  --card:#0d1a2b;
+  --card2:#101f33;
+  --border:#20324a;
+  --text:#f8fafc;
+  --muted:#9fb0c5;
+  --blue:#3b82f6;
+  --blue2:#2563eb;
+  --green:#10b981;
+  --amber:#f59e0b;
+  --red:#f43f5e;
+  --shadow:0 24px 70px rgba(0,0,0,.32);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Assistant',sans-serif;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(37,99,235,.16),transparent 32%),
+    radial-gradient(circle at 90% 20%,rgba(16,185,129,.08),transparent 28%),
+    var(--bg);
+  color:var(--text);
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.header{
+  position:sticky;top:0;z-index:20;
+  background:rgba(7,17,31,.88);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(148,163,184,.12);
+}
+.header-inner{
+  max-width:1050px;margin:auto;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{
+  width:46px;height:46px;border-radius:14px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#1d4ed8,#0f766e);
+  box-shadow:0 10px 28px rgba(37,99,235,.24);
+  font-size:22px;
+}
+.brand-title{font-weight:800;font-size:18px;line-height:1.1}
+.brand-sub{color:var(--muted);font-size:12px;margin-top:3px}
+.back-link{
+  color:#bfdbfe;text-decoration:none;font-size:13px;font-weight:700;
+  padding:10px 13px;border:1px solid var(--border);border-radius:12px;
+  background:rgba(15,31,51,.7)
+}
+.back-link:hover{border-color:#3b82f6;color:#fff}
+.main{max-width:760px;margin:0 auto;padding:34px 18px 45px}
+.hero{text-align:center;margin-bottom:22px}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 12px;border:1px solid rgba(59,130,246,.28);
+  border-radius:999px;background:rgba(37,99,235,.10);
+  color:#bfdbfe;font-size:12px;font-weight:700;
+}
+.hero h1{font-size:30px;line-height:1.15;margin:15px 0 9px}
+.hero p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+.card{
+  background:linear-gradient(180deg,rgba(16,31,51,.96),rgba(10,23,39,.98));
+  border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.progress{
+  height:4px;background:#132238;
+}
+.progress > div{
+  height:100%;width:25%;background:linear-gradient(90deg,#2563eb,#38bdf8);
+  transition:width .25s ease;
+}
+.step{padding:28px}
+.hidden{display:none!important}
+.step-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px}
+.step-icon{
+  flex:0 0 48px;width:48px;height:48px;border-radius:15px;
+  display:grid;place-items:center;font-size:21px;
+  background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25)
+}
+.step-number{font-size:12px;color:#60a5fa;font-weight:800;margin-bottom:3px}
+.step-title{font-size:21px;font-weight:800;margin:0}
+.step-desc{color:var(--muted);font-size:13px;line-height:1.55;margin:4px 0 0}
+.label{display:block;font-size:13px;font-weight:700;color:#dbeafe;margin-bottom:8px}
+.input{
+  width:100%;height:52px;border-radius:14px;border:1px solid #263b55;
+  background:#07111f;color:#fff;padding:0 15px;outline:none;
+  transition:border-color .2s,box-shadow .2s
+}
+.input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.input.ltr{direction:ltr;text-align:left}
+.hint{color:#8294ab;font-size:12px;margin-top:7px;line-height:1.45}
+.actions{display:flex;gap:10px;align-items:center;margin-top:20px}
+.btn{
+  min-height:48px;border:0;border-radius:14px;padding:0 19px;
+  font-weight:800;font-size:14px;transition:.2s;
+}
+.btn-primary{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 10px 24px rgba(37,99,235,.2)}
+.btn-primary:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.btn-ghost{background:transparent;color:#9fb0c5;border:1px solid var(--border)}
+.btn-ghost:hover{color:#fff;border-color:#49627e}
+.error,.success,.warning{
+  margin-top:14px;padding:12px 14px;border-radius:13px;font-size:13px;line-height:1.5
+}
+.error{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.28);color:#fecdd3}
+.success{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.28);color:#a7f3d0}
+.warning{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:#fde68a}
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.method{
+  border:1px solid var(--border);background:#091627;color:#dbeafe;
+  border-radius:16px;padding:15px 10px;text-align:center;
+  transition:.2s
+}
+.method:hover{border-color:#3b82f6}
+.method.active{border-color:#3b82f6;background:rgba(37,99,235,.13);box-shadow:0 0 0 2px rgba(59,130,246,.09)}
+.method .emoji{font-size:22px;display:block;margin-bottom:5px}
+.method strong{display:block;font-size:13px}
+.method span{display:block;color:#7f91a8;font-size:11px;margin-top:3px}
+.form-panel{margin-top:16px}
+.dashboard{
+  padding:28px;
+}
+.status{
+  padding:20px;border-radius:18px;border:1px solid;
+  display:flex;gap:14px;align-items:flex-start
+}
+.status.success{background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.25);margin-top:0}
+.status.warning{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.25);margin-top:0}
+.status-icon{font-size:30px}
+.status h2{font-size:19px;margin:0 0 5px}
+.status p{margin:0;color:#b8c6d8;font-size:13px;line-height:1.55}
+.update-box{
+  margin-top:18px;padding:20px;border:1px solid rgba(59,130,246,.24);
+  background:rgba(37,99,235,.07);border-radius:18px
+}
+.update-title{font-size:15px;font-weight:800;margin-bottom:5px}
+.update-desc{color:#aebed1;font-size:12px;line-height:1.5;margin:0 0 14px}
+.update-row{display:flex;gap:9px}
+.update-row .input{flex:1}
+.security-note{
+  margin-top:17px;padding:13px 14px;border-radius:14px;
+  background:#091627;border:1px solid var(--border);
+  color:#8fa1b8;font-size:11px;line-height:1.55
+}
+.footer{text-align:center;color:#62738a;font-size:11px;padding:0 18px 24px}
+.loader-wrap{
+  min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px
+}
+.loader{
+  width:42px;height:42px;border-radius:50%;border:4px solid #21334b;
+  border-top-color:#3b82f6;animation:spin .8s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal{
+  position:fixed;inset:0;background:rgba(2,8,23,.78);backdrop-filter:blur(7px);
+  display:grid;place-items:center;padding:18px;z-index:50
+}
+.modal-box{
+  max-width:430px;width:100%;background:#0e1d30;border:1px solid #29405d;
+  border-radius:24px;padding:28px;text-align:center;box-shadow:var(--shadow)
+}
+.modal-icon{
+  width:65px;height:65px;border-radius:20px;margin:0 auto 15px;
+  display:grid;place-items:center;background:rgba(16,185,129,.1);
+  border:1px solid rgba(16,185,129,.25);font-size:30px
+}
+.modal h3{margin:0 0 7px;font-size:21px}
+.modal p{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 19px}
+.full-btn{width:100%}
+@media(max-width:620px){
+  .header-inner{padding:11px 13px}
+  .brand-sub{display:none}
+  .brand-title{font-size:15px}
+  .brand-mark{width:40px;height:40px}
+  .back-link{font-size:11px;padding:8px 9px}
+  .main{padding:22px 11px 34px}
+  .hero h1{font-size:25px}
+  .hero p{font-size:13px}
+  .step,.dashboard{padding:20px 16px}
+  .step-title{font-size:18px}
+  .method-grid{grid-template-columns:1fr}
+  .actions{flex-direction:column-reverse;align-items:stretch}
+  .actions .btn{width:100%}
+  .update-row{flex-direction:column}
+}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
-    <!-- Header / Navbar -->
-    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <!-- צד שמאל: כותרת מעודכנת -->
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">🩺</div>
+      <div>
+        <div class="brand-title">יוז'וק מדיק</div>
+        <div class="brand-sub">מרכז עזרה מאובטח לאזור האישי</div>
+      </div>
+    </div>
+    <a class="back-link" href="https://yuzok101.github.io/limud/login1.html">← חזרה לאזור האישי</a>
+  </div>
+</header>
+
+<main class="main">
+  <section class="hero">
+    <div class="badge">🔐 עזרה בכניסה ועדכון פרטים</div>
+    <h1>לא זוכרים את מספר הטלפון?</h1>
+    <p>אין בעיה. מזהים את החשבון באמצעות פרט אישי נוסף, ואז ניתן להגדיר מספר טלפון חדש.</p>
+  </section>
+
+  <section class="card">
+    <div class="progress"><div id="progress-bar"></div></div>
+
+    <!-- STEP 1 -->
+    <div id="step-1" class="step">
+      <div class="step-head">
+        <div class="step-icon">🪪</div>
         <div>
-            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                יוז'וק מדיק לדעת להציל חיים
-            </h1>
-            <p class="text-xs text-slate-400 mt-0.5">איתור תקלות כניסה, אימות דו-שלבי ועדכון פרטים מאובטח</p>
+          <div class="step-number">שלב 1 מתוך 3</div>
+          <h2 class="step-title">זיהוי החשבון</h2>
+          <p class="step-desc">הזן את מספר תעודת הזהות כדי לאתר את החשבון שלך.</p>
         </div>
-        <!-- צד ימין: לוגו מוגדל ומקושר -->
-        <div class="flex items-center gap-3">
-            <div class="text-left hidden sm:block">
-                <span class="block text-xs font-semibold text-slate-300">סביבת ייצור</span>
-                <span class="block text-[10px] text-emerald-400 font-medium">● מסד נתונים מחובר</span>
-            </div>
-            <a href="https://yuzok101.github.io/limud/login1.html" class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shadow-md hover:border-blue-500 transition cursor-pointer group">
-                <img src="logo.png" alt="לוגו המערכת" class="h-11 w-11 object-contain group-hover:scale-105 transition duration-300" onerror="this.replaceWith(document.createTextNode('LOGO'))">
-            </a>
-        </div>
-    </header>
+      </div>
 
-    <!-- Main Content Container -->
-    <main class="max-w-xl w-full mx-auto p-4 md:p-6 my-auto flex-grow flex flex-col justify-center">
-        
-        <div class="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
-            
-            <!-- Banner -->
-            <div class="bg-gradient-to-l from-slate-900 via-slate-900 to-blue-950/60 p-6 md:p-8 border-b border-slate-800 relative">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-3xl text-blue-400 shadow-inner">
-                        🛡️
-                    </div>
-                    <div>
-                        <h2 class="text-lg md:text-xl font-bold text-white tracking-wide">בדיקת גישה ואבחון תקלה</h2>
-                        <p class="text-slate-400 text-xs md:text-sm mt-1">תהליך אימות מדורג לאיתור בעיות בכניסה לאזור האישי.</p>
-                    </div>
-                </div>
-            </div>
+      <label class="label" for="input-tz">מספר תעודת זהות</label>
+      <input id="input-tz" class="input ltr" inputmode="numeric" autocomplete="off"
+             maxlength="9" placeholder="9 ספרות" aria-label="מספר תעודת זהות">
+      <div class="hint">המספר משמש רק לאיתור הרשומה המתאימה במערכת.</div>
 
-            <!-- STEP 1: Enter ID -->
-            <div id="step-1-tz" class="p-6 md:p-8 space-y-6">
-                <div class="space-y-1.5">
-                    <label class="block text-sm font-semibold text-slate-200">הזן מספר תעודת זהות:</label>
-                    <p class="text-xs text-slate-400">יש להזין 9 ספרות בדיוק (כולל ספרת ביקורת במידת הצורך).</p>
-                </div>
-                <div class="flex gap-3">
-                    <input type="text" id="input-tz" maxlength="9" placeholder="" 
-                        class="flex-grow px-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-lg tracking-widest shadow-inner">
-                    <button onclick="verifyTz()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-7 py-3.5 rounded-2xl transition shadow-lg shadow-blue-600/20 flex items-center gap-2 shrink-0 text-sm">
-                        <span>המשך</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </button>
-                </div>
-                <p id="error-msg-1" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
-            </div>
-
-            <!-- STEP 2: Phone Verification -->
-            <div id="step-2-phone" class="p-6 md:p-8 space-y-6 hidden">
-                <div class="space-y-1.5">
-                    <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">שלב אימות 2 מתוך 2</span>
-                    <h3 class="text-base md:text-lg font-bold text-white">אימות באמצעות מספר טלפון נייד</h3>
-                    <p class="text-xs text-slate-400">הזן את מספר הטלפון המעודכן במערכת שלך.</p>
-                </div>
-                <div class="flex gap-3">
-                    <input type="tel" id="input-phone" maxlength="10" placeholder="" 
-                        class="flex-grow px-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-lg tracking-wider shadow-inner">
-                    <button onclick="verifyPhone()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3.5 rounded-2xl transition shadow-lg shadow-emerald-600/20 shrink-0 text-sm">
-                        אמת טלפון
-                    </button>
-                </div>
-                <div class="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <button onclick="backToTz()" class="text-slate-400 hover:text-white text-xs transition flex items-center gap-1">
-                        ← חזור לתעודת זהות
-                    </button>
-                    <button onclick="switchToAlternativeVerification()" class="text-amber-400 hover:text-amber-300 text-xs font-medium transition underline underline-offset-4">
-                        מעבר להזדהות בדרך שונה 🔄
-                    </button>
-                </div>
-                <p id="error-msg-2" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
-            </div>
-
-            <!-- STEP 2B: Alternative Verification -->
-            <div id="step-2-alt" class="p-6 md:p-8 space-y-5 hidden">
-                <div class="space-y-1.5">
-                    <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">אבחון וזיהוי חלופי</span>
-                    <h3 class="text-base md:text-lg font-bold text-white">בחר דרך אימות חלופית:</h3>
-                    <p class="text-xs text-slate-400">בחר אפשרות אחת מבין השניים הנותרים לאימות זהותך:</p>
-                </div>
-
-                <div class="space-y-4 pt-2">
-                    <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                        <button type="button" id="tab-opt-1" onclick="switchAltTab('email')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow">אימייל</button>
-                        <button type="button" id="tab-opt-2" onclick="switchAltTab('details')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white">תאריך סיום / עיר מגורים</button>
-                    </div>
-
-                    <!-- שדה אימייל -->
-                    <div id="alt-box-email" class="space-y-2">
-                        <label class="block text-xs font-medium text-slate-300">הזן כתובת אימייל מלאה:</label>
-                        <input type="email" id="alt-email" placeholder="user@gmail.com" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
-                    </div>
-
-                    <!-- שדה תאריך או כתובת (ללא דוגמאות בטקסט הרץ) -->
-                    <div id="alt-box-details" class="space-y-3 hidden">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">תאריך סיום קורס:</label>
-                            <input type="text" id="alt-date" placeholder="" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
-                        </div>
-                        <div class="text-center text-xs text-slate-500 font-medium">- או -</div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">עיר מגורים / כתובת:</label>
-                            <input type="text" id="alt-address" placeholder="" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-inner">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-center pt-4 border-t border-slate-800/80">
-                    <button onclick="backToPhone()" class="text-slate-400 hover:text-white text-xs transition">
-                        ← חזור לבדיקת טלפון
-                    </button>
-                    <button onclick="verifyAlternative()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-6 py-3 rounded-xl transition shadow-md">
-                        בצע אימות חלופי
-                    </button>
-                </div>
-                <p id="error-msg-alt" class="text-rose-400 text-xs font-medium hidden bg-rose-950/30 border border-rose-900/50 p-3 rounded-xl"></p>
-            </div>
-
-            <!-- Loader State -->
-            <div id="loading-state" class="hidden p-12 text-center flex flex-col items-center justify-center space-y-4">
-                <div class="loader"></div>
-                <p class="text-slate-400 text-xs font-medium tracking-wide">מאמת נתונים מול מסד הנתונים...</p>
-            </div>
-
-            <!-- STEP 3: Dashboard (Success) -->
-            <div id="step-3-dashboard" class="hidden p-6 md:p-8 space-y-6">
-                
-                <!-- Status Alert עם אייקון לייק זז -->
-                <div id="dashboard-alert" class="p-5 rounded-2xl border flex items-start gap-4">
-                    <div id="dash-icon" class="text-3xl mt-0.5 animate-like shrink-0">👍</div>
-                    <div>
-                        <h3 id="dash-title" class="font-bold text-sm md:text-base text-white"></h3>
-                        <p id="dash-desc" class="text-xs md:text-sm mt-1 text-slate-300 leading-relaxed"></p>
-                    </div>
-                </div>
-
-                <!-- Phone Update Section (עודכן ל"עדכן במערכת") -->
-                <div id="phone-fix-section" class="bg-blue-950/30 border border-blue-900/60 rounded-2xl p-5 hidden space-y-3">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400">🛠️ עדכון מספר טלפון במערכת</h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">מספר הטלפון לא תאם, הזן מספר חדש שיתעדכן ישירות במסד הנתונים בגוגל שיטס:</p>
-                    <div class="flex gap-2.5">
-                        <input type="tel" id="new-phone-input" maxlength="10" placeholder="הכנס מספר טלפון חדש ותקין" class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none shadow-inner">
-                        <button onclick="updatePhoneNumber()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md shrink-0">
-                            עדכן במערכת
-                        </button>
-                    </div>
-                    <p id="update-phone-msg" class="text-xs font-medium mt-1 text-emerald-400 hidden"></p>
-                </div>
-
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Modal Popup for Success -->
-    <div id="success-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto text-3xl animate-like">
-                👍
-            </div>
-            <div class="space-y-2">
-                <h3 class="text-lg font-bold text-white">יאללה אפשר להתקדם!</h3>
-                <p class="text-xs text-slate-300">מספר הטלפון עודכן בהצלחה במערכת, אתה יכול לעבור כעת לאזור האישי שלך.</p>
-            </div>
-            <a href="https://yuzok101.github.io/limud/login1.html" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-2xl transition shadow-lg shadow-blue-600/20 text-sm">
-                מעבר לאזור האישי 🚀
-            </a>
-        </div>
+      <div class="actions">
+        <button id="btn-tz" class="btn btn-primary" type="button" onclick="verifyTz()">המשך</button>
+      </div>
+      <div id="error-1" class="error hidden" role="alert"></div>
     </div>
 
-    <!-- Footer -->
-    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-900">
-        יוז'וק מדיק &copy; 2026 | מוגן ומאובטח
-    </footer>
+    <!-- STEP 2 -->
+    <div id="step-2" class="step hidden">
+      <div class="step-head">
+        <div class="step-icon">🛡️</div>
+        <div>
+          <div class="step-number">שלב 2 מתוך 3</div>
+          <h2 class="step-title">אימות זהות</h2>
+          <p class="step-desc">בחר דרך אימות אחת. אם אינך זוכר את הטלפון הרשום, אפשר להשתמש באימייל, בתאריך סיום ההכשרה או בכתובת.</p>
+        </div>
+      </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQKPYOodhU46r38Q7kSQJWMvP9fX9Ax96hf0qJhjAxH7IWtZd9KWlNf7XHMjUsB-5RMw/exec";
-        
-        let currentUserData = null;
+      <div class="method-grid">
+        <button id="method-email" class="method active" type="button" onclick="selectMethod('email')">
+          <span class="emoji">✉️</span>
+          <strong>אימייל</strong>
+          <span>כתובת הרשומה במערכת</span>
+        </button>
+        <button id="method-date" class="method" type="button" onclick="selectMethod('date')">
+          <span class="emoji">📅</span>
+          <strong>תאריך הכשרה</strong>
+          <span>תאריך סיום ההכשרה</span>
+        </button>
+        <button id="method-address" class="method" type="button" onclick="selectMethod('address')">
+          <span class="emoji">📍</span>
+          <strong>כתובת מגורים</strong>
+          <span>עיר או כתובת הרשומה במערכת</span>
+        </button>
+      </div>
 
-        function isValidTZ(tz) {
-            return /^\d{9}$/.test(tz);
-        }
+      <div id="panel-email" class="form-panel">
+        <label class="label" for="alt-email">כתובת אימייל</label>
+        <input id="alt-email" class="input ltr" type="email" autocomplete="email" placeholder="name@example.com">
+      </div>
 
-        function isValidPhone(phone) {
-            return /^05\d{8}$/.test(phone);
-        }
+      <div id="panel-date" class="form-panel hidden">
+        <label class="label" for="alt-date">תאריך סיום ההכשרה</label>
+        <input id="alt-date" class="input ltr" type="text" inputmode="numeric" autocomplete="off" placeholder="DD/MM/YYYY">
+        <div class="hint">ניתן להקליד גם 01.09.2026 או 01-09-2026.</div>
+      </div>
 
-        async function verifyTz() {
-            const tz = document.getElementById('input-tz').value.trim();
-            const errorMsg = document.getElementById('error-msg-1');
+      <div id="panel-address" class="form-panel hidden">
+        <label class="label" for="alt-address">עיר מגורים / כתובת</label>
+        <input id="alt-address" class="input" type="text" autocomplete="street-address" placeholder="הזן את העיר או הכתובת כפי שהיא רשומה במערכת">
+        <div class="hint">אין צורך להוסיף מידע שאינו מופיע ברשומה.</div>
+      </div>
 
-            if (!isValidTZ(tz)) {
-                errorMsg.innerText = "מספר תעודת זהות חייב להכיל בדיוק 9 ספרות.";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            errorMsg.classList.add('hidden');
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" onclick="backToTz()">← חזרה</button>
+        <button id="btn-alt" class="btn btn-primary" type="button" onclick="verifyAlternative()">אימות והמשך</button>
+      </div>
+      <div id="error-2" class="error hidden" role="alert"></div>
+    </div>
 
-            showLoader(true);
-            try {
-                const response = await fetch(`${SCRIPT_URL}?tz=${encodeURIComponent(tz)}`);
-                const result = await response.json();
-                showLoader(false);
+    <!-- STEP 3 -->
+    <div id="step-3" class="dashboard hidden">
+      <div id="dashboard-success" class="status success hidden">
+        <div class="status-icon">✅</div>
+        <div>
+          <h2>המספר תואם למערכת</h2>
+          <p>הזיהוי הצליח. אין צורך לשנות דבר. אפשר לחזור עכשיו לאזור האישי ולהיכנס כרגיל.</p>
+        </div>
+      </div>
 
-                if (result.status === 'success') {
-                    currentUserData = result.data;
-                    document.getElementById('step-1-tz').classList.add('hidden');
-                    document.getElementById('step-2-phone').classList.remove('hidden');
-                } else {
-                    errorMsg.innerText = "לא נמצאה תעודת זהות כזאת במערכת אנא נסה שנית";
-                    errorMsg.classList.remove('hidden');
-                }
-            } catch (err) {
-                showLoader(false);
-                errorMsg.innerText = "שגיאת תקשורת מול השרת.";
-                errorMsg.classList.remove('hidden');
-            }
-        }
+      <div id="dashboard-update" class="status warning hidden">
+        <div class="status-icon">🔐</div>
+        <div>
+          <h2>הזהות אומתה בהצלחה</h2>
+          <p>אפשר עכשיו להגדיר מספר טלפון חדש. העדכון יבוצע ישירות בשורת המשתמש שלך בגוגל שיטס.</p>
+        </div>
+      </div>
 
-        async function verifyPhone() {
-            const phone = document.getElementById('input-phone').value.trim();
-            const errorMsg = document.getElementById('error-msg-2');
+      <div id="phone-update-box" class="update-box hidden">
+        <div class="update-title">📱 הגדרת מספר טלפון חדש</div>
+        <p class="update-desc">הזן מספר נייד ישראלי תקין. לאחר השמירה ניתן יהיה להשתמש בו בכניסה הבאה לאזור האישי.</p>
+        <div class="update-row">
+          <input id="new-phone" class="input ltr" type="tel" inputmode="numeric" autocomplete="tel"
+                 maxlength="10" placeholder="05XXXXXXXX">
+          <button id="btn-update" class="btn btn-green" type="button" onclick="updatePhoneNumber()">שמור מספר</button>
+        </div>
+        <div id="update-msg" class="success hidden" role="status"></div>
+      </div>
 
-            if (!isValidPhone(phone)) {
-                errorMsg.innerText = "מספר הטלפון אינו תקין (חייב להכיל 10 ספרות ולהתחיל ב-05).";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
+      <div class="security-note">
+        🔒 האימות החלופי יוצר הרשאת עדכון זמנית וקצרת-טווח. לאחר השימוש בה, ההרשאה נמחקת ואי אפשר להשתמש בה שוב.
+      </div>
 
-            errorMsg.classList.add('hidden');
-            showLoader(true);
+      <div class="actions">
+        <a class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none"
+           href="https://yuzok101.github.io/limud/login1.html">מעבר לאזור האישי 🚀</a>
+        <button class="btn btn-ghost" type="button" onclick="restart()">התחלה מחדש</button>
+      </div>
+    </div>
 
-            try {
-                // חשוב: כאן מתבצע אימות בלבד. אין עדכון של Google Sheets.
-                const response = await fetch(
-                    `${SCRIPT_URL}?action=verify_phone&tz=${encodeURIComponent(currentUserData.tz)}&phone=${encodeURIComponent(phone)}`
-                );
+    <!-- LOADING -->
+    <div id="loading" class="loader-wrap hidden" aria-live="polite">
+      <div class="loader"></div>
+      <strong id="loading-title">בודק את הפרטים...</strong>
+      <span id="loading-desc" class="hint">מתבצעת תקשורת מאובטחת עם המערכת.</span>
+    </div>
+  </section>
+</main>
 
-                const result = await response.json();
-                showLoader(false);
+<footer class="footer">יוז'וק מדיק © 2026 · מרכז עזרה לכניסה לאזור האישי</footer>
 
-                if (result.status === 'verified') {
-                    showDashboard(true);
-                    return;
-                }
+<div id="success-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="modal-icon">✅</div>
+    <h3 id="modal-title">המספר עודכן בהצלחה</h3>
+    <p>מספר הטלפון נשמר בגוגל שיטס. בפעם הבאה ניתן להשתמש במספר החדש כדי להיכנס לאזור האישי.</p>
+    <a class="btn btn-primary full-btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none"
+       href="https://yuzok101.github.io/limud/login1.html">כניסה לאזור האישי</a>
+  </div>
+</div>
 
-                errorMsg.innerText =
-                    result.message ||
-                    "מספר הטלפון שהזנת אינו תואם למספר המעודכן במערכת. ניתן לנסות שוב או לעבור להזדהות בדרך שונה.";
-                errorMsg.classList.remove('hidden');
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQKPYOodhU46r38Q7kSQJWMvP9fX9Ax96hf0qJhjAxH7IWtZd9KWlNf7XHMjUsB-5RMw/exec";
 
-            } catch (err) {
-                console.error("שגיאה באימות הטלפון:", err);
-                showLoader(false);
-                errorMsg.innerText = "שגיאת תקשורת מול השרת. נסה שוב.";
-                errorMsg.classList.remove('hidden');
-            }
-        }
+let currentUser = null;
+let selectedMethod = "email";
+let busy = false;
 
-        function switchToAlternativeVerification() {
-            document.getElementById('step-2-phone').classList.add('hidden');
-            document.getElementById('step-2-alt').classList.remove('hidden');
-        }
+function digits(value) {
+  return String(value ?? "").replace(/\D/g, "");
+}
 
-        let currentAltTab = 'email';
-        function switchAltTab(tab) {
-            currentAltTab = tab;
-            const btnEmail = document.getElementById('tab-opt-1');
-            const btnDetails = document.getElementById('tab-opt-2');
-            const boxEmail = document.getElementById('alt-box-email');
-            const boxDetails = document.getElementById('alt-box-details');
+function normalizeClientPhone(value) {
+  let p = digits(value);
+  if (p.length === 9 && p.startsWith("5")) p = "0" + p;
+  return p;
+}
 
-            if (tab === 'email') {
-                btnEmail.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow";
-                btnDetails.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
-                boxEmail.classList.remove('hidden');
-                boxDetails.classList.add('hidden');
-            } else {
-                btnDetails.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition bg-blue-600 text-white shadow";
-                btnEmail.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
-                boxDetails.classList.remove('hidden');
-                boxEmail.classList.add('hidden');
-            }
-        }
+function validTz(value) {
+  return /^\d{9}$/.test(digits(value));
+}
 
-        async function verifyAlternative() {
-            const errorMsg = document.getElementById('error-msg-alt');
+function validPhone(value) {
+  return /^05\d{8}$/.test(normalizeClientPhone(value));
+}
 
-            errorMsg.classList.add('hidden');
-            showLoader(true);
+function setProgress(percent) {
+  document.getElementById("progress-bar").style.width = percent + "%";
+}
 
-            try {
-                let url =
-                    `${SCRIPT_URL}?action=verify_alternative` +
-                    `&tz=${encodeURIComponent(currentUserData.tz)}`;
+function hideAll() {
+  ["step-1","step-2","step-3","loading"].forEach(id => document.getElementById(id).classList.add("hidden"));
+}
 
-                if (currentAltTab === 'email') {
-                    const emailInput =
-                        document.getElementById('alt-email').value.trim().toLowerCase();
+function showStep(step) {
+  hideAll();
+  document.getElementById(step).classList.remove("hidden");
+  if (step === "step-1") setProgress(25);
+  if (step === "step-2") setProgress(55);
+  if (step === "step-3") setProgress(100);
+}
 
-                    if (!emailInput) {
-                        showLoader(false);
-                        errorMsg.innerText = "נא להזין כתובת אימייל.";
-                        errorMsg.classList.remove('hidden');
-                        return;
-                    }
+function setLoading(on, title = "בודק את הפרטים...", desc = "מתבצעת תקשורת מאובטחת עם המערכת.") {
+  busy = on;
+  document.getElementById("loading-title").textContent = title;
+  document.getElementById("loading-desc").textContent = desc;
+  if (on) {
+    hideAll();
+    document.getElementById("loading").classList.remove("hidden");
+  }
+}
 
-                    url +=
-                        `&method=email` +
-                        `&email=${encodeURIComponent(emailInput)}`;
+function showError(id, message) {
+  const el = document.getElementById(id);
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
 
-                } else {
-                    const dateInput =
-                        document.getElementById('alt-date').value.trim();
+function clearError(id) {
+  document.getElementById(id).classList.add("hidden");
+}
 
-                    const addressInput =
-                        document.getElementById('alt-address').value.trim();
+function setButtonBusy(id, on, busyText, normalText) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.disabled = on;
+  b.textContent = on ? busyText : normalText;
+}
 
-                    if (dateInput) {
-                        url +=
-                            `&method=date` +
-                            `&date=${encodeURIComponent(dateInput)}`;
+async function api(params) {
+  const query = new URLSearchParams(params);
+  const response = await fetch(SCRIPT_URL + "?" + query.toString(), {
+    method: "GET",
+    cache: "no-store",
+    redirect: "follow",
+    headers: { "Accept": "application/json" }
+  });
 
-                    } else if (addressInput) {
-                        url +=
-                            `&method=address` +
-                            `&address=${encodeURIComponent(addressInput)}`;
+  if (!response.ok) throw new Error("HTTP " + response.status);
 
-                    } else {
-                        showLoader(false);
-                        errorMsg.innerText = "נא להזין תאריך סיום או עיר / כתובת.";
-                        errorMsg.classList.remove('hidden');
-                        return;
-                    }
-                }
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("השרת החזיר תשובה שאינה JSON");
+  }
+  return data;
+}
 
-                const response = await fetch(url);
-                const result = await response.json();
+async function verifyTz() {
+  if (busy) return;
+  clearError("error-1");
 
-                showLoader(false);
+  const tz = digits(document.getElementById("input-tz").value);
+  if (!validTz(tz)) {
+    showError("error-1", "מספר תעודת הזהות חייב להכיל בדיוק 9 ספרות.");
+    return;
+  }
 
-                if (result.status === 'verified') {
-                    // השרת מחזיר Token זמני רק לאחר אימות מוצלח.
-                    currentUserData.verificationToken =
-                        result.verificationToken || null;
+  setButtonBusy("btn-tz", true, "בודק...", "המשך");
+  setLoading(true, "מאתר את החשבון...", "מחפש את הרשומה המתאימה בגוגל שיטס.");
 
-                    showDashboard(false, true);
-                    return;
-                }
+  try {
+    const result = await api({ tz });
+    if (result.status !== "success" || !result.data) {
+      setLoading(false);
+      showStep("step-1");
+      showError("error-1", result.message || "לא נמצאה תעודת זהות כזאת במערכת.");
+      return;
+    }
 
-                errorMsg.innerText =
-                    result.message ||
-                    "הפרטים שהוזנו אינם תואמים לנתונים הרשומים במערכת.";
-                errorMsg.classList.remove('hidden');
+    currentUser = result.data;
+    setLoading(false);
+    showStep("step-2");
+    document.getElementById("alt-email").focus();
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+    showStep("step-1");
+    showError("error-1", "לא הצלחנו להתחבר למערכת. בדוק את החיבור לאינטרנט ונסה שוב.");
+  } finally {
+    setButtonBusy("btn-tz", false, "בודק...", "המשך");
+  }
+}
 
-            } catch (err) {
-                console.error("שגיאה באימות חלופי:", err);
-                showLoader(false);
-                errorMsg.innerText = "שגיאת תקשורת מול השרת. נסה שוב.";
-                errorMsg.classList.remove('hidden');
-            }
-        }
+function selectMethod(method) {
+  selectedMethod = method;
 
-        function showDashboard(phoneMatched, alternativeVerified = false) {
-            document.getElementById('step-2-phone').classList.add('hidden');
-            document.getElementById('step-2-alt').classList.add('hidden');
-            document.getElementById('step-3-dashboard').classList.remove('hidden');
+  ["email","date","address"].forEach(m => {
+    document.getElementById("method-" + m).classList.toggle("active", m === method);
+    document.getElementById("panel-" + m).classList.toggle("hidden", m !== method);
+  });
 
-            const alertBox = document.getElementById('dashboard-alert');
-            const dashTitle = document.getElementById('dash-title');
-            const dashDesc = document.getElementById('dash-desc');
-            const phoneFixSection = document.getElementById('phone-fix-section');
+  clearError("error-2");
+}
 
-            if (phoneMatched) {
-                alertBox.className =
-                    "p-5 rounded-2xl border bg-emerald-950/30 border-emerald-900/60 text-emerald-200 flex items-start gap-4";
+async function verifyAlternative() {
+  if (busy || !currentUser) return;
+  clearError("error-2");
 
-                dashTitle.innerText = "מעולה!";
-                dashDesc.innerText =
-                    "מספר הטלפון תואם למערכת. עכשיו אתה יכול להיכנס לאזור האישי.";
+  const params = {
+    action: "verify_alternative",
+    tz: currentUser.tz,
+    method: selectedMethod
+  };
 
-                phoneFixSection.classList.add('hidden');
+  if (selectedMethod === "email") {
+    const email = document.getElementById("alt-email").value.trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError("error-2", "נא להזין כתובת אימייל תקינה.");
+      return;
+    }
+    params.email = email;
+  }
 
-                setTimeout(() => {
-                    document.getElementById('success-modal').classList.remove('hidden');
-                }, 800);
+  if (selectedMethod === "date") {
+    const date = document.getElementById("alt-date").value.trim();
+    if (!date) {
+      showError("error-2", "נא להזין את תאריך סיום ההכשרה.");
+      return;
+    }
+    params.date = date;
+  }
 
-            } else if (alternativeVerified) {
-                alertBox.className =
-                    "p-5 rounded-2xl border bg-amber-950/30 border-amber-900/60 text-amber-200 flex items-start gap-4";
+  if (selectedMethod === "address") {
+    const address = document.getElementById("alt-address").value.trim();
+    if (address.length < 3) {
+      showError("error-2", "נא להזין עיר או כתובת הרשומה במערכת.");
+      return;
+    }
+    params.address = address;
+  }
 
-                dashTitle.innerText = "זיהוי חלופי בוצע בהצלחה";
-                dashDesc.innerText =
-                    "הזהות אומתה בהצלחה, אך מספר הטלפון במערכת דורש עדכון.";
+  setButtonBusy("btn-alt", true, "מאמת...", "אימות והמשך");
+  setLoading(true, "מאמת את הזהות...", "הפרטים נבדקים מול הרשומה שלך.");
 
-                phoneFixSection.classList.remove('hidden');
-            }
-        }
+  try {
+    const result = await api(params);
 
-        async function updatePhoneNumber() {
-            const newPhone =
-                document.getElementById('new-phone-input').value.trim();
+    if (result.status !== "verified") {
+      setLoading(false);
+      showStep("step-2");
+      showError("error-2", result.message || "הפרטים אינם תואמים למערכת.");
+      return;
+    }
 
-            const msg =
-                document.getElementById('update-phone-msg');
+    currentUser.verificationToken = result.verificationToken || null;
 
-            if (!isValidPhone(newPhone)) {
-                msg.innerText =
-                    "מספר טלפון חדש חייב להיות תקין (10 ספרות ומתחיל ב-05).";
-                msg.className =
-                    "text-xs font-medium mt-1 text-rose-400";
-                msg.classList.remove('hidden');
-                return;
-            }
+    setLoading(false);
+    showDashboard(result.method === "phone");
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+    showStep("step-2");
+    showError("error-2", "שגיאת תקשורת מול השרת. נסה שוב בעוד רגע.");
+  } finally {
+    setButtonBusy("btn-alt", false, "מאמת...", "אימות והמשך");
+  }
+}
 
-            // עדכון מותר רק לאחר אימות חלופי מוצלח.
-            if (
-                !currentUserData ||
-                !currentUserData.verificationToken
-            ) {
-                msg.innerText =
-                    "לא נמצא אישור אימות. יש לבצע את תהליך האימות מחדש.";
-                msg.className =
-                    "text-xs font-medium mt-1 text-rose-400";
-                msg.classList.remove('hidden');
-                return;
-            }
+function showDashboard(phoneMatched) {
+  showStep("step-3");
 
-            showLoader(true);
+  document.getElementById("dashboard-success").classList.toggle("hidden", !phoneMatched);
+  document.getElementById("dashboard-update").classList.toggle("hidden", phoneMatched);
+  document.getElementById("phone-update-box").classList.toggle("hidden", phoneMatched);
+}
 
-            try {
-                const response = await fetch(
-                    `${SCRIPT_URL}?action=update_phone` +
-                    `&tz=${encodeURIComponent(currentUserData.tz)}` +
-                    `&newPhone=${encodeURIComponent(newPhone)}` +
-                    `&verificationToken=${encodeURIComponent(currentUserData.verificationToken)}`
-                );
+async function updatePhoneNumber() {
+  if (busy || !currentUser) return;
 
-                const result = await response.json();
+  const msg = document.getElementById("update-msg");
+  msg.classList.add("hidden");
+  msg.textContent = "";
 
-                showLoader(false);
+  const newPhone = normalizeClientPhone(document.getElementById("new-phone").value);
 
-                if (result.status === 'success') {
-                    currentUserData.phone = newPhone;
-                    currentUserData.verificationToken = null;
+  if (!validPhone(newPhone)) {
+    showError("update-msg", "מספר הטלפון חייב להיות בן 10 ספרות ולהתחיל ב־05.");
+    document.getElementById("update-msg").className = "error";
+    return;
+  }
 
-                    msg.innerText =
-                        "✔ מספר הטלפון עודכן בהצלחה במסד הנתונים בגוגל שיטס!";
-                    msg.className =
-                        "text-xs font-medium mt-1 text-emerald-400";
-                    msg.classList.remove('hidden');
+  if (!currentUser.verificationToken) {
+    document.getElementById("update-msg").textContent = "אישור האימות פג. יש לבצע את תהליך האימות מחדש.";
+    document.getElementById("update-msg").className = "error";
+    document.getElementById("update-msg").classList.remove("hidden");
+    return;
+  }
 
-                    setTimeout(() => {
-                        document.getElementById('success-modal').classList.remove('hidden');
-                    }, 800);
+  setButtonBusy("btn-update", true, "שומר...", "שמור מספר");
+  setLoading(true, "שומר את המספר החדש...", "מבצע עדכון ישיר בשורת המשתמש בגוגל שיטס.");
 
-                    return;
-                }
+  try {
+    const result = await api({
+      action: "update_phone",
+      tz: currentUser.tz,
+      newPhone,
+      verificationToken: currentUser.verificationToken
+    });
 
-                msg.innerText =
-                    result.message ||
-                    "שגיאה בעדכון מספר הטלפון.";
-                msg.className =
-                    "text-xs font-medium mt-1 text-rose-400";
-                msg.classList.remove('hidden');
+    if (result.status !== "success") {
+      setLoading(false);
+      showStep("step-3");
+      document.getElementById("update-msg").textContent = result.message || "המספר לא עודכן.";
+      document.getElementById("update-msg").className = "error";
+      document.getElementById("update-msg").classList.remove("hidden");
+      return;
+    }
 
-            } catch (err) {
-                console.error("שגיאה בעדכון הטלפון:", err);
-                showLoader(false);
+    currentUser.phone = newPhone;
+    currentUser.verificationToken = null;
 
-                msg.innerText =
-                    "שגיאת תקשורת מול השרת. המספר לא עודכן.";
-                msg.className =
-                    "text-xs font-medium mt-1 text-rose-400";
-                msg.classList.remove('hidden');
-            }
-        }
+    setLoading(false);
+    showStep("step-3");
 
-        function showLoader(show) {
-            const loader = document.getElementById('loading-state');
-            if (show) {
-                document.getElementById('step-1-tz').classList.add('hidden');
-                document.getElementById('step-2-phone').classList.add('hidden');
-                document.getElementById('step-2-alt').classList.add('hidden');
-                loader.classList.remove('hidden');
-            } else {
-                loader.classList.add('hidden');
-            }
-        }
+    document.getElementById("update-msg").textContent = "✓ המספר נשמר בהצלחה בגוגל שיטס.";
+    document.getElementById("update-msg").className = "success";
+    document.getElementById("update-msg").classList.remove("hidden");
 
-        function backToTz() {
-            document.getElementById('step-2-phone').classList.add('hidden');
-            document.getElementById('step-1-tz').classList.remove('hidden');
-            document.getElementById('input-tz').value = '';
-        }
+    document.getElementById("success-modal").classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+    showStep("step-3");
+    document.getElementById("update-msg").textContent = "שגיאת תקשורת. לא בוצע שינוי במספר הטלפון.";
+    document.getElementById("update-msg").className = "error";
+    document.getElementById("update-msg").classList.remove("hidden");
+  } finally {
+    setButtonBusy("btn-update", false, "שומר...", "שמור מספר");
+  }
+}
 
-        function backToPhone() {
-            document.getElementById('step-2-alt').classList.add('hidden');
-            document.getElementById('step-2-phone').classList.remove('hidden');
-        }
-    </script>
+function backToTz() {
+  currentUser = null;
+  document.getElementById("input-tz").value = "";
+  clearError("error-1");
+  clearError("error-2");
+  showStep("step-1");
+  document.getElementById("input-tz").focus();
+}
+
+function restart() {
+  currentUser = null;
+  document.getElementById("input-tz").value = "";
+  document.getElementById("alt-email").value = "";
+  document.getElementById("alt-date").value = "";
+  document.getElementById("alt-address").value = "";
+  document.getElementById("new-phone").value = "";
+  selectMethod("email");
+  document.getElementById("update-msg").classList.add("hidden");
+  document.getElementById("success-modal").classList.add("hidden");
+  showStep("step-1");
+  document.getElementById("input-tz").focus();
+}
+
+document.getElementById("input-tz").addEventListener("input", e => {
+  e.target.value = digits(e.target.value).slice(0, 9);
+});
+document.getElementById("new-phone").addEventListener("input", e => {
+  e.target.value = digits(e.target.value).slice(0, 10);
+});
+document.getElementById("alt-date").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/[^\d./-]/g, "").slice(0, 10);
+});
+
+["input-tz","alt-email","alt-date","alt-address","new-phone"].forEach(id => {
+  document.getElementById(id).addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (id === "input-tz") verifyTz();
+      else if (id === "new-phone") updatePhoneNumber();
+      else if (["alt-email","alt-date","alt-address"].includes(id)) verifyAlternative();
+    }
+  });
+});
+
+showStep("step-1");
+</script>
 </body>
 </html>
